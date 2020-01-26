@@ -1,0 +1,5 @@
+module PackageEtherCaptureC {
+  umbrella header "shim.h"
+  export *
+  link "dcap"
+}
