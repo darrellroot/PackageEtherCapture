@@ -8,7 +8,7 @@
 
 import Foundation
 
-struct Frame: CustomStringConvertible {
+public struct Frame: CustomStringConvertible {
     var description: String {
         let ethertypeString = String(format: "%04x",ethertype)
         return "\(date) \(srcmac) \(dstmac) \(ethertypeString) \(contents)"

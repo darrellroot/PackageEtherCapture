@@ -8,7 +8,7 @@
 
 import Foundation
 
-struct Unknown: CustomStringConvertible {
+public struct Unknown: CustomStringConvertible {
     var description: String {
         return "unknown"
     }

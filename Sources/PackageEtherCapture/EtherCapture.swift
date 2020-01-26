@@ -3,7 +3,7 @@ import Foundation
 import Darwin
 import PackageEtherCaptureC
 
-class EtherCapture {
+public class EtherCapture {
     var errbuf = UnsafeMutablePointer<Int8>.allocate(capacity: Int(PCAP_ERRBUF_SIZE))
     var alldevs: UnsafeMutablePointer<pcap_if_t>? = nil
     var datalink: Int32

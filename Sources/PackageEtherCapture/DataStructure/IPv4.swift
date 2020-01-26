@@ -9,7 +9,7 @@
 import Foundation
 import Network
 
-struct IPv4: CustomStringConvertible {
+public struct IPv4: CustomStringConvertible {
     var description: String {
         return "\(sourceIP) \(destinationIP)"
     }

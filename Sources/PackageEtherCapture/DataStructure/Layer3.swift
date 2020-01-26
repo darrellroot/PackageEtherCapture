@@ -8,7 +8,7 @@
 
 import Foundation
 
-enum Layer3: CustomStringConvertible {
+public enum Layer3: CustomStringConvertible {
     case ipv4(IPv4)
     case ipv6(IPv6)
     case unknown(Unknown)

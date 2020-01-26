@@ -9,7 +9,7 @@
 import Foundation
 import Network
 
-struct IPv6 {
+public struct IPv6 {
     let sourceIP: IPv6Address
     let destinationIP: IPv6Address
     var description: String {
