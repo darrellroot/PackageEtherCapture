@@ -116,29 +116,35 @@ public class EtherCapture {
         // see http://www.tcpdump.org/linktypes.html for return value information
         debugPrint("datalink type \(datalink)")
     }//init
-    func got_packet() {
-        
+
+    func executeCallback(frame: Frame) {
+        if let callback = self.callback {
+            callback(frame)
+        }
     }
     public func setCallback(_ callback: @escaping (Frame) -> Void) {
         self.callback = callback
+        //let localCallback = callback
         DispatchQueue.global().async {
+            
+            
             pcap_loop(self.pcap, 0,
-            {
-                (args: UnsafeMutablePointer<u_char>,
-                 header:UnsafePointer<pcap_pkthdr>,
-                 ptr: UnsafePointer<u_char>) ->Void in
-                let timestamp = header.pointee.ts
-                let packetLength = header.pointee.len  //we may not capture whole packet
-                let captureLength = Int(header.pointee.caplen)
-                        debugPrint("packet \(self.packetCount) ptr \(String(describing: ptr))")
-                        self.packetCount = self.packetCount + 1
+                {
+                    (args: UnsafeMutablePointer<UInt8>?,
+                     header:UnsafePointer<pcap_pkthdr>?,
+                     ptr: UnsafePointer<UInt8>?) -> () in
+                    if let header = header, let ptr = ptr {
+                        let timestamp = header.pointee.ts
+                        let packetLength = header.pointee.len  //we may not capture whole packet
+                        let captureLength = Int(header.pointee.caplen)
+                        debugPrint("packet ptr \(String(describing: ptr))")
+                            //self.packetCount = self.packetCount + 1
                         let data = Data(bytes: ptr, count: captureLength)
                         let frame = Frame(data: data, timeval: timestamp)
-                        if let callback = self.callback {
-                            callback(frame)
-                        }
-                            
-                } as! pcap_handler,
+                        //executeCallback(frame: frame)
+                    }
+                                
+                },
             nil)
 
         }
