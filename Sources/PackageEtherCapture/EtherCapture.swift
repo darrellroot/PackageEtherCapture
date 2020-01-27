@@ -11,7 +11,8 @@ public class EtherCapture {
     var pcap: OpaquePointer
     var fcode: UnsafeMutablePointer<bpf_program>
     var packetCount = 0
-    public init?(interface: String, command: String) {
+    var callback: ((Frame) -> Void)? = nil
+    public init?(interface: String, command: String, snaplen: Int = 96, promiscuous: Bool = true) {
         //alldevs!.initialize(to: nil)
         //pcap_findalldevs(2,3)
         var retval = pcap_findalldevs(&alldevs, errbuf)
@@ -66,14 +67,16 @@ public class EtherCapture {
             }
         } while nextdev != nil
         
-        guard let pcap = pcap_open_live(interface, 200, 0, 2000, errbuf) else {
+        let promiscuousInt: Int32 = promiscuous ? 1 : 0
+        let snaplen = Int32(snaplen)
+        guard let pcap = pcap_open_live(interface, snaplen, promiscuousInt, 1000, errbuf) else {
             let errString = String(cString: errbuf)
             debugPrint("pcap_open_live failed \(errString)")
             return nil
         }
         self.pcap = pcap
-        var localnet = UnsafeMutablePointer<bpf_u_int32>.allocate(capacity: 1)
-        var netmask = UnsafeMutablePointer<bpf_u_int32>.allocate(capacity: 1)
+        let localnet = UnsafeMutablePointer<bpf_u_int32>.allocate(capacity: 1)
+        let netmask = UnsafeMutablePointer<bpf_u_int32>.allocate(capacity: 1)
         
         retval = pcap_lookupnet(interface, localnet, netmask, errbuf)
         if retval < 0 {
@@ -85,7 +88,7 @@ public class EtherCapture {
         let netmaskString = String(format: "%2x", netmask.pointee)
         debugPrint("localnet \(localnetString) \(netmaskString)")
         
-        var cmd = UnsafePointer<Int8>((NSString("port 443")).utf8String)
+        let cmd = UnsafePointer<Int8>((NSString("port 443")).utf8String)
         fcode = UnsafeMutablePointer<bpf_program>.allocate(capacity: 1)
         retval = pcap_compile(pcap, fcode, cmd, 0, PCAP_NETMASK_UNKNOWN)
         if retval < 0 {
@@ -113,7 +116,33 @@ public class EtherCapture {
         // see http://www.tcpdump.org/linktypes.html for return value information
         debugPrint("datalink type \(datalink)")
     }//init
-    
+    func got_packet() {
+        
+    }
+    public func setCallback(_ callback: @escaping (Frame) -> Void) {
+        self.callback = callback
+        DispatchQueue.global().async {
+            pcap_loop(self.pcap, 0,
+            {
+                (args: UnsafeMutablePointer<u_char>,
+                 header:UnsafePointer<pcap_pkthdr>,
+                 ptr: UnsafePointer<u_char>) ->Void in
+                let timestamp = header.pointee.ts
+                let packetLength = header.pointee.len  //we may not capture whole packet
+                let captureLength = Int(header.pointee.caplen)
+                        debugPrint("packet \(self.packetCount) ptr \(String(describing: ptr))")
+                        self.packetCount = self.packetCount + 1
+                        let data = Data(bytes: ptr, count: captureLength)
+                        let frame = Frame(data: data, timeval: timestamp)
+                        if let callback = self.callback {
+                            callback(frame)
+                        }
+                            
+                } as! pcap_handler,
+            nil)
+
+        }
+    }
     public func nextPacket() -> Frame? {
         
         var header = pcap_pkthdr()
@@ -132,7 +161,7 @@ public class EtherCapture {
                 let offsetPtr = ptr + offset
                 print(String(format: "%02x", offsetPtr.pointee), terminator:"")
             }*/
-            print("\n")
+            //print("\n")
             return frame
         } else {
             return nil
