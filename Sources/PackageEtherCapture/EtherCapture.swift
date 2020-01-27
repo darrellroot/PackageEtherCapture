@@ -11,7 +11,9 @@ public class EtherCapture {
     var pcap: OpaquePointer
     var fcode: UnsafeMutablePointer<bpf_program>
     var packetCount = 0
-    var callback: ((Frame) -> Void)? = nil
+    //var callback: ((Frame) -> Void)? = nil
+    
+    static var callbacks: [((Frame) -> Void)] = []
     public init?(interface: String, command: String, snaplen: Int = 96, promiscuous: Bool = true) {
         //alldevs!.initialize(to: nil)
         //pcap_findalldevs(2,3)
@@ -117,14 +119,20 @@ public class EtherCapture {
         debugPrint("datalink type \(datalink)")
     }//init
 
-    func executeCallback(frame: Frame) {
+    /*func executeCallback(frame: Frame) {
         if let callback = self.callback {
             callback(frame)
         }
-    }
+    }*/
     public func setCallback(_ callback: @escaping (Frame) -> Void) {
-        self.callback = callback
-        //let localCallback = callback
+        EtherCapture.callbacks.append(callback)
+        guard EtherCapture.callbacks.count < 256 else {
+            fatalError("TODO PackageEtherCapture can only handle 256 captures")
+        }
+        var callbackIndex: u_char = u_char(EtherCapture.callbacks.count - 1)
+        let callbackIndexPointer = UnsafeMutablePointer<u_char>.allocate(capacity: 1)
+        callbackIndexPointer.initialize(from: &callbackIndex, count: 1)
+        
         DispatchQueue.global().async {
             
             
@@ -141,11 +149,15 @@ public class EtherCapture {
                             //self.packetCount = self.packetCount + 1
                         let data = Data(bytes: ptr, count: captureLength)
                         let frame = Frame(data: data, timeval: timestamp)
-                        //executeCallback(frame: frame)
+                        if let pointee = args?.pointee,                        Int(pointee) < EtherCapture.callbacks.count {
+                            EtherCapture.callbacks[Int(pointee)](frame)
+                        } else {
+                            debugPrint("Invalid PackageEtherCapture callback")
+                        }
                     }
                                 
                 },
-            nil)
+            callbackIndexPointer)
 
         }
     }
