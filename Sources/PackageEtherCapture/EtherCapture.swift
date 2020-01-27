@@ -14,7 +14,7 @@ public class EtherCapture {
     //var callback: ((Frame) -> Void)? = nil
     
     static var callbacks: [((Frame) -> Void)] = []
-    public init?(interface: String, command: String, snaplen: Int = 96, promiscuous: Bool = true) {
+    public init?(interface: String, command: String, snaplen: Int = 96, promiscuous: Bool = true, _ callback: @escaping (Frame) -> Void) {
         //alldevs!.initialize(to: nil)
         //pcap_findalldevs(2,3)
         var retval = pcap_findalldevs(&alldevs, errbuf)
@@ -117,6 +117,43 @@ public class EtherCapture {
         datalink = pcap_datalink(pcap)
         // see http://www.tcpdump.org/linktypes.html for return value information
         debugPrint("datalink type \(datalink)")
+        
+        EtherCapture.callbacks.append(callback)
+        guard EtherCapture.callbacks.count < 256 else {
+            fatalError("TODO PackageEtherCapture can only handle 256 captures")
+        }
+        var callbackIndex: u_char = u_char(EtherCapture.callbacks.count - 1)
+        let callbackIndexPointer = UnsafeMutablePointer<u_char>.allocate(capacity: 1)
+        callbackIndexPointer.initialize(from: &callbackIndex, count: 1)
+        
+        DispatchQueue.global().async {
+            
+            
+            pcap_loop(self.pcap, 0,
+                {
+                    (args: UnsafeMutablePointer<UInt8>?,
+                     header:UnsafePointer<pcap_pkthdr>?,
+                     ptr: UnsafePointer<UInt8>?) -> () in
+                    if let header = header, let ptr = ptr {
+                        let timestamp = header.pointee.ts
+                        let packetLength = header.pointee.len  //we may not capture whole packet
+                        let captureLength = Int(header.pointee.caplen)
+                        debugPrint("packet ptr \(String(describing: ptr))")
+                            //self.packetCount = self.packetCount + 1
+                        let data = Data(bytes: ptr, count: captureLength)
+                        let frame = Frame(data: data, timeval: timestamp)
+                        if let pointee = args?.pointee,                        Int(pointee) < EtherCapture.callbacks.count {
+                            EtherCapture.callbacks[Int(pointee)](frame)
+                        } else {
+                            debugPrint("Invalid PackageEtherCapture callback")
+                        }
+                    }
+                                
+                },
+            callbackIndexPointer)
+
+        }
+
     }//init
 
     /*func executeCallback(frame: Frame) {
