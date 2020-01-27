@@ -90,7 +90,8 @@ public class EtherCapture {
         let netmaskString = String(format: "%2x", netmask.pointee)
         debugPrint("localnet \(localnetString) \(netmaskString)")
         
-        let cmd = UnsafePointer<Int8>((NSString("port 443")).utf8String)
+        //let cmd = UnsafePointer<Int8>((NSString("port 443")).utf8String)
+        let cmd = UnsafePointer<Int8>((NSString(string: command)).utf8String)
         fcode = UnsafeMutablePointer<bpf_program>.allocate(capacity: 1)
         retval = pcap_compile(pcap, fcode, cmd, 0, PCAP_NETMASK_UNKNOWN)
         if retval < 0 {
