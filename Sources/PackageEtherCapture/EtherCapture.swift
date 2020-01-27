@@ -21,7 +21,8 @@ public class EtherCapture {
     //var callback: ((Frame) -> Void)? = nil
     
     static var callbacks: [((Frame) -> Void)] = []
-    public init(interface: String, command: String, snaplen: Int = 96, promiscuous: Bool = true, _ callback: @escaping (Frame) -> Void) throws {
+    public init(interface: String, count: Int32 = 0, command: String, snaplen: Int = 96, promiscuous: Bool = true, _ callback: @escaping (Frame) -> Void) throws {
+        print("Executing etherdump on interface \(interface) count \(count) snaplen \(snaplen) promiscuous \(promiscuous) command \(command)")
         //alldevs!.initialize(to: nil)
         //pcap_findalldevs(2,3)
         //var retval = pcap_findalldevs(&alldevs, errbuf)
@@ -137,7 +138,7 @@ public class EtherCapture {
         DispatchQueue.global().async {
             
             
-            pcap_loop(self.pcap, 0,
+            pcap_loop(self.pcap, count,
                 {
                     (args: UnsafeMutablePointer<UInt8>?,
                      header:UnsafePointer<pcap_pkthdr>?,
@@ -161,12 +162,6 @@ public class EtherCapture {
         }
 
     }//init
-
-    /*func executeCallback(frame: Frame) {
-        if let callback = self.callback {
-            callback(frame)
-        }
-    }*/
     
     /*old code from prior to switch to pcap_loop
     public func nextPacket() -> Frame? {
