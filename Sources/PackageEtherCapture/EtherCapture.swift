@@ -95,7 +95,7 @@ public class EtherCapture {
         }
         let localnetString = String(format:"%2x", localnet.pointee)  // TODO byte order issue here
         let netmaskString = String(format: "%2x", netmask.pointee)
-        debugPrint("localnet \(localnetString) \(netmaskString)")
+        //debugPrint("localnet \(localnetString) \(netmaskString)")
         
         //let cmd = UnsafePointer<Int8>((NSString("port 443")).utf8String)
         let cmd = UnsafePointer<Int8>((NSString(string: command)).utf8String)
