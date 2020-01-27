@@ -3,6 +3,13 @@ import Foundation
 import Darwin
 import PackageEtherCaptureC
 
+public enum EtherCaptureError: String, Error {
+    case pcap_open_live_failed
+    case pcap_lookupnet_failed
+    case pcap_compile_failed
+    case pcap_setfilter_failed
+    case pcap_max_captures_exceeded
+}
 public class EtherCapture {
     var errbuf = UnsafeMutablePointer<Int8>.allocate(capacity: Int(PCAP_ERRBUF_SIZE))
     var alldevs: UnsafeMutablePointer<pcap_if_t>? = nil
@@ -14,18 +21,18 @@ public class EtherCapture {
     //var callback: ((Frame) -> Void)? = nil
     
     static var callbacks: [((Frame) -> Void)] = []
-    public init?(interface: String, command: String, snaplen: Int = 96, promiscuous: Bool = true, _ callback: @escaping (Frame) -> Void) {
+    public init(interface: String, command: String, snaplen: Int = 96, promiscuous: Bool = true, _ callback: @escaping (Frame) -> Void) throws {
         //alldevs!.initialize(to: nil)
         //pcap_findalldevs(2,3)
-        var retval = pcap_findalldevs(&alldevs, errbuf)
-        debugPrint("pcap_findalldevs retval \(retval)")
+        //var retval = pcap_findalldevs(&alldevs, errbuf)
+        /*debugPrint("pcap_findalldevs retval \(retval)")
         if retval == -1 {
             let errString = String(cString: errbuf)
             debugPrint("pcap_findalldevs error \(errString)")
             return nil
-        }
+        }*/
         
-        var nextdev: UnsafeMutablePointer<pcap_if_t>? = alldevs
+        /*var nextdev: UnsafeMutablePointer<pcap_if_t>? = alldevs
         repeat {
             if let thisdevPtr = nextdev {
                 let thisdev = thisdevPtr.pointee
@@ -67,24 +74,24 @@ public class EtherCapture {
             } else {
                 nextdev = nil  // can only happen on first round if already nil, but just in case
             }
-        } while nextdev != nil
+        } while nextdev != nil*/
         
         let promiscuousInt: Int32 = promiscuous ? 1 : 0
         let snaplen = Int32(snaplen)
         guard let pcap = pcap_open_live(interface, snaplen, promiscuousInt, 1000, errbuf) else {
             let errString = String(cString: errbuf)
             debugPrint("pcap_open_live failed \(errString)")
-            return nil
+            throw EtherCaptureError.pcap_open_live_failed
         }
         self.pcap = pcap
         let localnet = UnsafeMutablePointer<bpf_u_int32>.allocate(capacity: 1)
         let netmask = UnsafeMutablePointer<bpf_u_int32>.allocate(capacity: 1)
         
-        retval = pcap_lookupnet(interface, localnet, netmask, errbuf)
+        var retval = pcap_lookupnet(interface, localnet, netmask, errbuf)
         if retval < 0 {
             let errString = String(cString: errbuf)
             debugPrint("pcap_lookupnet failed \(errString)")
-            return nil
+            throw EtherCaptureError.pcap_lookupnet_failed
         }
         let localnetString = String(format:"%2x", localnet.pointee)  // TODO byte order issue here
         let netmaskString = String(format: "%2x", netmask.pointee)
@@ -102,7 +109,7 @@ public class EtherCapture {
                 errString = "unknown error"
             }
             debugPrint("pcap_compile failed \(errString)")
-            return nil
+            throw EtherCaptureError.pcap_compile_failed
         }
         retval = pcap_setfilter(pcap, fcode)  // this starts the capture!
         guard retval >= 0 else {
@@ -113,7 +120,7 @@ public class EtherCapture {
                 errString = "unknown error"
             }
             debugPrint("pcap_setfilter failed \(errString)")
-            return nil
+            throw EtherCaptureError.pcap_setfilter_failed
         }
         datalink = pcap_datalink(pcap)
         // see http://www.tcpdump.org/linktypes.html for return value information
@@ -121,7 +128,7 @@ public class EtherCapture {
         
         EtherCapture.callbacks.append(callback)
         guard EtherCapture.callbacks.count < 256 else {
-            fatalError("TODO PackageEtherCapture can only handle 256 captures")
+            throw EtherCaptureError.pcap_max_captures_exceeded
         }
         var callbackIndex: u_char = u_char(EtherCapture.callbacks.count - 1)
         let callbackIndexPointer = UnsafeMutablePointer<u_char>.allocate(capacity: 1)
