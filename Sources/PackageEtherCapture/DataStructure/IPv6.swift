@@ -12,7 +12,7 @@ import Network
 public struct IPv6 {
     let sourceIP: IPv6Address
     let destinationIP: IPv6Address
-    var description: String {
+    public var description: String {
         return "\(sourceIP.debugDescription) \(destinationIP.debugDescription)"
     }
 

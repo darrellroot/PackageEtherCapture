@@ -13,7 +13,7 @@ public enum Layer3: CustomStringConvertible {
     case ipv6(IPv6)
     case unknown(Unknown)
     
-    var description: String {
+    public var description: String {
         switch self {
             
         case .ipv4(let ipv4):

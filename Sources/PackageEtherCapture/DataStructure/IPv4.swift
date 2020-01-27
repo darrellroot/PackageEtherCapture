@@ -10,7 +10,7 @@ import Foundation
 import Network
 
 public struct IPv4: CustomStringConvertible {
-    var description: String {
+    public var description: String {
         return "\(sourceIP) \(destinationIP)"
     }
     let sourceIP: IPv4Address

@@ -9,7 +9,7 @@
 import Foundation
 
 public struct Unknown: CustomStringConvertible {
-    var description: String {
+    public var description: String {
         return "unknown"
     }
     let data: Data
