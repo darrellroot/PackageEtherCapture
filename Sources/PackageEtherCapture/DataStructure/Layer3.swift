@@ -8,6 +8,11 @@
 
 import Foundation
 
+/**
+ Enumeration containing anything encapsulated in the ethernet frame.
+ Usually layer-3 (IPv4, IPv6) but could be encapsulated Layer 2
+ (LDP, CDP, STP)
+ */
 public enum Layer3: CustomStringConvertible {
     case ipv4(IPv4)
     case ipv6(IPv6)

@@ -28,7 +28,7 @@ extension Data {
                 debugPrint("unexpected hexdump case")
             }
         }
-        if self.count % 16 != 15 {  // adding newline if we didn't just do that
+        if self.count % 16 != 0 {  // adding newline if we didn't just do that
             output.append("\n")
         }
         return output
