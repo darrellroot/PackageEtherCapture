@@ -195,6 +195,15 @@ public class EtherCapture {
         }
     }*/
     
+    public static func pcapVersion() -> String {
+        guard let versionC = pcap_lib_version() else {
+            return "unknown"
+        }
+        guard let version: String = String(cString: versionC) else {
+            return "unknown"
+        }
+        return version
+    }
     public static func listInterfaces() -> [String]? {
         var alldevs: UnsafeMutablePointer<pcap_if_t>? = nil
         let errbuf = UnsafeMutablePointer<Int8>.allocate(capacity: Int(PCAP_ERRBUF_SIZE))
