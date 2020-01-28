@@ -13,8 +13,8 @@ public struct IPv4: CustomStringConvertible {
     public var description: String {
         return "\(sourceIP) \(destinationIP)"
     }
-    let sourceIP: IPv4Address
-    let destinationIP: IPv4Address
+    public let sourceIP: IPv4Address
+    public let destinationIP: IPv4Address
 
     init?(data: Data) {
         if data.count > 15, let sourceIP = IPv4Address(data[data.startIndex + 12 ..< data.startIndex + 16]) {

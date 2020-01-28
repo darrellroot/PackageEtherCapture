@@ -15,20 +15,23 @@ public struct Frame: CustomStringConvertible {
     }
     
     //var timeval: timeval
-    var date: Date
-    var srcmac: String = "unknown"
-    var dstmac: String = "unknown"
-    var ethertype: UInt = 0
-    var contents: Layer3
+    public let date: Date
+    public let srcmac: String
+    public let dstmac: String
+    public let ethertype: UInt // ethertype of 0 is an error
+    public let contents: Layer3
     
     init(data: Data, timeval: timeval) {
-        self.date = Date(timeIntervalSince1970: Double(timeval.tv_sec))
-        self.date += Double(timeval.tv_usec)/1000000.0
+        self.date = Date(timeIntervalSince1970: Double(timeval.tv_sec)) + Double(timeval.tv_usec)/1000000.0
         if data.count > 5 {
             srcmac = "\(data[0].hex):\(data[1].hex):\(data[3].hex):\(data[4].hex):\(data[5].hex):\(data[6].hex)"
+        } else {
+            srcmac = "unknown"
         }
         if data.count > 11 {
             dstmac = "\(data[6].hex):\(data[7].hex):\(data[8].hex):\(data[9].hex):\(data[10].hex):\(data[11].hex)"
+        } else {
+            dstmac = "unknown"
         }
         if data.count > 13 {
             let unsure = UInt(data[12]) * 256 + UInt(data[13])
@@ -37,8 +40,12 @@ public struct Frame: CustomStringConvertible {
             } else {
                 if data.count > 15 {
                     self.ethertype = UInt(data[14]) * 256 + UInt(data[15])
+                } else {
+                    ethertype = 0
                 }
             }
+        } else {
+            ethertype = 0
         }
         switch self.ethertype {
         case 0x0800:

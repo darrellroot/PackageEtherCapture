@@ -10,8 +10,8 @@ import Foundation
 import Network
 
 public struct IPv6 {
-    let sourceIP: IPv6Address
-    let destinationIP: IPv6Address
+    public let sourceIP: IPv6Address
+    public let destinationIP: IPv6Address
     public var description: String {
         return "\(sourceIP.debugDescription) \(destinationIP.debugDescription)"
     }

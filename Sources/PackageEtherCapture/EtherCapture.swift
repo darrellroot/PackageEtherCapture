@@ -94,8 +94,8 @@ public class EtherCapture {
             debugPrint("pcap_lookupnet failed \(errString)")
             throw EtherCaptureError.pcap_lookupnet_failed
         }
-        let localnetString = String(format:"%2x", localnet.pointee)  // TODO byte order issue here
-        let netmaskString = String(format: "%2x", netmask.pointee)
+        //let localnetString = String(format:"%2x", localnet.pointee)  // TODO byte order issue here
+        //let netmaskString = String(format: "%2x", netmask.pointee)
         //debugPrint("localnet \(localnetString) \(netmaskString)")
         
         //let cmd = UnsafePointer<Int8>((NSString("port 443")).utf8String)
@@ -151,7 +151,7 @@ public class EtherCapture {
                      ptr: UnsafePointer<UInt8>?) -> () in
                     if let header = header, let ptr = ptr {
                         let timestamp = header.pointee.ts
-                        let packetLength = header.pointee.len  //we may not capture whole packet
+                        //let packetLength = header.pointee.len  //we may not capture whole packet
                         let captureLength = Int(header.pointee.caplen)
                         let data = Data(bytes: ptr, count: captureLength)
                         let frame = Frame(data: data, timeval: timestamp)
@@ -201,7 +201,7 @@ public class EtherCapture {
         var interfaceNames: [String] = []
         //alldevs!.initialize(to: nil)
         let retval = pcap_findalldevs(&alldevs, errbuf)
-        debugPrint("pcap_findalldevs retval \(retval)")
+        //debugPrint("pcap_findalldevs retval \(retval)")
         if retval == -1 {
             let errString = String(cString: errbuf)
             debugPrint("pcap_findalldevs error \(errString)")
@@ -214,13 +214,13 @@ public class EtherCapture {
                 let thisdev = thisdevPtr.pointee
                 if thisdev.name != nil {
                     let name = String(cString: thisdev.name)
-                    debugPrint("name \(name)")
+                    //debugPrint("name \(name)")
                     interfaceNames.append(name)
                 }
-                if thisdev.description != nil {
+                /*if thisdev.description != nil {
                     let description = String(cString: thisdev.description)
                     debugPrint("description \(description)")
-                }
+                }*/
                 // TODO ipv6 address information learned via pcap seems incorrect
                 /*if let addresses = thisdev.addresses {
                     var nextAddress: UnsafeMutablePointer<pcap_addr>? = addresses

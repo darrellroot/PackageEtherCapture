@@ -12,7 +12,7 @@ public struct Unknown: CustomStringConvertible {
     public var description: String {
         return "unknown"
     }
-    let data: Data
+    public let data: Data
     init(data: Data) {
         self.data = data
     }
