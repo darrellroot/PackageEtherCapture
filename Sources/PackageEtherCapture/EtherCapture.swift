@@ -9,10 +9,10 @@ public enum EtherCaptureError: String, Error {
     case pcap_compile_failed
     case pcap_setfilter_failed
     case pcap_max_captures_exceeded
+    case unsupported_datalink
 }
 public class EtherCapture {
     var errbuf = UnsafeMutablePointer<Int8>.allocate(capacity: Int(PCAP_ERRBUF_SIZE))
-    var alldevs: UnsafeMutablePointer<pcap_if_t>? = nil
     var datalink: Int32
     var interfaceNames: [String] = []
     var pcap: OpaquePointer
@@ -101,7 +101,8 @@ public class EtherCapture {
         //let cmd = UnsafePointer<Int8>((NSString("port 443")).utf8String)
         let cmd = UnsafePointer<Int8>((NSString(string: command)).utf8String)
         fcode = UnsafeMutablePointer<bpf_program>.allocate(capacity: 1)
-        retval = pcap_compile(pcap, fcode, cmd, 0, PCAP_NETMASK_UNKNOWN)
+        //We set pcap_compile to optimize, TODO fix netmask
+        retval = pcap_compile(pcap, fcode, cmd, 1, netmask.pointee)
         if retval < 0 {
             let errString: String
             if let error = pcap_geterr(pcap) {
@@ -123,9 +124,14 @@ public class EtherCapture {
             debugPrint("pcap_setfilter failed \(errString)")
             throw EtherCaptureError.pcap_setfilter_failed
         }
-        datalink = pcap_datalink(pcap)
+        self.datalink = pcap_datalink(pcap)
         // see http://www.tcpdump.org/linktypes.html for return value information
-        debugPrint("datalink type \(datalink)")
+        // datalink 1 is Ethernet, datalink 105 is 802.11
+        guard self.datalink == DLT_EN10MB || self.datalink == DLT_IEEE802_11 else {
+            debugPrint("datalink type \(self.datalink)")
+            throw EtherCaptureError.unsupported_datalink
+        }
+        //debugPrint("datalink type \(self.datalink)")
         
         EtherCapture.callbacks.append(callback)
         guard EtherCapture.callbacks.count < 256 else {
@@ -188,4 +194,64 @@ public class EtherCapture {
             return nil
         }
     }*/
+    
+    static func alldevs() -> [String]? {
+        var alldevs: UnsafeMutablePointer<pcap_if_t>? = nil
+        let errbuf = UnsafeMutablePointer<Int8>.allocate(capacity: Int(PCAP_ERRBUF_SIZE))
+        var interfaceNames: [String] = []
+        //alldevs!.initialize(to: nil)
+        let retval = pcap_findalldevs(&alldevs, errbuf)
+        debugPrint("pcap_findalldevs retval \(retval)")
+        if retval == -1 {
+            let errString = String(cString: errbuf)
+            debugPrint("pcap_findalldevs error \(errString)")
+            return nil
+        }
+        
+        var nextdev: UnsafeMutablePointer<pcap_if_t>? = alldevs
+        repeat {
+            if let thisdevPtr = nextdev {
+                let thisdev = thisdevPtr.pointee
+                if thisdev.name != nil {
+                    let name = String(cString: thisdev.name)
+                    debugPrint("name \(name)")
+                    interfaceNames.append(name)
+                }
+                if thisdev.description != nil {
+                    let description = String(cString: thisdev.description)
+                    debugPrint("description \(description)")
+                }
+                // TODO ipv6 address information learned via pcap seems incorrect
+                /*if let addresses = thisdev.addresses {
+                    var nextAddress: UnsafeMutablePointer<pcap_addr>? = addresses
+                    repeat {
+                        if let thisAddress = nextAddress {
+                            if let address = thisAddress.pointee.addr?.pointee {
+                                debugPrint("address \(address.printout)")
+                            }
+                            if let netmask = thisAddress.pointee.netmask?.pointee {
+                                debugPrint("netmask \(netmask.printout)")
+                            }
+                            if let broadcastAddress = thisAddress.pointee.broadaddr?.pointee {
+                                debugPrint("broadcast \(broadcastAddress.printout)")
+                            }
+                            if let dstaddr = thisAddress.pointee.dstaddr?.pointee {
+                                debugPrint("p2p destination address \(dstaddr.printout)")
+                            }
+                            nextAddress = thisAddress.pointee.next
+                        } else {
+                            nextAddress = nil // terminates loop
+                        }
+                    } while nextAddress != nil
+                }*/
+                let flags = thisdev.flags
+                debugPrint("flags %x", flags)
+                nextdev = thisdev.next
+            } else {
+                nextdev = nil  // can only happen on first round if already nil, but just in case
+            }
+        } while nextdev != nil
+        pcap_freealldevs(alldevs)
+        return interfaceNames
+    }
 }
