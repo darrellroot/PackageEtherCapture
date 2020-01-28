@@ -195,7 +195,7 @@ public class EtherCapture {
         }
     }*/
     
-    static func alldevs() -> [String]? {
+    static func listInterfaces() -> [String]? {
         var alldevs: UnsafeMutablePointer<pcap_if_t>? = nil
         let errbuf = UnsafeMutablePointer<Int8>.allocate(capacity: Int(PCAP_ERRBUF_SIZE))
         var interfaceNames: [String] = []
@@ -244,8 +244,8 @@ public class EtherCapture {
                         }
                     } while nextAddress != nil
                 }*/
-                let flags = thisdev.flags
-                debugPrint("flags %x", flags)
+                //let flags = thisdev.flags
+                //debugPrint("flags %x", flags)
                 nextdev = thisdev.next
             } else {
                 nextdev = nil  // can only happen on first round if already nil, but just in case
