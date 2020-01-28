@@ -15,8 +15,8 @@ public struct Frame: CustomStringConvertible {
     }
     
     public var hexdump: String {
-        debugPrint("generating frame hexdump")
-        var output: String = ""
+        return self.data.hexdump
+        /*var output: String = ""
         output.reserveCapacity(data.count * 3)
         for (position,datum) in self.data.enumerated() {
             switch (position % 2 == 0, position % 16 == 0, position % 16 == 15) {
@@ -27,7 +27,7 @@ public struct Frame: CustomStringConvertible {
                 output.append(datum.hex)
                 output.append("\n")
             case (true, true, false):  // beginning of line, even
-                output.append(String(format: "0x%04x",position))
+                output.append(String(format: "0x%04x ",position))
                 output.append(datum.hex)
             case (true, false, false): // even but not beginning of line
                 output.append(datum.hex)
@@ -38,7 +38,7 @@ public struct Frame: CustomStringConvertible {
         if data.count % 16 != 15 {  // adding newline if we didn't just do that
             output.append("\n")
         }
-        return output
+        return output*/
     }
     //var timeval: timeval
     public let date: Date    // pcap timestamp of packet capture

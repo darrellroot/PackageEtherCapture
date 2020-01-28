@@ -234,9 +234,7 @@ public class EtherCapture {
         guard let versionC = pcap_lib_version() else {
             return "unknown"
         }
-        guard let version: String = String(cString: versionC) else {
-            return "unknown"
-        }
+        let version: String = String(cString: versionC)
         return version
     }
     public static func listInterfaces() -> [String]? {
