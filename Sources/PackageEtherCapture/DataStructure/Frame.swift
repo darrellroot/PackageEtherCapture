@@ -11,7 +11,7 @@ import Foundation
 public struct Frame: CustomStringConvertible {
     public var description: String {
         let ethertypeString = String(format: "%04x",ethertype)
-        return "\(date) \(srcmac) \(dstmac) \(ethertypeString) \(contents)"
+        return "\(srcmac) \(dstmac) \(ethertypeString) \(contents)"
     }
     
     //var timeval: timeval
