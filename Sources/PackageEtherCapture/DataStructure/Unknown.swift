@@ -9,10 +9,17 @@
 import Foundation
 
 public struct Unknown: CustomStringConvertible {
+    public let data: Data
+    
     public var description: String {
         return "unknown"
     }
-    public let data: Data
+
+    public var hexdump: String {
+        return self.data.hexdump
+    }
+
+    
     init(data: Data) {
         self.data = data
     }

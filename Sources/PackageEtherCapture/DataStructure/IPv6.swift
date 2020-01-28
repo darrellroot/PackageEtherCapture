@@ -10,13 +10,20 @@ import Foundation
 import Network
 
 public struct IPv6 {
+    public let data: Data
     public let sourceIP: IPv6Address
     public let destinationIP: IPv6Address
+
     public var description: String {
         return "\(sourceIP.debugDescription) \(destinationIP.debugDescription)"
     }
-
+    
+    public var hexdump: String {
+        return self.data.hexdump
+    }
+    
     init?(data: Data) {
+        self.data = data
         if data.count >= 24, let sourceIP = IPv6Address(data[data.startIndex + 8 ..< data.startIndex + 24]) {
             self.sourceIP = sourceIP
         } else {

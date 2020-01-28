@@ -24,4 +24,16 @@ public enum Layer3: CustomStringConvertible {
             return unknown.description
         }
     }
+    
+    public var hexdump: String {
+        switch self {
+            
+        case .ipv4(let ipv4):
+            return ipv4.hexdump
+        case .ipv6(let ipv6):
+            return ipv6.hexdump
+        case .unknown(let unknown):
+            return unknown.hexdump
+        }
+    }
 }
