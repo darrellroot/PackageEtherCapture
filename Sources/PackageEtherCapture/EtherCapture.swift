@@ -3,13 +3,39 @@ import Foundation
 import Darwin
 import PackageEtherCaptureC
 
-public enum EtherCaptureError: String, Error {
-    case pcap_open_live_failed
-    case pcap_lookupnet_failed
-    case pcap_compile_failed
-    case pcap_setfilter_failed
+public enum EtherCaptureError: Error, CustomStringConvertible {
+    
+    case pcap_open_live_failed(message: String)
+    case pcap_lookupnet_failed(message: String)
+    case pcap_lookupdev_failed(message: String)
+    case pcap_compile_failed(message: String)
+    case pcap_setfilter_failed(message: String)
     case pcap_max_captures_exceeded
-    case unsupported_datalink
+    case unsupported_datalink(message: String)
+    
+    
+    public var localizedDescription: String {
+        return self.description
+    }
+    public var description: String {
+        switch self {
+            
+        case .pcap_open_live_failed(let message):
+            return "pcap_open_live failed with error \(message)"
+        case .pcap_lookupnet_failed(let message):
+            return "pcap_lookupnet failed with error \(message)"
+        case .pcap_lookupdev_failed(let message):
+            return "pcap_lookupdev failed with error \(message)"
+        case .pcap_compile_failed(let message):
+            return "pcap_compile failed with error \(message)"
+        case .pcap_setfilter_failed(let message):
+            return "pcap_setupfilter failed with error \(message)"
+        case .pcap_max_captures_exceeded:
+            return "pcap max captures exceeded"
+        case .unsupported_datalink(let message):
+            return "unsupported pcap datalink type: \(message)"
+        }
+    }
 }
 public class EtherCapture {
     var errbuf = UnsafeMutablePointer<Int8>.allocate(capacity: Int(PCAP_ERRBUF_SIZE))
@@ -81,8 +107,8 @@ public class EtherCapture {
         let snaplen = Int32(snaplen)
         guard let pcap = pcap_open_live(interface, snaplen, promiscuousInt, 1000, errbuf) else {
             let errString = String(cString: errbuf)
-            debugPrint("pcap_open_live failed \(errString)")
-            throw EtherCaptureError.pcap_open_live_failed
+            //debugPrint("pcap_open_live failed \(errString)")
+            throw EtherCaptureError.pcap_open_live_failed(message: errString)
         }
         self.pcap = pcap
         let localnet = UnsafeMutablePointer<bpf_u_int32>.allocate(capacity: 1)
@@ -91,8 +117,8 @@ public class EtherCapture {
         var retval = pcap_lookupnet(interface, localnet, netmask, errbuf)
         if retval < 0 {
             let errString = String(cString: errbuf)
-            debugPrint("pcap_lookupnet failed \(errString)")
-            throw EtherCaptureError.pcap_lookupnet_failed
+            //debugPrint("pcap_lookupnet failed \(errString)")
+            throw EtherCaptureError.pcap_lookupnet_failed(message: errString)
         }
         //let localnetString = String(format:"%2x", localnet.pointee)  // TODO byte order issue here
         //let netmaskString = String(format: "%2x", netmask.pointee)
@@ -110,8 +136,8 @@ public class EtherCapture {
             } else {
                 errString = "unknown error"
             }
-            debugPrint("pcap_compile failed \(errString)")
-            throw EtherCaptureError.pcap_compile_failed
+            //debugPrint("pcap_compile failed \(errString)")
+            throw EtherCaptureError.pcap_compile_failed(message: errString)
         }
         retval = pcap_setfilter(pcap, fcode)  // this starts the capture!
         guard retval >= 0 else {
@@ -121,15 +147,15 @@ public class EtherCapture {
             } else {
                 errString = "unknown error"
             }
-            debugPrint("pcap_setfilter failed \(errString)")
-            throw EtherCaptureError.pcap_setfilter_failed
+            //debugPrint("pcap_setfilter failed \(errString)")
+            throw EtherCaptureError.pcap_setfilter_failed(message: errString)
         }
         self.datalink = pcap_datalink(pcap)
         // see http://www.tcpdump.org/linktypes.html for return value information
         // datalink 1 is Ethernet, datalink 105 is 802.11
         guard self.datalink == DLT_EN10MB || self.datalink == DLT_IEEE802_11 else {
-            debugPrint("datalink type \(self.datalink)")
-            throw EtherCaptureError.unsupported_datalink
+            //debugPrint("datalink type \(self.datalink)")
+            throw EtherCaptureError.unsupported_datalink(message: String(self.datalink))
         }
         //debugPrint("datalink type \(self.datalink)")
         
@@ -194,6 +220,15 @@ public class EtherCapture {
             return nil
         }
     }*/
+    
+    public static func defaultInterface() throws -> String {
+        let errbuf = UnsafeMutablePointer<Int8>.allocate(capacity: Int(PCAP_ERRBUF_SIZE))
+        guard let dev = pcap_lookupdev(errbuf) else {
+            let errString = String(cString: errbuf)
+            throw EtherCaptureError.pcap_lookupdev_failed(message: errString)
+        }
+        return(String(cString: dev))
+    }
     
     public static func pcapVersion() -> String {
         guard let versionC = pcap_lib_version() else {
