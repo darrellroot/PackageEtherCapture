@@ -18,9 +18,9 @@ public struct Frame: CustomStringConvertible {
     public var description: String {
         let ethertypeString: String
         if let ethertype = ethertype {
-            ethertypeString = String(format: "0x%04x",ethertype)
+            ethertypeString = String(format: "0x%4x",ethertype)
         } else if let ieeeDsap = ieeeDsap, let ieeeSsap = ieeeSsap {
-            ethertypeString = String(format: "0x%02x",ieeeDsap) + String(format: "%02x",ieeeSsap)
+            ethertypeString = String(format: "0x%2x",ieeeDsap) + String(format: "%02x",ieeeSsap)
         } else {
             ethertypeString = "unknown"
         }
@@ -122,14 +122,14 @@ public struct Frame: CustomStringConvertible {
             return
         }
         if data.count > 5 {
-            srcmac = "\(data[0].hex):\(data[1].hex):\(data[3].hex):\(data[4].hex):\(data[5].hex):\(data[6].hex)"
-        } else {
-            srcmac = "unknown"
-        }
-        if data.count > 11 {
-            dstmac = "\(data[6].hex):\(data[7].hex):\(data[8].hex):\(data[9].hex):\(data[10].hex):\(data[11].hex)"
+            dstmac = "\(data[0].hex):\(data[1].hex):\(data[2].hex):\(data[3].hex):\(data[4].hex):\(data[5].hex)"
         } else {
             dstmac = "unknown"
+        }
+        if data.count > 11 {
+            srcmac = "\(data[6].hex):\(data[7].hex):\(data[8].hex):\(data[9].hex):\(data[10].hex):\(data[11].hex)"
+        } else {
+            srcmac = "unknown"
         }
         let unsure: UInt = UInt(data[12]) * 256 + UInt(data[13]) // could be ethertype or length
         
