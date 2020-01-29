@@ -63,7 +63,7 @@ public struct IPv4: CustomStringConvertible {
         self.dontFragmentFlag = data[data.startIndex + 6] & 0b01000000 != 0
         self.evilBit = data[data.startIndex + 6] & 0b10000000 != 0
         self.moreFragmentsFlag = data[data.startIndex + 6] & 0b00100000 != 0
-        
+
         self.fragmentOffset = UInt(data[data.startIndex + 6] & 0b00011111) * 256 + UInt(data[data.startIndex + 7])
         
         self.ttl = data[data.startIndex + 8]
