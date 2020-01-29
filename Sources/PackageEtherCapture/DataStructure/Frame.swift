@@ -27,6 +27,9 @@ public struct Frame: CustomStringConvertible {
         return "\(srcmac) \(dstmac) \(frameFormat) \(ethertypeString) \(layer3)"
     }
     
+    /**
+     - Returns: One line verbose information frame header only
+     */
     public var verboseDescription: String {
         let length: String
         if let ieeeLength = ieeeLength {
@@ -36,19 +39,43 @@ public struct Frame: CustomStringConvertible {
         }
         let dsap: String
         if let ieeeDsap = ieeeDsap {
-            dsap = "DSAP \(ieeeDsap) "
+            dsap = "DSAP 0x\(ieeeDsap.hex) "
         } else {
             dsap = ""
         }
         let ssap: String
         if let ieeeSsap = ieeeSsap {
-            ssap = "SSAP \(ieeeSsap) "
+            ssap = "SSAP 0x\(ieeeSsap.hex) "
         } else {
             ssap = ""
         }
+        let control: String
+        if let ieeeControl = ieeeControl {
+            control = "CONTROL 0x\(ieeeControl.hex) "
+        } else {
+            control = ""
+        }
+        let org: String
+        if let snapOrg = snapOrg {
+            org = "SNAP Org 0x\(String(format: "%6x ",snapOrg)) "
+        } else {
+            org = ""
+        }
+        let sType: String
+        if let snapType = snapType {
+            sType = "SType 0x\(String(format: "%4x ",snapType)) "
+        } else {
+            sType = ""
+        }
+        let eType: String
+        if let ethertype = ethertype {
+            eType = "Ethertype 0x\(String(format: "%4x ",ethertype)) "
+        } else {
+            eType = ""
+        }
 
         //each optional has 1 space at end provided above
-        return "\(srcmac) > \(dstmac) \(frameFormat) \(length)\(dsap)\(ssap)"
+        return "\(srcmac) > \(dstmac) \(frameFormat) \(length)\(dsap)\(ssap)\(control)\(org)\(sType)\(eType)"
     }
     
     /**
@@ -67,9 +94,9 @@ public struct Frame: CustomStringConvertible {
     // Had trouble getting compiler to admit next 5 variables initialized
     // so used var
     public var ieeeLength: UInt? = nil  //802.2 802.3 encapsulation
-    public var ieeeDsap: UInt? = nil
-    public var ieeeSsap: UInt? = nil
-    public var ieeeControl: UInt? = nil
+    public var ieeeDsap: UInt8? = nil
+    public var ieeeSsap: UInt8? = nil
+    public var ieeeControl: UInt8? = nil
     public var snapOrg: UInt? = nil  //802.2 SNAP header
     public var snapType: UInt? = nil   //802.2 SNAP header
     public var ethertype: UInt? = nil // ethernetII encapsulation
@@ -117,9 +144,9 @@ public struct Frame: CustomStringConvertible {
         } else {
             frameFormat = .ieee8023
             self.ieeeLength = unsure
-            self.ieeeDsap = UInt(data[14])
-            self.ieeeSsap = UInt(data[15])
-            self.ieeeControl = UInt(data[16])
+            self.ieeeDsap = UInt8(data[14])
+            self.ieeeSsap = UInt8(data[15])
+            self.ieeeControl = UInt8(data[16])
             self.ethertype = nil
         }
         self.frameFormat = .ethernet
