@@ -90,7 +90,7 @@ public struct Frame: CustomStringConvertible {
     public let date: Date    // pcap timestamp of packet capture
     public let srcmac: String
     public let dstmac: String
-    public let frameFormat: FrameFormat
+    public var frameFormat: FrameFormat  //should be let but compiler complains
     // Had trouble getting compiler to admit next 5 variables initialized
     // so used var
     public var ieeeLength: UInt? = nil  //802.2 802.3 encapsulation
@@ -136,6 +136,7 @@ public struct Frame: CustomStringConvertible {
         let frameFormat: FrameFormat
         
         if unsure > 0x5dc {
+            frameFormat = .ethernet
             ethertype = unsure
             self.frameFormat = .ethernet
             self.ieeeLength = nil
