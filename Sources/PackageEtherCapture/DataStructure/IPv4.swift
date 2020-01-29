@@ -15,7 +15,11 @@ public struct IPv4: CustomStringConvertible {
     public let data: Data
     
     public var description: String {
-        return "\(sourceIP) \(destinationIP)"
+        return "\(sourceIP) > \(destinationIP)"
+    }
+    
+    public var verboseDescription: String {
+        return "\(sourceIP) > \(destinationIP)"
     }
     
     public var hexdump: String {

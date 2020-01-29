@@ -14,6 +14,11 @@ public struct Unknown: CustomStringConvertible {
     public var description: String {
         return "unknown"
     }
+    
+    public var verboseDescription: String {
+        return "unknown"
+    }
+    
     public static let completely = Unknown(data: Data()) // empty for error cases
 
     public var hexdump: String {

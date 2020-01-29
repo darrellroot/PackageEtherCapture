@@ -136,8 +136,8 @@ public struct Frame: CustomStringConvertible {
         let frameFormat: FrameFormat
         
         if unsure > 0x5dc {
-            self.ethertype = unsure
-            frameFormat = .ethernet
+            ethertype = unsure
+            self.frameFormat = .ethernet
             self.ieeeLength = nil
             self.ieeeDsap = nil
             self.ieeeSsap = nil
@@ -149,7 +149,7 @@ public struct Frame: CustomStringConvertible {
             self.ieeeControl = UInt8(data[16])
             self.ethertype = nil
         }
-        self.frameFormat = .ethernet
+        self.frameFormat = frameFormat
 
         switch (frameFormat, unsure, UInt(data[14])) {
             

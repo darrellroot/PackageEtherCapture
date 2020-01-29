@@ -15,9 +15,13 @@ public struct IPv6 {
     public let destinationIP: IPv6Address
 
     public var description: String {
-        return "\(sourceIP.debugDescription) \(destinationIP.debugDescription)"
+        return "\(sourceIP.debugDescription) > \(destinationIP.debugDescription)"
     }
     
+    public var verboseDescription: String {
+        return "\(sourceIP) > \(destinationIP)"
+    }
+
     public var hexdump: String {
         return self.data.hexdump
     }

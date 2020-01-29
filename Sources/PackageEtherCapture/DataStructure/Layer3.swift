@@ -41,4 +41,17 @@ public enum Layer3: CustomStringConvertible {
             return unknown.hexdump
         }
     }
+    
+    public var verboseDescription: String {
+        switch self {
+            
+        case .ipv4(let ipv4):
+            return ipv4.verboseDescription
+        case .ipv6(let ipv6):
+            return ipv6.verboseDescription
+        case .unknown(let unknown):
+            return unknown.verboseDescription
+        }
+    }
+
 }
