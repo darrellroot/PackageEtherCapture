@@ -18,6 +18,16 @@ public enum Layer3: CustomStringConvertible, EtherDisplay {
     case ipv6(IPv6)
     case unknown(Unknown)
     
+    public var layer4: EtherDisplay {
+        switch self {
+            case .ipv4(let ipv4):
+                return ipv4
+            case .ipv6(let ipv6):
+                return ipv6
+            case .unknown(let unknown):
+                return unknown
+        }
+    }
     public var description: String {
         switch self {
             
