@@ -12,11 +12,11 @@ public struct Unknown: CustomStringConvertible, EtherDisplay {
     public let data: Data
     
     public var description: String {
-        return "unknown"
+        return "unknown \(data.count) bytes"
     }
     
     public var verboseDescription: String {
-        return "unknown"
+        return "unknown \(data.count) bytes"
     }
     
     public static let completely = Unknown(data: Data()) // empty for error cases
