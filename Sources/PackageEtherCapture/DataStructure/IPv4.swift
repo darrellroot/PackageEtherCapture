@@ -27,7 +27,12 @@ public struct IPv4: CustomStringConvertible, EtherDisplay {
     public let ipProtocol: UInt8
     public let headerChecksum: UInt
     public let options: Data?
-    
+    //public let payload: Data?
+    /**
+     - Parameter layer4: Nested data structure with higher layer information
+     */
+    public var layer4: Layer4 = .unknown(Unknown.completely)
+
     public var description: String {
         return "IPv\(version) \(sourceIP) > \(destinationIP) Len \(totalLength) ttl \(ttl) ipProt \(ipProtocol)"
     }
@@ -55,6 +60,10 @@ public struct IPv4: CustomStringConvertible, EtherDisplay {
         self.version = (data[data.startIndex] & 0b11110000) >> 4
         let ihl = data[data.startIndex] & 0b00001111
         self.ihl = ihl
+        guard ihl >= 5 else {
+            debugPrint("IPv4: Invalid ihl \(ihl) detected")
+            return nil
+        }
         self.dscp = (data[data.startIndex + 1] & 0b11111100) >> 2
         self.ecn = (data[data.startIndex + 1] & 0b00000011)
         self.totalLength = UInt(data[data.startIndex + 2]) * 256 + UInt(data[data.startIndex + 3])
@@ -81,10 +90,35 @@ public struct IPv4: CustomStringConvertible, EtherDisplay {
             return nil
         }
         
-        if ihl > 20 && data.count >= ihl {
-            self.options = data[data.startIndex + 20 ..< data.startIndex + Int(ihl)]
+        let finalHeaderIndex = data.startIndex + 4 * Int(ihl)
+        if data.count >= finalHeaderIndex, ihl > 5 {
+            self.options = data[data.startIndex + 20 ..< finalHeaderIndex]
         } else {
             self.options = nil
         }
+        
+        if finalHeaderIndex >= data.endIndex {  // invalid case
+            self.layer4 = .unknown(Unknown.completely)
+        } else {
+            switch ipProtocol {
+            case 6:
+                //let myData = Data(data[data.startIndex + 4 * Int(ihl) ..< data.endIndex])
+                //if let tcp = Tcp(data: myData) {
+                if let tcp = Tcp(data: data[data.startIndex + 4 * Int(ihl) ..< data.endIndex]) {
+                    self.layer4 = .tcp(tcp)
+                } else {
+                    self.layer4 = .unknown(Unknown(data: data[finalHeaderIndex ..< data.endIndex]))
+                }
+            case 17:
+                if let udp = Udp(data: data[finalHeaderIndex ..< data.endIndex]) {
+                    self.layer4 = .udp(udp)
+                } else {
+                    self.layer4 = .unknown(Unknown(data: data[finalHeaderIndex ..< data.endIndex]))
+                }
+            default:
+                self.layer4 = .unknown(Unknown(data: data[finalHeaderIndex ..< data.endIndex]))
+            }
+            
+        }// if finalHeaderIndex >= data.endIndex else
     }
 }

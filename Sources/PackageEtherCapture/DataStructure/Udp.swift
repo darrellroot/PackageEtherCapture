@@ -37,7 +37,7 @@ public struct Udp: EtherDisplay {
         self.destinationPort = UInt(data[data.startIndex + 2]) * 256 + UInt(data[data.startIndex + 3])
         self.length = UInt(data[data.startIndex + 4]) * 256 + UInt(data[data.startIndex + 5])
         self.checksum = UInt(data[data.startIndex + 6]) * 256 + UInt(data[data.startIndex + 7])
-        self.payload = Data(data[data.startIndex + 8] ..< data[data.endIndex])
+        self.payload = Data(data[(data.startIndex + 8) ..< data.endIndex])
 
     }
 }

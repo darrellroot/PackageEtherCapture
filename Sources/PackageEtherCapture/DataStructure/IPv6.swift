@@ -19,6 +19,7 @@ public struct IPv6: EtherDisplay {
     public let hopLimit: UInt8
     public let sourceIP: IPv6Address
     public let destinationIP: IPv6Address
+    public let layer4: Layer4
 
     public var description: String {
         return "IPv\(version) \(sourceIP.debugDescription) > \(destinationIP.debugDescription) payload \(payloadLength) nextHeader \(nextHeader) hopLimit \(hopLimit)"
@@ -59,5 +60,29 @@ public struct IPv6: EtherDisplay {
         } else {
             return nil
         }
+        
+        let finalHeaderIndex = data.startIndex + 20 //TODO deal with extension headers
+        if finalHeaderIndex >= data.endIndex {  // invalid case
+            self.layer4 = .unknown(Unknown.completely)
+        } else {
+            switch nextHeader {
+            case 6:
+                if let tcp = Tcp(data: data[data.startIndex + 20 ..< data.endIndex]) {
+                    self.layer4 = .tcp(tcp)
+                } else {
+                    self.layer4 = .unknown(Unknown(data: data[data.startIndex + 20 ..< data.endIndex]))
+                }
+            case 17:
+                if let udp = Udp(data: data[finalHeaderIndex ..< data.endIndex]) {
+                    self.layer4 = .udp(udp)
+                } else {
+                    self.layer4 = .unknown(Unknown(data: data[finalHeaderIndex ..< data.endIndex]))
+                }
+            default:
+                self.layer4 = .unknown(Unknown(data: data[finalHeaderIndex ..< data.endIndex]))
+            }
+            
+        }// if finalHeaderIndex >= data.endIndex else
+
     }
 }

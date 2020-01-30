@@ -61,11 +61,12 @@ public struct Tcp: EtherDisplay {
     public let payload: Data
     
     init?(data: Data) {
+        debugPrint("tcp initialization started")
         guard data.count >= 20 else {
             debugPrint("incomplete TCP header detected")
             return nil
         }
-        self.data = data
+        self.data = Data(data)
         self.sourcePort = UInt(data[data.startIndex]) * 256 + UInt(data[data.startIndex + 1])
         self.destinationPort = UInt(data[data.startIndex + 2]) * 256 + UInt(data[data.startIndex + 3])
         self.sequenceNumber = UInt(data[data.startIndex + 4]) * 256 * 256 * 256 + UInt(data[data.startIndex + 5]) * 256 * 256 + UInt(data[data.startIndex + 6]) * 256 + UInt(data[data.startIndex + 7])
@@ -84,7 +85,8 @@ public struct Tcp: EtherDisplay {
         //TODO TCP header options and variable size
         self.options = nil
         
-        self.payload = Data(data[data.startIndex + 20] ..< data[data.endIndex])
-        
+        self.payload = Data(data[data.startIndex + 20 ..< data.endIndex])
+        debugPrint("TCP initialization complete")
+        debugPrint(self)
     }
 }
