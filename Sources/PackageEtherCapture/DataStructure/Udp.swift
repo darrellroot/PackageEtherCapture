@@ -17,7 +17,7 @@ public struct Udp: EtherDisplay {
     }
     
     public var verboseDescription: String {
-           return "\(sourcePort) > \(destinationPort) length \(length) checksum \(checksum)"
+           return "UDP \(sourcePort) > \(destinationPort) length \(length) checksum \(checksum)"
     }
     
     public let data: Data

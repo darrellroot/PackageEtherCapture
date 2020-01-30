@@ -39,7 +39,7 @@ public struct Tcp: EtherDisplay {
     }
     
     public var verboseDescription: String {
-           return "\(sourcePort) > \(destinationPort) seq \(sequenceNumber) ack \(acknowledgementNumber) offset \(dataOffset) flags \(flags) window \(window) checksum \(checksum) urgentPtr \(urgentPointer)  \(payload.count) bytes"
+           return "TCP \(sourcePort) > \(destinationPort) seq \(sequenceNumber) ack \(acknowledgementNumber) offset \(dataOffset) flags \(flags) window \(window) checksum \(checksum) urgentPtr \(urgentPointer)  \(payload.count) bytes"
     }
     public let data: Data
     public let sourcePort: UInt
@@ -61,7 +61,6 @@ public struct Tcp: EtherDisplay {
     public let payload: Data
     
     init?(data: Data) {
-        debugPrint("tcp initialization started")
         guard data.count >= 20 else {
             debugPrint("incomplete TCP header detected")
             return nil
@@ -86,7 +85,5 @@ public struct Tcp: EtherDisplay {
         self.options = nil
         
         self.payload = Data(data[data.startIndex + 20 ..< data.endIndex])
-        debugPrint("TCP initialization complete")
-        debugPrint(self)
     }
 }
