@@ -30,7 +30,7 @@ final class PackageEtherCaptureTests: XCTestCase {
      To get hex stream for Frame() construct input:
         right-click->copy->as hex stream
      */
-    func testFrame30() {
+    func testIpv4Frame30() {
         /*
          Frame 30: 66 bytes on wire (528 bits), 66 bytes captured (528 bits) on interface 0
          Ethernet II, Src: Apple_2c:0d:50 (c8:69:cd:2c:0d:50), Dst: Apple_89:0a:04 (68:5b:35:89:0a:04)
@@ -131,7 +131,36 @@ final class PackageEtherCaptureTests: XCTestCase {
         XCTAssert(ipv4.options == nil)
         
     }
-
+    func testIpv6Frame2() {
+        let packetStream = "685b35890a04b07fb95d8ed286dd620d78a900200639260014061400049c00000000000023132601064748021620d5ae46fbf6c7a15401bbf0f198953ced5030c49a8011011623d200000101080a0243f4b91f79a97d"
+        guard let data = makeData(packetStream: packetStream) else {
+            XCTFail()
+            return
+        }
+        let frame = Frame(data: data, timeval: timeval())
+        XCTAssert(frame.frameFormat == .ethernet)
+        XCTAssert(frame.dstmac == "68:5b:35:89:0a:04")
+        XCTAssert(frame.srcmac == "b0:7f:b9:5d:8e:d2")
+        XCTAssert(frame.ieeeLength == nil)
+        XCTAssert(frame.ieeeDsap == nil)
+        XCTAssert(frame.ieeeControl == nil)
+        XCTAssert(frame.snapOrg == nil)
+        XCTAssert(frame.snapType == nil)
+        XCTAssert(frame.ethertype == 0x86dd)
+        XCTAssert(frame.data.count == 86)
+        guard case .ipv6(let ipv6) = frame.layer3 else {
+            XCTFail()
+            return
+        }
+        XCTAssert(ipv6.version == 6)
+        XCTAssert(ipv6.trafficClass == 0x20)
+        XCTAssert(ipv6.flowLabel == 0xd78a9)
+        XCTAssert(ipv6.payloadLength == 32)
+        XCTAssert(ipv6.nextHeader == 6)
+        XCTAssert(ipv6.hopLimit == 57)
+        XCTAssert(ipv6.sourceIP == IPv6Address("2600:1406:1400:49c::2313")!)
+        XCTAssert(ipv6.destinationIP == IPv6Address("2601:647:4802:1620:d5ae:46fb:f6c7:a154")!)
+    }
     /*static var allTests = [
         ("testExample", testExample),
     ]*/

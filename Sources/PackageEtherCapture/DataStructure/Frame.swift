@@ -11,7 +11,7 @@ import Foundation
 /**
  Top-level data structure for a frame capture from the network.
  */
-public struct Frame: CustomStringConvertible {
+public struct Frame: CustomStringConvertible, EtherDisplay {
     /**
      - Returns: One line summary of the frame and packet contents
      */

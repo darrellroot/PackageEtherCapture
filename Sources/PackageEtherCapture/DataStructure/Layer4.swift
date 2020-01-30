@@ -1,5 +1,5 @@
 //
-//  Layer3.swift
+//  Layer4.swift
 //  packetCapture1
 //
 //  Created by Darrell Root on 1/24/20.
@@ -13,18 +13,18 @@ import Foundation
  Usually layer-3 (IPv4, IPv6) but could be encapsulated Layer 2
  (LDP, CDP, STP)
  */
-public enum Layer3: CustomStringConvertible, EtherDisplay {
-    case ipv4(IPv4)
-    case ipv6(IPv6)
+public enum Layer4: CustomStringConvertible, EtherDisplay {
+    case tcp(Tcp)
+    case udp(Udp)
     case unknown(Unknown)
     
     public var description: String {
         switch self {
             
-        case .ipv4(let ipv4):
-            return ipv4.description
-        case .ipv6(let ipv6):
-            return ipv6.description
+        case .tcp(let tcp):
+            return tcp.description
+        case .udp(let udp):
+            return udp.description
         case .unknown(let unknown):
             return unknown.description
         }
@@ -33,10 +33,10 @@ public enum Layer3: CustomStringConvertible, EtherDisplay {
     public var hexdump: String {
         switch self {
             
-        case .ipv4(let ipv4):
-            return ipv4.hexdump
-        case .ipv6(let ipv6):
-            return ipv6.hexdump
+        case .tcp(let tcp):
+            return tcp.hexdump
+        case .udp(let udp):
+            return udp.hexdump
         case .unknown(let unknown):
             return unknown.hexdump
         }
@@ -45,10 +45,10 @@ public enum Layer3: CustomStringConvertible, EtherDisplay {
     public var verboseDescription: String {
         switch self {
             
-        case .ipv4(let ipv4):
-            return ipv4.verboseDescription
-        case .ipv6(let ipv6):
-            return ipv6.verboseDescription
+        case .tcp(let tcp):
+            return tcp.verboseDescription
+        case .udp(let udp):
+            return udp.verboseDescription
         case .unknown(let unknown):
             return unknown.verboseDescription
         }

@@ -9,7 +9,7 @@
 import Foundation
 import Network
 
-public struct IPv6 {
+public struct IPv6: EtherDisplay {
     public let data: Data
     public let version: UInt8
     public let trafficClass: UInt8
@@ -42,7 +42,7 @@ public struct IPv6 {
         self.version = (data[data.startIndex] & 0b11110000) >> 4
         self.trafficClass = (data[data.startIndex] & 0b00001111) << 4 + (data[data.startIndex + 1] & 0b11110000) >> 4
         
-        self.flowLabel = UInt(data[data.startIndex + 1] & 0b00001111) * 256 * 256 + UInt(data[data.startIndex + 2]) + UInt(data[data.startIndex + 3])
+        self.flowLabel = UInt(data[data.startIndex + 1] & 0b00001111) * 256 * 256 + UInt(data[data.startIndex + 2]) * 256 + UInt(data[data.startIndex + 3])
         
         self.payloadLength = UInt(data[data.startIndex + 4]) * 256 + UInt(data[data.startIndex + 5])
         

@@ -9,7 +9,7 @@
 import Foundation
 import Network
 
-public struct IPv4: CustomStringConvertible {
+public struct IPv4: CustomStringConvertible, EtherDisplay {
     public let sourceIP: IPv4Address
     public let destinationIP: IPv4Address
     public let data: Data
