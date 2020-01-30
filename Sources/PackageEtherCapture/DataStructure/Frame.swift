@@ -104,6 +104,18 @@ public struct Frame: CustomStringConvertible, EtherDisplay {
      - Parameter layer3: Nested data structure with higher layer information
      */
     public var layer3: Layer3 = .unknown(Unknown.completely)
+    
+    public var layer4: Layer4? {
+        switch self.layer3 {
+        case .ipv4(let ipv4):
+            return ipv4.layer4
+        case .ipv6(let ipv6):
+            return ipv6.layer4
+        case .unknown(let unknown):
+            return nil
+        }
+    }
+    
     /**
      - Parameter data: Total frame contents as captured
      */
