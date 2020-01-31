@@ -87,6 +87,7 @@ public struct Frame: CustomStringConvertible, EtherDisplay {
     /**
      - Parameter date: pcap timestamp the frame was captured
      */
+    public let id = UUID()
     public let date: Date    // pcap timestamp of packet capture
     public let srcmac: String
     public let dstmac: String
