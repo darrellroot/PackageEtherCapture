@@ -122,7 +122,7 @@ public struct Frame: CustomStringConvertible, EtherDisplay {
      */
     public let data: Data  // total frame contents
     
-    init(data: Data, timeval: timeval) {
+    init(data: Data, timeval: timeval = timeval()) {
         self.data = data
         self.date = Date(timeIntervalSince1970: Double(timeval.tv_sec)) + Double(timeval.tv_usec)/1000000.0
         guard data.count > 17 else {
@@ -210,4 +210,27 @@ public struct Frame: CustomStringConvertible, EtherDisplay {
             self.layer3 = .unknown(unknown)*/
         }
     }
+    
+    static func makeData(packetStream: String) -> Data? {
+        var total = 0
+        var data = Data(capacity: (packetStream.count / 2 + 1))
+        for (count,char) in packetStream.enumerated() {
+            guard let charValue = Int(String(char), radix: 16) else {
+                debugPrint("makeData: invalid char \(char) at position \(count)")
+                return nil
+            }
+            if count % 2 == 0 {
+                total = charValue * 16
+            } else {
+                total = total + charValue
+                data.append(UInt8(total))
+            }
+        }
+        return data
+    }
+    /**
+     - Returns: A sample frame suitable for content view previews
+     */
+    public static let sampleFrame: Frame = Frame(data: makeData(packetStream: "685b35890a04c869cd2c0d50080045000034000040004006b959c0a80010c0a8000ac001de7ebc1aa99e868a316380100804203100000101080a872fd3281be79ab6")!)
+
 }

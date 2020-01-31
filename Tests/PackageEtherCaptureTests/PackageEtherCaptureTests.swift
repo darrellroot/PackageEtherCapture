@@ -4,23 +4,6 @@ import Network
 
 final class PackageEtherCaptureTests: XCTestCase {
     
-    func makeData(packetStream: String) -> Data? {
-        var total = 0
-        var data = Data(capacity: (packetStream.count / 2 + 1))
-        for (count,char) in packetStream.enumerated() {
-            guard let charValue = Int(String(char), radix: 16) else {
-                debugPrint("makeData: invalid char \(char) at position \(count)")
-                return nil
-            }
-            if count % 2 == 0 {
-                total = charValue * 16
-            } else {
-                total = total + charValue
-                data.append(UInt8(total))
-            }
-        }
-        return data
-    }
     /*
      To get frames for testing use wireshark
      
@@ -91,7 +74,7 @@ final class PackageEtherCaptureTests: XCTestCase {
 
          */
         let packetStream = "685b35890a04c869cd2c0d50080045000034000040004006b959c0a80010c0a8000ac001de7ebc1aa99e868a316380100804203100000101080a872fd3281be79ab6"
-        guard let data = makeData(packetStream: packetStream) else {
+        guard let data = Frame.makeData(packetStream: packetStream) else {
             XCTFail()
             return
         }
@@ -133,7 +116,7 @@ final class PackageEtherCaptureTests: XCTestCase {
     }
     func testIpv6Frame2() {
         let packetStream = "685b35890a04b07fb95d8ed286dd620d78a900200639260014061400049c00000000000023132601064748021620d5ae46fbf6c7a15401bbf0f198953ced5030c49a8011011623d200000101080a0243f4b91f79a97d"
-        guard let data = makeData(packetStream: packetStream) else {
+        guard let data = Frame.makeData(packetStream: packetStream) else {
             XCTFail()
             return
         }
