@@ -18,7 +18,7 @@ extension IPv4Address: Codable {
 
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        let addressString = self.debugDescription
+        let addressString = self.description
         try container.encode(addressString, forKey: .ipv4String)
     }
     
