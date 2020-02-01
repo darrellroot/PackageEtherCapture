@@ -9,7 +9,7 @@
 import Foundation
 import Network
 
-public struct IPv6: EtherDisplay {
+public struct IPv6: EtherDisplay, Codable {
     public let data: Data
     public let version: UInt8
     public let trafficClass: UInt8

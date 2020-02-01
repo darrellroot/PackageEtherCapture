@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct Tcp: EtherDisplay {
+public struct Tcp: EtherDisplay, Codable {
     var flags: String {
         var output = ""
         if self.syn {

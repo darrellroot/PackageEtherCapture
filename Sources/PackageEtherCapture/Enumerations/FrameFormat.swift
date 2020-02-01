@@ -7,7 +7,7 @@
 
 import Foundation
 
-public enum FrameFormat {
+public enum FrameFormat: String, Codable {
     case ieee8023
     case ethernet
     case invalid

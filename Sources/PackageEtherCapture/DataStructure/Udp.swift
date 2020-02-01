@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct Udp: EtherDisplay {
+public struct Udp: EtherDisplay, Codable {
     public var description: String {
         return "\(sourcePort) > \(destinationPort) length \(length)"
     }
