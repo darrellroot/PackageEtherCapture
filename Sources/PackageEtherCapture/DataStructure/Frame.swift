@@ -135,16 +135,16 @@ public struct Frame: CustomStringConvertible, EtherDisplay, Identifiable, Codabl
             return
         }
         if data.count > 5 {
-            dstmac = "\(data[0].hex):\(data[1].hex):\(data[2].hex):\(data[3].hex):\(data[4].hex):\(data[5].hex)"
+            dstmac = "\(data[data.startIndex + 0].hex):\(data[data.startIndex + 1].hex):\(data[data.startIndex + 2].hex):\(data[data.startIndex + 3].hex):\(data[data.startIndex + 4].hex):\(data[data.startIndex + 5].hex)"
         } else {
             dstmac = "unknown"
         }
         if data.count > 11 {
-            srcmac = "\(data[6].hex):\(data[7].hex):\(data[8].hex):\(data[9].hex):\(data[10].hex):\(data[11].hex)"
+            srcmac = "\(data[data.startIndex + 6].hex):\(data[data.startIndex + 7].hex):\(data[data.startIndex + 8].hex):\(data[data.startIndex + 9].hex):\(data[data.startIndex + 10].hex):\(data[data.startIndex + 11].hex)"
         } else {
             srcmac = "unknown"
         }
-        let unsure: UInt = UInt(data[12]) * 256 + UInt(data[13]) // could be ethertype or length
+        let unsure: UInt = UInt(data[data.startIndex + 12]) * 256 + UInt(data[data.startIndex + 13]) // could be ethertype or length
         
         let frameFormat: FrameFormat
         
@@ -158,55 +158,55 @@ public struct Frame: CustomStringConvertible, EtherDisplay, Identifiable, Codabl
         } else {
             frameFormat = .ieee8023
             self.ieeeLength = unsure
-            self.ieeeDsap = UInt8(data[14])
-            self.ieeeSsap = UInt8(data[15])
-            self.ieeeControl = UInt8(data[16])
+            self.ieeeDsap = UInt8(data[data.startIndex + 14])
+            self.ieeeSsap = UInt8(data[data.startIndex + 15])
+            self.ieeeControl = UInt8(data[data.startIndex + 16])
             self.ethertype = nil
         }
         self.frameFormat = frameFormat
 
-        switch (frameFormat, unsure, UInt(data[14])) {
+        switch (frameFormat, unsure, UInt(data[data.startIndex + 14])) {
             
         case (.invalid,_,_):  // should not get here
             break
         case (.ieee8023,_,0x42): // spanning tree
             //TODO
-            let unknown = Unknown(data: data[17..<data.count])
+            let unknown = Unknown(data: data[data.startIndex + 17 ..< data.endIndex])
             self.layer3 = .unknown(unknown)
         case (.ieee8023,_,0x98): // ARP
-            let unknown = Unknown(data: data[17..<data.count])
+            let unknown = Unknown(data: data[data.startIndex + 17..<data.endIndex])
             self.layer3 = .unknown(unknown)
         case (.ieee8023,_,0xaa): //SNAP, add 802.2 SNAP, might be CDP
             //TODO
-            self.snapOrg = UInt(data[17]) * 256 * 256 + UInt(data[18]) * 256 + UInt(data[19])
-            self.snapType = UInt(data[20]) * 256 + UInt(data[21])
-            let unknown = Unknown(data: data[20..<data.count])
+            self.snapOrg = UInt(data[data.startIndex + 17]) * 256 * 256 + UInt(data[data.startIndex + 18]) * 256 + UInt(data[data.startIndex + 19])
+            self.snapType = UInt(data[data.startIndex + 20]) * 256 + UInt(data[data.startIndex + 21])
+            let unknown = Unknown(data: data[data.startIndex + 20..<data.endIndex])
             self.layer3 = .unknown(unknown)
         case (.ieee8023,_,_): // default case for 802.3
-            let unknown = Unknown(data: data[17..<data.count])
+            let unknown = Unknown(data: data[data.startIndex + 17..<data.endIndex])
             self.layer3 = .unknown(unknown)
         case (.ethernet,0 ..< 0x5dc, _):     //802.3 length field detected in ethernet!
             // should not get here
             break
         case (.ethernet,0x0800,_):  // IPv4
-            if let ipv4 = IPv4(data: data[14..<data.count]) {
+            if let ipv4 = IPv4(data: data[data.startIndex + 14..<data.endIndex]) {
                 self.layer3 = .ipv4(ipv4)
             } else {
-                let unknown = Unknown(data: data[14..<data.count])
+                let unknown = Unknown(data: data[data.startIndex + 14..<data.endIndex])
                 self.layer3 = .unknown(unknown)
             }
         case (.ethernet,0x86dd,_): // IPv6
-            if let ipv6 = IPv6(data: data[14..<data.count]) {
+            if let ipv6 = IPv6(data: data[data.startIndex + 14..<data.endIndex]) {
                 self.layer3 = .ipv6(ipv6)
             } else {
-                let unknown = Unknown(data: data[14..<data.count])
+                let unknown = Unknown(data: data[data.startIndex + 14..<data.endIndex])
                 self.layer3 = .unknown(unknown)
             }
         case (.ethernet,_,_): // other Ethernet
-            let unknown = Unknown(data: data[14..<data.count])
+            let unknown = Unknown(data: data[data.startIndex + 14..<data.endIndex])
             self.layer3 = .unknown(unknown)
         /*@unknown default:
-            let unknown = Unknown(data: data[14..<data.count])
+            let unknown = Unknown(data: data[data.startIndex + 14..<data.endIndex])
             self.layer3 = .unknown(unknown)*/
         }
     }
