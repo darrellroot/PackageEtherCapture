@@ -122,7 +122,7 @@ public struct Frame: CustomStringConvertible, EtherDisplay, Identifiable, Codabl
      */
     public let data: Data  // total frame contents
     
-    init(data: Data, timeval: timeval = timeval()) {
+    public init(data: Data, timeval: timeval = timeval()) {
         self.data = data
         self.date = Date(timeIntervalSince1970: Double(timeval.tv_sec)) + Double(timeval.tv_usec)/1000000.0
         guard data.count > 17 else {
