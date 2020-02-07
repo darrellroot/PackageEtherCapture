@@ -50,7 +50,7 @@ public class EtherCapture {
     
     static var callbacks: [((Frame) -> Void)] = []
     public init(interface: String, count: Int32 = 0, command: String, snaplen: Int = 96, promiscuous: Bool = true, _ callback: @escaping (Frame) -> Void) throws {
-        EtherCapture.logger.critical("Executing etherdump on interface \(interface) count \(count) snaplen \(snaplen) promiscuous \(promiscuous) command \(command)")
+        EtherCapture.logger.warning("Executing etherdump on interface \(interface) count \(count) snaplen \(snaplen) promiscuous \(promiscuous) command \(command)")
         //alldevs!.initialize(to: nil)
         //pcap_findalldevs(2,3)
         //var retval = pcap_findalldevs(&alldevs, errbuf)
@@ -222,7 +222,13 @@ public class EtherCapture {
             return nil
         }
     }*/
-    
+    /**
+     Cancels the pcap_loop
+     */
+    public func cancel() {
+        Logger.warning("EtherCapture.cancel: Cancelling pcap_loop")
+        pcap_breakloop(pcap)
+    }
     public static func defaultInterface() throws -> String {
         let errbuf = UnsafeMutablePointer<Int8>.allocate(capacity: Int(PCAP_ERRBUF_SIZE))
         guard let dev = pcap_lookupdev(errbuf) else {
