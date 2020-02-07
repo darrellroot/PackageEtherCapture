@@ -226,7 +226,7 @@ public class EtherCapture {
      Cancels the pcap_loop
      */
     public func cancel() {
-        Logger.warning("EtherCapture.cancel: Cancelling pcap_loop")
+        EtherCapture.logger.warning("EtherCapture.cancel: Cancelling pcap_loop")
         pcap_breakloop(pcap)
     }
     public static func defaultInterface() throws -> String {
