@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Logging
 
 public struct Udp: EtherDisplay, Codable {
     public var description: String {
@@ -29,7 +30,7 @@ public struct Udp: EtherDisplay, Codable {
     
     init?(data: Data) {
         guard data.count >= 8 else {
-            debugPrint("incomplete UDP datagram detected")
+            EtherCapture.logger.error("incomplete UDP datagram detected")
             return nil
         }
         self.data = data

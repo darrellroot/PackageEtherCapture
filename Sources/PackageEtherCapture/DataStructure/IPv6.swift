@@ -8,6 +8,7 @@
 
 import Foundation
 import Network
+import Logging
 
 public struct IPv6: EtherDisplay, Codable {
     public let data: Data
@@ -35,7 +36,7 @@ public struct IPv6: EtherDisplay, Codable {
     
     init?(data: Data) {
         guard data.count >= 40 else {
-            debugPrint("IPv6: error short packet header size \(data.count)")
+            EtherCapture.logger.error("IPv6: error short packet header size \(data.count)")
             return nil
         }
         self.data = data

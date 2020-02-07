@@ -2,6 +2,7 @@
 import Foundation
 import Darwin
 import PackageEtherCaptureC
+import Logging
 
 public enum EtherCaptureError: Error, CustomStringConvertible {
     
@@ -38,6 +39,7 @@ public enum EtherCaptureError: Error, CustomStringConvertible {
     }
 }
 public class EtherCapture {
+    public static var logger = Logger(label: "net.networkmom.PackageEtherCapture")
     var errbuf = UnsafeMutablePointer<Int8>.allocate(capacity: Int(PCAP_ERRBUF_SIZE))
     var datalink: Int32
     var interfaceNames: [String] = []
@@ -48,7 +50,7 @@ public class EtherCapture {
     
     static var callbacks: [((Frame) -> Void)] = []
     public init(interface: String, count: Int32 = 0, command: String, snaplen: Int = 96, promiscuous: Bool = true, _ callback: @escaping (Frame) -> Void) throws {
-        print("Executing etherdump on interface \(interface) count \(count) snaplen \(snaplen) promiscuous \(promiscuous) command \(command)")
+        EtherCapture.logger.critical("Executing etherdump on interface \(interface) count \(count) snaplen \(snaplen) promiscuous \(promiscuous) command \(command)")
         //alldevs!.initialize(to: nil)
         //pcap_findalldevs(2,3)
         //var retval = pcap_findalldevs(&alldevs, errbuf)
@@ -184,7 +186,7 @@ public class EtherCapture {
                         if let pointee = args?.pointee,                        Int(pointee) < EtherCapture.callbacks.count {
                             EtherCapture.callbacks[Int(pointee)](frame)
                         } else {
-                            debugPrint("Invalid PackageEtherCapture callback")
+                            EtherCapture.logger.error("Invalid PackageEtherCapture callback")
                         }
                     }
                                 
@@ -246,7 +248,7 @@ public class EtherCapture {
         //debugPrint("pcap_findalldevs retval \(retval)")
         if retval == -1 {
             let errString = String(cString: errbuf)
-            debugPrint("pcap_findalldevs error \(errString)")
+            EtherCapture.logger.error("pcap_findalldevs error \(errString)")
             return nil
         }
         

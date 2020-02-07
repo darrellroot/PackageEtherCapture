@@ -8,6 +8,7 @@
 
 import Foundation
 import Network
+import Logging
 
 public struct IPv4: CustomStringConvertible, EtherDisplay, Codable {
     public let sourceIP: IPv4Address
@@ -61,7 +62,7 @@ public struct IPv4: CustomStringConvertible, EtherDisplay, Codable {
         let ihl = data[data.startIndex] & 0b00001111
         self.ihl = ihl
         guard ihl >= 5 else {
-            debugPrint("IPv4: Invalid ihl \(ihl) detected")
+            EtherCapture.logger.error("IPv4: Invalid ihl \(ihl) detected")
             return nil
         }
         self.dscp = (data[data.startIndex + 1] & 0b11111100) >> 2

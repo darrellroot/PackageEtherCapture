@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import Logging
 
 /**
  Top-level data structure for a frame capture from the network.
@@ -126,7 +127,7 @@ public struct Frame: CustomStringConvertible, EtherDisplay, Identifiable, Codabl
         self.data = data
         self.date = Date(timeIntervalSince1970: Double(timeval.tv_sec)) + Double(timeval.tv_usec)/1000000.0
         guard data.count > 17 else {
-            debugPrint("Error: short frame detected size \(data.count) unable to analyze")
+            EtherCapture.logger.error("Error: short frame detected size \(data.count) unable to analyze")
             self.srcmac = "unknown"
             self.dstmac = "unknown"
             self.frameFormat = .invalid
@@ -216,7 +217,7 @@ public struct Frame: CustomStringConvertible, EtherDisplay, Identifiable, Codabl
         var data = Data(capacity: (packetStream.count / 2 + 1))
         for (count,char) in packetStream.enumerated() {
             guard let charValue = Int(String(char), radix: 16) else {
-                debugPrint("makeData: invalid char \(char) at position \(count)")
+                EtherCapture.logger.error("makeData: invalid char \(char) at position \(count)")
                 return nil
             }
             if count % 2 == 0 {

@@ -62,7 +62,7 @@ public struct Tcp: EtherDisplay, Codable {
     
     init?(data: Data) {
         guard data.count >= 20 else {
-            debugPrint("incomplete TCP header detected")
+            EtherCapture.logger.error("incomplete TCP header detected")
             return nil
         }
         self.data = Data(data)
