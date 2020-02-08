@@ -8,7 +8,7 @@
 import Foundation
 
 extension Data {
-    var hexdump: String {
+    public var hexdump: String {
         var output: String = ""
         output.reserveCapacity(self.count * 3)
         for (position,datum) in self.enumerated() {
