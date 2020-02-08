@@ -8,7 +8,7 @@
 import Foundation
 
 public struct Tcp: EtherDisplay, Codable {
-    var flags: String {
+    public var flags: String {
         var output = ""
         if self.syn {
             output.append("S")
