@@ -8,15 +8,15 @@ PackageEtherCapture is a Swift Package with two sets of functionality:
 
 ## Packet capture restrictions
 
-**Capturing packets requires read access to /dev/bpf* (the berkely packet filter device files).  Most MacOS users who "can administer their computers" are in the admin group, so we recommend the following commmand: **
+### Capturing packets requires read access to /dev/bpf* (the berkely packet filter device files).  Most MacOS users who "can administer their computers" are in the admin group, so we recommend the following commmand:
 
     sudo chmod g+r /dev/bpf*
 
 If you already installed Wireshark on your system, the installation process may have already created an "access_bpf" group, granted it rw access to /dev/bpf*, and added you to that group.  If that is already done, no further change is necessary.
 
-**Access to /dev/bpf* is not available on iOS.  So capturing packets from the wire is only supported for MacOS**
+### Access to /dev/bpf* is not available on iOS.  So capturing packets from the wire is only supported for MacOS.
 
-**Access to /dev/bpf* is not possible for sandboxed apps.  So capturing packets in an app in the MacOS App store is not possible.**
+### Access to /dev/bpf* is not possible for sandboxed apps.  So capturing packets in an app in the MacOS App store is not possible.
 
 ## Dependencies
 
