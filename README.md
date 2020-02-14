@@ -6,7 +6,7 @@ PackageEtherCapture is a Swift Package with two sets of functionality:
 1. Capturing frames from the network (wrapping the C-based libpcap library)
 2. Decoding network frames into a Swift data structure.
 
-**Capturing packets requires read access to /dev/bpf* (the berkely packet filter device files).  Most MacOS users who "can administer their computers" are in the admin group, so we recommend the following commmand:
+**Capturing packets requires read access to /dev/bpf* (the berkely packet filter device files).  Most MacOS users who "can administer their computers" are in the admin group, so we recommend the following commmand:**
 
     sudo chmod g+r /dev/bpf*
     
