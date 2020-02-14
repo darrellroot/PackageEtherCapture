@@ -84,7 +84,8 @@ The following Layer-4 decodes are currently supported:
 2. TCP Segment Header
 3. Unknown
 
-We hope and expect m
+We hope and expect many additional decodes to be added, plus additional layers for application data encoded inside the UDP datagrams or TCP segments.
+
 ## Frame Hierarchial Data Structure Overview
 
 Here is an overview of the data structure hierarchy:
