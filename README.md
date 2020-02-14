@@ -2,6 +2,8 @@
 
 **Warning: PackageEtherCapture is a 0.x release.  The API and resulting data structure are very unstable.  If you use this package, we recommend using a specific minor release and not automatically upgrading without testing.**
 
+## Overview
+
 PackageEtherCapture is a Swift Package with two sets of functionality:
 1. Capturing frames from the network (wrapping the C-based libpcap library)
 2. Decoding network frames into a Swift data structure.
