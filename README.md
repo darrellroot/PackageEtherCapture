@@ -16,7 +16,7 @@ If you already installed Wireshark on your system, the installation process may 
 
 **Access to /dev/bpf* is not available on iOS.  So capturing packets from the wire is only supported for MacOS**
 
-**Access to /dev/bpf* is not possible for sandboxed apps.  So capturing packets in an app in the MacOS App store is not possible. :-( **
+**Access to /dev/bpf* is not possible for sandboxed apps.  So capturing packets in an app in the MacOS App store is not possible.**
 
 ## Dependencies
 
