@@ -215,12 +215,22 @@ This protocol includes conveniently available computed properties for displaying
     public let options: Data?
     public let payload: Data
 
-public struct Udp: EtherDisplay, Codable {
-    public let data: Data
-    public let payload: Data
-    public let sourcePort: UInt
-    public let destinationPort: UInt
-    public let length: UInt
-    public let checksum: UInt
+    public struct Udp: EtherDisplay, Codable {
+        public let data: Data
+        public let payload: Data
+        public let sourcePort: UInt
+        public let destinationPort: UInt
+        public let length: UInt
+        public let checksum: UInt
 
 ## At this time we do not have a layer-5 structure for application-level data, but we anticipate that in the future.
+
+## Related Repositories
+
+**PackageEtherCaptureDemo** is a minimial sample CLI application which uses PackageEtherCapture with under 20 lines of code!
+
+**PackageSwiftPcapng** can read pcapng and pcap files.  The packet data read can be sent into the PackageEtherCapture Frame() initializer.
+
+**etherdump** is a fully featured CLI packet capture tool which uses PackageEtherCapture
+
+**Etherdump** is a GUI packet capture tool which uses PackageEtherCapture
