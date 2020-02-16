@@ -227,10 +227,10 @@ This protocol includes conveniently available computed properties for displaying
 
 ## Related Repositories
 
-**PackageEtherCaptureDemo** is a minimial sample CLI application which uses PackageEtherCapture with under 20 lines of code!
+[PackageEtherCaptureDemo](https://github.com/darrellroot/PackageEtherCaptureDemo) is a minimial sample CLI application which uses PackageEtherCapture with under 20 lines of code!
 
-**PackageSwiftPcapng** can read pcapng and pcap files.  The packet data read can be sent into the PackageEtherCapture Frame() initializer.
+[PackageSwiftPcapng](https://github.com/darrellroot/PackageSwiftPcapng) can read pcapng and pcap files.  The packet data read can be sent into the PackageEtherCapture Frame() initializer.
 
-**etherdump** is a fully featured CLI packet capture tool which uses PackageEtherCapture
+[etherdump](https://github.com/darrellroot/etherdump) is a fully featured CLI packet capture tool which uses PackageEtherCapture
 
-**Etherdump** is a GUI packet capture tool which uses PackageEtherCapture
+[Etherdump](https://github.com/darrellroot/Etherdump) is a GUI packet capture tool which uses PackageEtherCapture
