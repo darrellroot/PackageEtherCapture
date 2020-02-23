@@ -341,6 +341,7 @@ public class EtherCapture {
             returnData.append(microSeconds.data)
             returnData.append(UInt32(frame.data.count).data)
             returnData.append(UInt32(frame.originalLength).data)
+            returnData.append(frame.data)
         }
         return returnData
     }
