@@ -2,6 +2,8 @@
 
 **Warning: PackageEtherCapture is a 0.x release.  The API and resulting data structure are very unstable.  If you use this package, we recommend using a specific minor release and not automatically upgrading without testing.**
 
+## Overview
+
 PackageEtherCapture is a Swift Package with two sets of functionality:
 1. Capturing frames from the network (wrapping the C-based libpcap library)
 2. Decoding network frames into a Swift data structure.
@@ -82,7 +84,8 @@ The following Layer-4 decodes are currently supported:
 2. TCP Segment Header
 3. Unknown
 
-We hope and expect m
+We hope and expect many additional decodes to be added, plus additional layers for application data encoded inside the UDP datagrams or TCP segments.
+
 ## Frame Hierarchial Data Structure Overview
 
 Here is an overview of the data structure hierarchy:
@@ -212,12 +215,22 @@ This protocol includes conveniently available computed properties for displaying
     public let options: Data?
     public let payload: Data
 
-public struct Udp: EtherDisplay, Codable {
-    public let data: Data
-    public let payload: Data
-    public let sourcePort: UInt
-    public let destinationPort: UInt
-    public let length: UInt
-    public let checksum: UInt
+    public struct Udp: EtherDisplay, Codable {
+        public let data: Data
+        public let payload: Data
+        public let sourcePort: UInt
+        public let destinationPort: UInt
+        public let length: UInt
+        public let checksum: UInt
 
 ## At this time we do not have a layer-5 structure for application-level data, but we anticipate that in the future.
+
+## Related Repositories
+
+[PackageEtherCaptureDemo](https://github.com/darrellroot/PackageEtherCaptureDemo) is a minimial sample CLI application which uses PackageEtherCapture with under 20 lines of code!
+
+[PackageSwiftPcapng](https://github.com/darrellroot/PackageSwiftPcapng) can read pcapng and pcap files.  The packet data read can be sent into the PackageEtherCapture Frame() initializer.
+
+[etherdump](https://github.com/darrellroot/etherdump) is a fully featured CLI packet capture tool which uses PackageEtherCapture
+
+[Etherdump](https://github.com/darrellroot/Etherdump) is a GUI packet capture tool which uses PackageEtherCapture
