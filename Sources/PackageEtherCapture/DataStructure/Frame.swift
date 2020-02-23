@@ -13,78 +13,7 @@ import Logging
  Top-level data structure for a frame capture from the network.
  */
 public struct Frame: CustomStringConvertible, EtherDisplay, Identifiable, Codable {
-    /**
-     - Returns: One line summary of the frame and packet contents
-     */
-    public var description: String {
-        let ethertypeString: String
-        if let ethertype = ethertype {
-            ethertypeString = String(format: "0x%4x",ethertype)
-        } else if let ieeeDsap = ieeeDsap, let ieeeSsap = ieeeSsap {
-            ethertypeString = String(format: "0x%2x",ieeeDsap) + String(format: "%02x",ieeeSsap)
-        } else {
-            ethertypeString = "unknown"
-        }
-        return "\(srcmac) \(dstmac) \(frameFormat) \(ethertypeString) \(layer3)"
-    }
     
-    /**
-     - Returns: One line verbose information frame header only
-     */
-    public var verboseDescription: String {
-        let length: String
-        if let ieeeLength = ieeeLength {
-            length = "LEN \(ieeeLength) "  //provide 1 space on end
-        } else {
-            length = ""  //if optional does not exist, dont add ending space
-        }
-        let dsap: String
-        if let ieeeDsap = ieeeDsap {
-            dsap = "DSAP 0x\(ieeeDsap.hex) "
-        } else {
-            dsap = ""
-        }
-        let ssap: String
-        if let ieeeSsap = ieeeSsap {
-            ssap = "SSAP 0x\(ieeeSsap.hex) "
-        } else {
-            ssap = ""
-        }
-        let control: String
-        if let ieeeControl = ieeeControl {
-            control = "CONTROL 0x\(ieeeControl.hex) "
-        } else {
-            control = ""
-        }
-        let org: String
-        if let snapOrg = snapOrg {
-            org = "SNAP Org 0x\(String(format: "%6x ",snapOrg)) "
-        } else {
-            org = ""
-        }
-        let sType: String
-        if let snapType = snapType {
-            sType = "SType 0x\(String(format: "%4x ",snapType)) "
-        } else {
-            sType = ""
-        }
-        let eType: String
-        if let ethertype = ethertype {
-            eType = "Ethertype 0x\(String(format: "%4x ",ethertype)) "
-        } else {
-            eType = ""
-        }
-
-        //each optional has 1 space at end provided above
-        return "\(srcmac) > \(dstmac) \(frameFormat) \(length)\(dsap)\(ssap)\(control)\(org)\(sType)\(eType)"
-    }
-    
-    /**
-    - Returns: Hexdump printout of frame contents
-    */
-    public var hexdump: String {
-        return self.data.hexdump
-    }
     /**
      - Parameter date: pcap timestamp the frame was captured
      */
@@ -102,6 +31,7 @@ public struct Frame: CustomStringConvertible, EtherDisplay, Identifiable, Codabl
     public var snapOrg: UInt? = nil  //802.2 SNAP header
     public var snapType: UInt? = nil   //802.2 SNAP header
     public var ethertype: UInt? = nil // ethernetII encapsulation
+    public var originalLength: Int // used for generating pcap
     /**
      - Parameter layer3: Nested data structure with higher layer information
      */
@@ -123,8 +53,9 @@ public struct Frame: CustomStringConvertible, EtherDisplay, Identifiable, Codabl
      */
     public let data: Data  // total frame contents
     
-    public init(data: Data, timeval: timeval = timeval()) {
+    public init(data: Data, timeval: timeval = timeval(), originalLength: Int) {
         self.data = data
+        self.originalLength = originalLength
         self.date = Date(timeIntervalSince1970: Double(timeval.tv_sec)) + Double(timeval.tv_usec)/1000000.0
         guard data.count > 17 else {
             EtherCapture.logger.error("Error: short frame detected size \(data.count) unable to analyze")
@@ -230,8 +161,80 @@ public struct Frame: CustomStringConvertible, EtherDisplay, Identifiable, Codabl
         return data
     }
     /**
+     - Returns: One line verbose information frame header only
+     */
+    public var verboseDescription: String {
+        let length: String
+        if let ieeeLength = ieeeLength {
+            length = "LEN \(ieeeLength) "  //provide 1 space on end
+        } else {
+            length = ""  //if optional does not exist, dont add ending space
+        }
+        let dsap: String
+        if let ieeeDsap = ieeeDsap {
+            dsap = "DSAP 0x\(ieeeDsap.hex) "
+        } else {
+            dsap = ""
+        }
+        let ssap: String
+        if let ieeeSsap = ieeeSsap {
+            ssap = "SSAP 0x\(ieeeSsap.hex) "
+        } else {
+            ssap = ""
+        }
+        let control: String
+        if let ieeeControl = ieeeControl {
+            control = "CONTROL 0x\(ieeeControl.hex) "
+        } else {
+            control = ""
+        }
+        let org: String
+        if let snapOrg = snapOrg {
+            org = "SNAP Org 0x\(String(format: "%6x ",snapOrg)) "
+        } else {
+            org = ""
+        }
+        let sType: String
+        if let snapType = snapType {
+            sType = "SType 0x\(String(format: "%4x ",snapType)) "
+        } else {
+            sType = ""
+        }
+        let eType: String
+        if let ethertype = ethertype {
+            eType = "Ethertype 0x\(String(format: "%4x ",ethertype)) "
+        } else {
+            eType = ""
+        }
+
+        //each optional has 1 space at end provided above
+        return "\(srcmac) > \(dstmac) \(frameFormat) \(length)\(dsap)\(ssap)\(control)\(org)\(sType)\(eType)"
+    }
+    /**
+     - Returns: One line summary of the frame and packet contents
+     */
+    public var description: String {
+        let ethertypeString: String
+        if let ethertype = ethertype {
+            ethertypeString = String(format: "0x%4x",ethertype)
+        } else if let ieeeDsap = ieeeDsap, let ieeeSsap = ieeeSsap {
+            ethertypeString = String(format: "0x%2x",ieeeDsap) + String(format: "%02x",ieeeSsap)
+        } else {
+            ethertypeString = "unknown"
+        }
+        return "\(srcmac) \(dstmac) \(frameFormat) \(ethertypeString) \(layer3)"
+    }
+    
+    /**
+    - Returns: Hexdump printout of frame contents
+    */
+    public var hexdump: String {
+        return self.data.hexdump
+    }
+
+    /**
      - Returns: A sample frame suitable for content view previews
      */
-    public static let sampleFrame: Frame = Frame(data: makeData(packetStream: "685b35890a04c869cd2c0d50080045000034000040004006b959c0a80010c0a8000ac001de7ebc1aa99e868a316380100804203100000101080a872fd3281be79ab6")!)
+    public static let sampleFrame: Frame = Frame(data: makeData(packetStream: "685b35890a04c869cd2c0d50080045000034000040004006b959c0a80010c0a8000ac001de7ebc1aa99e868a316380100804203100000101080a872fd3281be79ab6")!, originalLength: 200)
 
 }

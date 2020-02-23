@@ -78,7 +78,7 @@ final class PackageEtherCaptureTests: XCTestCase {
             XCTFail()
             return
         }
-        let frame = Frame(data: data, timeval: timeval())
+        let frame = Frame(data: data, timeval: timeval(), originalLength: 66)
         //Frame tests
         XCTAssert(frame.frameFormat == .ethernet)
         XCTAssert(frame.dstmac == "68:5b:35:89:0a:04")
@@ -120,7 +120,7 @@ final class PackageEtherCaptureTests: XCTestCase {
             XCTFail()
             return
         }
-        let frame = Frame(data: data, timeval: timeval())
+        let frame = Frame(data: data, timeval: timeval(), originalLength: 100)
         XCTAssert(frame.frameFormat == .ethernet)
         XCTAssert(frame.dstmac == "68:5b:35:89:0a:04")
         XCTAssert(frame.srcmac == "b0:7f:b9:5d:8e:d2")

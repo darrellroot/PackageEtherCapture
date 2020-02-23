@@ -181,8 +181,9 @@ public class EtherCapture {
                         let timestamp = header.pointee.ts
                         //let packetLength = header.pointee.len  //we may not capture whole packet
                         let captureLength = Int(header.pointee.caplen)
+                        let originalLength = Int(header.pointee.len)
                         let data = Data(bytes: ptr, count: captureLength)
-                        let frame = Frame(data: data, timeval: timestamp)
+                        let frame = Frame(data: data, timeval: timestamp, originalLength: originalLength)
                         if let pointee = args?.pointee,                        Int(pointee) < EtherCapture.callbacks.count {
                             EtherCapture.callbacks[Int(pointee)](frame)
                         } else {
