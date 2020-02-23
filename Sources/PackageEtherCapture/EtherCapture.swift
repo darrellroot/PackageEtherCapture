@@ -305,4 +305,73 @@ public class EtherCapture {
         pcap_freealldevs(alldevs)
         return interfaceNames
     }
+    
+    public static func makePcap(frames: [Frame]) -> Data {
+        // https://wiki.wireshark.org/Development/LibpcapFileFormat
+            
+        guard frames.count > 0 else {
+            return Data()  // no frames return empty Data
+        }
+        var totalSize = 24 + 256 // 256 more than we need
+        var maxSize:UInt32 = 0  // we will assume this is snaplen.  not really true
+        for frame in frames {
+            totalSize = totalSize + 16 + frame.data.count
+            if frame.data.count > maxSize {
+                maxSize = UInt32(frame.data.count)
+            }
+        }
+        var returnData = Data(capacity: totalSize)
+        returnData.append((UInt32(0xa1b2c3d4)).data)
+        returnData.append((UInt16(2)).data)
+        returnData.append((UInt16(4)).data)
+        returnData.append((Int32(0)).data)
+        returnData.append((UInt32(0)).data)
+        returnData.append(maxSize.data)
+        returnData.append(UInt32(1).data) // assume ethernet
+        
+        // credit https://stackoverflow.com/questions/31396301/getting-the-decimal-part-of-a-double-in-swift
+        let numberOfPlaces:Double = 6.0
+        let powerOfTen:Double = pow(10.0, numberOfPlaces)
+
+        for frame in frames {
+            let seconds = UInt32(frame.date.timeIntervalSince1970)
+            let fractionalSeconds = frame.date.timeIntervalSince1970.truncatingRemainder(dividingBy: 1.0)
+            let microSeconds = UInt32(fractionalSeconds * powerOfTen)
+            returnData.append(seconds.data)
+            returnData.append(microSeconds.data)
+            returnData.append(UInt32(frame.data.count).data)
+            returnData.append(UInt32(frame.originalLength).data)
+        }
+        return returnData
+    }
 }
+
+// keeping these extensions private
+// from https://gist.github.com/bpolania/704901156020944d3e20fef515e73d61
+extension UInt8 {
+    var data: Data {
+        var int = self
+        return Data(bytes: &int, count: MemoryLayout<UInt8>.size)
+    }
+}
+extension UInt16 {
+    var data: Data {
+        var int = self
+        return Data(bytes: &int, count: MemoryLayout<UInt16>.size)
+    }
+}
+extension UInt32 {
+    var data: Data {
+        var int = self
+        return Data(bytes: &int, count: MemoryLayout<UInt32>.size)
+    }
+}
+
+extension Int32 {
+    var data: Data {
+        var int = self
+        return Data(bytes: &int, count: MemoryLayout<Int32>.size)
+    }
+}
+
+

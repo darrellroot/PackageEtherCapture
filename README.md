@@ -54,7 +54,7 @@ PackageEtherCaptureDemo https://github.com/darrellroot/PackageEtherCaptureDemo d
 Another way to use PackageEtherCapture is to pass in captured network traffic (one frame at a time) to create Frame data structures.  Here's an example from the CLI version of etherdump https://github.com/darrellroot/etherdump, passing in data obtained from a .pcapng file:
 
         for (count,packet) in packetBlocks.enumerated() {
-            let frame = Frame(data: packet.packetData)
+        let frame = Frame(data: packet.packetData)
             displayFrame(frame: frame, packetCount: Int32(count), arguments: arguments)
         }
 
