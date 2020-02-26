@@ -28,6 +28,8 @@ public struct IPv4: CustomStringConvertible, EtherDisplay {
     public let ipProtocol: UInt8
     public let headerChecksum: UInt
     public let options: Data?
+    public let padding: Data
+    
     //public let payload: Data?
     /**
      - Parameter layer4: Nested data structure with higher layer information
@@ -46,7 +48,7 @@ public struct IPv4: CustomStringConvertible, EtherDisplay {
     }
     public var verboseDescription: String {
         
-        return "IPv\(version) \(sourceIP) > \(destinationIP) IHL \(ihl) DSCP \(dscp.hex) ECN \(ecn.hex) TotLen \(totalLength) id \(identification) NoFrag \(dontFragmentFlag) MoreFrag \(moreFragmentsFlag) FragOff \(fragmentOffset) TTL \(ttl) IpProt \(ipProtocol) HdrChecksum \(headerChecksum) \(optionsAny)"
+        return "IPv\(version) \(sourceIP) > \(destinationIP) IHL \(ihl) DSCP \(dscp.hex) ECN \(ecn.hex) TotLen \(totalLength) id \(identification) NoFrag \(dontFragmentFlag) MoreFrag \(moreFragmentsFlag) FragOff \(fragmentOffset) TTL \(ttl) IpProt \(ipProtocol) HdrChecksum \(headerChecksum) \(optionsAny) Padding \(padding.count) Bytes"
     }
     
     public var hexdump: String {
@@ -57,6 +59,7 @@ public struct IPv4: CustomStringConvertible, EtherDisplay {
         guard data.count >= 20 else {
             return nil
         }
+        
         self.data = data
         self.version = (data[data.startIndex] & 0b11110000) >> 4
         let ihl = data[data.startIndex] & 0b00001111
@@ -67,7 +70,15 @@ public struct IPv4: CustomStringConvertible, EtherDisplay {
         }
         self.dscp = (data[data.startIndex + 1] & 0b11111100) >> 2
         self.ecn = (data[data.startIndex + 1] & 0b00000011)
-        self.totalLength = UInt(data[data.startIndex + 2]) * 256 + UInt(data[data.startIndex + 3])
+        let totalLength = UInt(data[data.startIndex + 2]) * 256 + UInt(data[data.startIndex + 3])
+        self.totalLength = totalLength
+        // deal with padding
+        if data.count > totalLength {
+            self.padding = data.advanced(by: Int(totalLength))
+        } else {
+            self.padding = Data()
+        }
+    
         self.identification = UInt(data[data.startIndex + 4]) * 256 + UInt(data[data.startIndex + 5])
 
         self.dontFragmentFlag = data[data.startIndex + 6] & 0b01000000 != 0

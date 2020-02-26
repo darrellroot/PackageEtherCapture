@@ -21,13 +21,14 @@ public struct IPv6: EtherDisplay {
     public let sourceIP: IPv6Address
     public let destinationIP: IPv6Address
     public let layer4: Layer4
+    public let padding: Data
 
     public var description: String {
         return "IPv\(version) \(sourceIP.debugDescription) > \(destinationIP.debugDescription) payload \(payloadLength) nextHeader \(nextHeader) hopLimit \(hopLimit)"
     }
     
     public var verboseDescription: String {
-        return "IPv\(version) \(sourceIP.debugDescription) > \(destinationIP.debugDescription) payload \(payloadLength) nextHeader \(nextHeader) trafficClass \(trafficClass) flowLabel \(flowLabel) hopLimit \(hopLimit)"
+        return "IPv\(version) \(sourceIP.debugDescription) > \(destinationIP.debugDescription) payload \(payloadLength) nextHeader \(nextHeader) trafficClass \(trafficClass) flowLabel \(flowLabel) hopLimit \(hopLimit) Padding \(padding.count) Bytes"
     }
 
     public var hexdump: String {
@@ -46,8 +47,14 @@ public struct IPv6: EtherDisplay {
         
         self.flowLabel = UInt(data[data.startIndex + 1] & 0b00001111) * 256 * 256 + UInt(data[data.startIndex + 2]) * 256 + UInt(data[data.startIndex + 3])
         
-        self.payloadLength = UInt(data[data.startIndex + 4]) * 256 + UInt(data[data.startIndex + 5])
+        let payloadLength = UInt(data[data.startIndex + 4]) * 256 + UInt(data[data.startIndex + 5])
+        self.payloadLength = payloadLength
         
+        if data.count > payloadLength + 40 {
+            self.padding = data.advanced(by: Int(payloadLength + 40))
+        } else {
+            self.padding = Data()
+        }
         self.nextHeader = data[data.startIndex + 6]
         self.hopLimit = data[data.startIndex + 7]
 

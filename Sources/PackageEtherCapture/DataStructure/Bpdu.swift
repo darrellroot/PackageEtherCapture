@@ -75,14 +75,14 @@ public struct Bpdu: CustomStringConvertible, EtherDisplay {
         }
         self.data = data
         self.protocolId = EtherCapture.getUInt16(data: data)
-        self.bpduVersion = data[data.startIndex + 2]
-        self.type = data[data.startIndex + 3]
+        self.bpduVersion = data[data.startIndex + 2] // 0=STP, 2=RSTP
+        self.type = data[data.startIndex + 3] // 0=config, ? = top change, 2 = RSTP
         let flags: UInt8 = data[data.startIndex + 4]
         self.flagTopChangeAgree = (flags & UInt8(0x80)) != 0
         self.flagAgreement = (flags & UInt8(0x40)) != 0
         self.flagForwarding = (flags & UInt8(0x20)) != 0
         self.flagLearning = (flags & UInt8(0x10)) != 0
-        self.portRole = (flags & UInt8(0x0c)) >> 2 // 3 = designated
+        self.portRole = (flags & UInt8(0x0c)) >> 2 // 0=unknown, 1=alternate, 2=root,3 = designated
         self.flagProposal = (flags & UInt8(0x02)) != 0
         self.flagTopChange = (flags & UInt8(0x01)) != 0
         
