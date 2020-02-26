@@ -17,6 +17,7 @@ public enum Layer4: CustomStringConvertible, EtherDisplay {
     case tcp(Tcp)
     case udp(Udp)
     case unknown(Unknown)
+    case noLayer4     // used when we know there is no layer4 for this frame
     
     /*enum Layer4DecodingError: Error {
         case decoding(String)
@@ -29,6 +30,8 @@ public enum Layer4: CustomStringConvertible, EtherDisplay {
             return tcp.description
         case .udp(let udp):
             return udp.description
+        case .noLayer4:
+            return ""
         case .unknown(let unknown):
             return unknown.description
         }
@@ -41,6 +44,8 @@ public enum Layer4: CustomStringConvertible, EtherDisplay {
             return tcp.hexdump
         case .udp(let udp):
             return udp.hexdump
+        case .noLayer4:
+            return ""
         case .unknown(let unknown):
             return unknown.hexdump
         }
@@ -53,6 +58,8 @@ public enum Layer4: CustomStringConvertible, EtherDisplay {
             return tcp.verboseDescription
         case .udp(let udp):
             return udp.verboseDescription
+        case .noLayer4:
+            return ""
         case .unknown(let unknown):
             return unknown.verboseDescription
         }
