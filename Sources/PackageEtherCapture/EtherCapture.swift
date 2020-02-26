@@ -346,7 +346,7 @@ public class EtherCapture {
         return returnData
     }
     
-    static let bigEndian = true  // network byte order is big endian
+    static let bigEndian = false
     
     static func getUInt32(data: Data)-> UInt32 {
         let octet0: UInt32 = UInt32(data[data.startIndex])
