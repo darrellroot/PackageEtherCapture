@@ -24,10 +24,12 @@ public struct Bpdu: CustomStringConvertible, EtherDisplay {
         return self.data.hexdump
     }
     public var rootIdString: String {
-        return String(format: "0x%x",rootId)
+        return "0x" + String(rootId, radix: 16, uppercase: false)
+        //return String(format: "0x%x",rootId)
     }
     public var bridgeIdString: String {
-        return String(format: "0x%x",bridgeId)
+        return "0x" + String(bridgeId, radix: 16, uppercase: false)
+        //return String(format: "0x%x",bridgeId)
     }
     public var flagsString: String {
         var flags = ""
