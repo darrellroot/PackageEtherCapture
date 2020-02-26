@@ -17,8 +17,19 @@ public struct Bpdu: CustomStringConvertible, EtherDisplay {
     }
     
     public var verboseDescription: String {
-        let bridgeIdString = String(format: "0x%x",bridgeId)
-        let rootIdString = String(format: "0x%x",rootId)
+        return "BPDU protocol \(protocolId) version \(bpduVersion) type \(type) flags \(flags) portRole \(portRole) rootID \(rootIdString) rootCost \(rootCost) bridgeID \(bridgeIdString) portId \(portId) age \(age) maxAge \(maxAge) helloTime \(helloTime) forwardDelay \(forwardDelay) \(data.count) bytes"
+    }
+    
+    public var hexdump: String {
+        return self.data.hexdump
+    }
+    public var rootIdString: String {
+        return String(format: "0x%x",rootId)
+    }
+    public var bridgeIdString: String {
+        return String(format: "0x%x",bridgeId)
+    }
+    public var flagsString: String {
         var flags = ""
         if flagTopChangeAgree {
             flags += "TCA "
@@ -32,18 +43,7 @@ public struct Bpdu: CustomStringConvertible, EtherDisplay {
         if flagTopChange {
             flags += "TCH "
         }
-        
-        return "BPDU protocol \(protocolId) version \(bpduVersion) type \(type) flags \(flags) portRole \(portRole) rootID \(rootIdString) rootCost \(rootCost) bridgeID \(bridgeIdString) portId \(portId) age \(age) maxAge \(maxAge) helloTime \(helloTime) forwardDelay \(forwardDelay) \(data.count) bytes"
-    }
-    
-    public var hexdump: String {
-        return self.data.hexdump
-    }
-    public var rootIdString: String {
-        return String(format: "0x%x",rootId)
-    }
-    public var bridgeIdString: String {
-        return String(format: "0x%x",bridgeId)
+        return flags
     }
     
     public let protocolId: UInt16
