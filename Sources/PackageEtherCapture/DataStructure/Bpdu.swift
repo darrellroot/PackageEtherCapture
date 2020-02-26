@@ -9,7 +9,7 @@ import Foundation
 import Network
 import Logging
 
-public struct Bpdu: CustomStringConvertible, EtherDisplay, Codable {
+public struct Bpdu: CustomStringConvertible, EtherDisplay {
     
     public var description: String {
         let bridgeIdString = String(format: "0x%x",bridgeId)

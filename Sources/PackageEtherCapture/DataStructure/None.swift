@@ -8,7 +8,7 @@
 
 import Foundation
 
-public struct Unknown: CustomStringConvertible, EtherDisplay, Codable {
+public struct Unknown: CustomStringConvertible, EtherDisplay {
     public let data: Data
     
     public var description: String {

@@ -12,7 +12,7 @@ import Logging
 /**
  Top-level data structure for a frame capture from the network.
  */
-public struct Frame: CustomStringConvertible, EtherDisplay, Identifiable, Codable {
+public struct Frame: CustomStringConvertible, EtherDisplay, Identifiable {
     
     /**
      - Parameter date: pcap timestamp the frame was captured
@@ -43,6 +43,8 @@ public struct Frame: CustomStringConvertible, EtherDisplay, Identifiable, Codabl
             return ipv4.layer4
         case .ipv6(let ipv6):
             return ipv6.layer4
+        case .bpdu(let bpdu):
+            return nil    // bpdu does not have layer 4
         case .unknown(let unknown):
             return nil
         }
@@ -102,8 +104,12 @@ public struct Frame: CustomStringConvertible, EtherDisplay, Identifiable, Codabl
         case (.invalid,_,_):  // should not get here
             break
         case (.ieee8023,_,0x42): // spanning tree
-            let bpdu = Bpdu(data: data[data.startIndex + 17 ..< data.endIndex])
-            self.layer3 = .bpdu(bpdu)
+            if let bpdu = Bpdu(data: data[data.startIndex + 17 ..< data.endIndex]) {
+                self.layer3 = .bpdu(bpdu)
+            } else {
+                let unknown = Unknown(data: data[data.startIndex + 17 ..< data.endIndex])
+                self.layer3 = .unknown(unknown)
+            }
         case (.ieee8023,_,0x98): // ARP
             let unknown = Unknown(data: data[data.startIndex + 17..<data.endIndex])
             self.layer3 = .unknown(unknown)

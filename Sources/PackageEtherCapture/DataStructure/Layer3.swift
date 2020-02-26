@@ -13,7 +13,7 @@ import Foundation
  Usually layer-3 (IPv4, IPv6) but could be encapsulated Layer 2
  (LDP, CDP, STP)
  */
-public enum Layer3: CustomStringConvertible, EtherDisplay, Codable {
+public enum Layer3: CustomStringConvertible, EtherDisplay {
     case ipv4(IPv4)
     case ipv6(IPv6)
     case bpdu(Bpdu)
@@ -26,7 +26,8 @@ public enum Layer3: CustomStringConvertible, EtherDisplay, Codable {
                 return ipv4
             case .ipv6(let ipv6):
                 return ipv6
-            
+            case .bpdu(let bpdu):
+                return bpdu
             case .unknown(let unknown):
                 return unknown
         }
@@ -38,6 +39,8 @@ public enum Layer3: CustomStringConvertible, EtherDisplay, Codable {
             return ipv4.description
         case .ipv6(let ipv6):
             return ipv6.description
+        case .bpdu(let bpdu):
+            return bpdu.description
         case .unknown(let unknown):
             return unknown.description
         }
@@ -50,6 +53,8 @@ public enum Layer3: CustomStringConvertible, EtherDisplay, Codable {
             return ipv4.hexdump
         case .ipv6(let ipv6):
             return ipv6.hexdump
+        case .bpdu(let bpdu):
+            return bpdu.hexdump
         case .unknown(let unknown):
             return unknown.hexdump
         }
@@ -62,12 +67,14 @@ public enum Layer3: CustomStringConvertible, EtherDisplay, Codable {
             return ipv4.verboseDescription
         case .ipv6(let ipv6):
             return ipv6.verboseDescription
+        case .bpdu(let bpdu):
+            return bpdu.verboseDescription
         case .unknown(let unknown):
             return unknown.verboseDescription
         }
     }
     
-    enum Layer3DecodingError: Error {
+    /*enum Layer3DecodingError: Error {
         case decoding(String)
     }
 
@@ -102,6 +109,6 @@ public enum Layer3: CustomStringConvertible, EtherDisplay, Codable {
             return
         }
         throw Layer3DecodingError.decoding("Decoding error for \(container)")
-    }
+    }*/
 
 }

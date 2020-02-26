@@ -13,14 +13,14 @@ import Foundation
  Usually layer-3 (IPv4, IPv6) but could be encapsulated Layer 2
  (LDP, CDP, STP)
  */
-public enum Layer4: CustomStringConvertible, EtherDisplay, Codable {
+public enum Layer4: CustomStringConvertible, EtherDisplay {
     case tcp(Tcp)
     case udp(Udp)
     case unknown(Unknown)
     
-    enum Layer4DecodingError: Error {
+    /*enum Layer4DecodingError: Error {
         case decoding(String)
-    }
+    }*/
     
     public var description: String {
         switch self {
@@ -57,7 +57,7 @@ public enum Layer4: CustomStringConvertible, EtherDisplay, Codable {
             return unknown.verboseDescription
         }
     }
-    enum CodingKeys: CodingKey {
+    /*enum CodingKeys: CodingKey {
         case tcp
         case udp
         case unknown
@@ -88,6 +88,6 @@ public enum Layer4: CustomStringConvertible, EtherDisplay, Codable {
             return
         }
         throw Layer4DecodingError.decoding("Decoding error for \(container)")
-    }
+    }*/
 }
 

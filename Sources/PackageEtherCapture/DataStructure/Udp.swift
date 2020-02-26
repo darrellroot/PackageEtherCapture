@@ -8,7 +8,7 @@
 import Foundation
 import Logging
 
-public struct Udp: EtherDisplay, Codable {
+public struct Udp: EtherDisplay {
     public var description: String {
         return "\(sourcePort) > \(destinationPort) length \(length)"
     }

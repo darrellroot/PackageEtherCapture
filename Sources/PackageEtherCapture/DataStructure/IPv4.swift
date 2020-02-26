@@ -10,7 +10,7 @@ import Foundation
 import Network
 import Logging
 
-public struct IPv4: CustomStringConvertible, EtherDisplay, Codable {
+public struct IPv4: CustomStringConvertible, EtherDisplay {
     public let sourceIP: IPv4Address
     public let destinationIP: IPv4Address
     public let data: Data

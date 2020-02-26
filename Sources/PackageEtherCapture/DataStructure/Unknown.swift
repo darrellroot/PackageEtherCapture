@@ -8,24 +8,21 @@
 
 import Foundation
 
-public struct Unknown: CustomStringConvertible, EtherDisplay, Codable {
+public struct None: CustomStringConvertible, EtherDisplay {
     public let data: Data
     
     public var description: String {
-        return "unknown \(data.count) bytes"
+        return "none \(data.count) bytes"
     }
     
     public var verboseDescription: String {
-        return "unknown \(data.count) bytes"
+        return "none \(data.count) bytes"
     }
     
-    public static let completely = Unknown(data: Data()) // empty for error cases
-
     public var hexdump: String {
         return self.data.hexdump
     }
 
-    
     init(data: Data) {
         self.data = data
     }
