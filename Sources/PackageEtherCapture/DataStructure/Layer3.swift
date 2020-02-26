@@ -16,6 +16,7 @@ import Foundation
 public enum Layer3: CustomStringConvertible, EtherDisplay, Codable {
     case ipv4(IPv4)
     case ipv6(IPv6)
+    case bpdu(Bpdu)
     case unknown(Unknown)
     
 
@@ -25,6 +26,7 @@ public enum Layer3: CustomStringConvertible, EtherDisplay, Codable {
                 return ipv4
             case .ipv6(let ipv6):
                 return ipv6
+            
             case .unknown(let unknown):
                 return unknown
         }

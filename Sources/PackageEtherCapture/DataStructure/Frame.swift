@@ -102,9 +102,8 @@ public struct Frame: CustomStringConvertible, EtherDisplay, Identifiable, Codabl
         case (.invalid,_,_):  // should not get here
             break
         case (.ieee8023,_,0x42): // spanning tree
-            //TODO
-            let unknown = Unknown(data: data[data.startIndex + 17 ..< data.endIndex])
-            self.layer3 = .unknown(unknown)
+            let bpdu = Bpdu(data: data[data.startIndex + 17 ..< data.endIndex])
+            self.layer3 = .bpdu(bpdu)
         case (.ieee8023,_,0x98): // ARP
             let unknown = Unknown(data: data[data.startIndex + 17..<data.endIndex])
             self.layer3 = .unknown(unknown)

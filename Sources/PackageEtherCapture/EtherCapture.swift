@@ -345,6 +345,56 @@ public class EtherCapture {
         }
         return returnData
     }
+    
+    static let bigEndian = true  // network byte order is big endian
+    
+    static func getUInt32(data: Data)-> UInt32 {
+        let octet0: UInt32 = UInt32(data[data.startIndex])
+        let octet1: UInt32 = UInt32(data[data.startIndex + 1])
+        let octet2: UInt32 = UInt32(data[data.startIndex + 2])
+        let octet3: UInt32 = UInt32(data[data.startIndex + 3])
+        if EtherCapture.bigEndian == false {
+            return octet0 + octet1 << 8 + octet2 << 16 + octet3 << 24
+        } else {
+            return octet0 << 24 + octet1 << 16 + octet2 << 8 + octet3
+        }
+    }
+    static func getUInt16(data: Data)-> UInt16 {
+        let octet0: UInt16 = UInt16(data[data.startIndex])
+        let octet1: UInt16 = UInt16(data[data.startIndex + 1])
+        if EtherCapture.bigEndian == false {
+            return octet0 + octet1 << 8
+        } else {
+            return octet0 << 8 + octet1
+        }
+    }
+    static func getInt64(data: Data)-> Int64 {
+        let first4 = getUInt32(data: data)
+        let second4 = getUInt32(data: data.advanced(by: 4))
+        if EtherCapture.bigEndian == false {
+            return Int64(UInt64(first4) << 32 + UInt64(second4))
+        } else {
+            return Int64(UInt64(first4) + UInt64(second4) << 32)
+        }
+    }
+    static func getUInt64(data: Data)-> UInt64 {
+        let first4 = getUInt32(data: data)
+        let second4 = getUInt32(data: data.advanced(by: 4))
+        if EtherCapture.bigEndian == false {
+            return UInt64(first4) << 32 + UInt64(second4)
+        } else {
+            return UInt64(first4) + UInt64(second4) << 32
+        }
+    }
+    static func getCStrings(data: Data) -> [String] {
+        guard let bigString = String(data: data, encoding: .utf8) else {
+            EtherCapture.logger.error("Unable to decode strings from data \(data)")
+            return []
+        }
+        let substrings = bigString.split(separator: "\0", omittingEmptySubsequences: true)
+        return substrings.map{String($0)}
+    }
+
 }
 
 // keeping these extensions private
@@ -367,6 +417,7 @@ extension UInt32 {
         return Data(bytes: &int, count: MemoryLayout<UInt32>.size)
     }
 }
+
 
 extension Int32 {
     var data: Data {
