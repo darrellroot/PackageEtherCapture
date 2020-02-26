@@ -32,6 +32,8 @@ public struct Frame: CustomStringConvertible, EtherDisplay, Identifiable {
     public var snapType: UInt? = nil   //802.2 SNAP header
     public var ethertype: UInt? = nil // ethernetII encapsulation
     public var originalLength: Int // used for generating pcap
+
+    public var padding: Data?  // for 802.2 only
     /**
      - Parameter layer3: Nested data structure with higher layer information
      */
@@ -96,6 +98,10 @@ public struct Frame: CustomStringConvertible, EtherDisplay, Identifiable {
             self.ieeeSsap = UInt8(data[data.startIndex + 15])
             self.ieeeControl = UInt8(data[data.startIndex + 16])
             self.ethertype = nil
+            
+            if data.count > unsure + 14 {
+                self.padding = data.advanced(by: (Int(unsure + 14)))
+            }
         }
         self.frameFormat = frameFormat
 
@@ -175,6 +181,12 @@ public struct Frame: CustomStringConvertible, EtherDisplay, Identifiable {
         } else {
             length = ""  //if optional does not exist, dont add ending space
         }
+        let padString: String
+        if let padding = padding, padding.count > 0 {
+            padString = "\(padding) padding "
+        } else {
+            padString = ""
+        }
         let dsap: String
         if let ieeeDsap = ieeeDsap {
             dsap = "DSAP 0x\(ieeeDsap.hex) "
@@ -213,7 +225,7 @@ public struct Frame: CustomStringConvertible, EtherDisplay, Identifiable {
         }
 
         //each optional has 1 space at end provided above
-        return "\(srcmac) > \(dstmac) \(frameFormat) \(length)\(dsap)\(ssap)\(control)\(org)\(sType)\(eType)"
+        return "\(srcmac) > \(dstmac) \(frameFormat) \(length)\(dsap)\(ssap)\(control)\(org)\(sType)\(eType)\(padString)"
     }
     /**
      - Returns: One line summary of the frame and packet contents
