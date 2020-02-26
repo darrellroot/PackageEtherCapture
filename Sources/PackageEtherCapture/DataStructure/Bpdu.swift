@@ -12,8 +12,6 @@ import Logging
 public struct Bpdu: CustomStringConvertible, EtherDisplay {
     
     public var description: String {
-        let bridgeIdString = String(format: "0x%x",bridgeId)
-        let rootIdString = String(format: "0x%x",rootId)
 
         return "BPDU version \(bpduVersion) type \(type) rootID \(rootIdString) bridgeID \(bridgeIdString) rootCost \(rootCost) portId \(portId)"
     }
@@ -40,6 +38,12 @@ public struct Bpdu: CustomStringConvertible, EtherDisplay {
     
     public var hexdump: String {
         return self.data.hexdump
+    }
+    public var rootIdString: String {
+        return String(format: "0x%x",rootId)
+    }
+    public var bridgeIdString: String {
+        return String(format: "0x%x",bridgeId)
     }
     
     public let protocolId: UInt16
