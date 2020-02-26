@@ -17,7 +17,7 @@ public struct Bpdu: CustomStringConvertible, EtherDisplay {
     }
     
     public var verboseDescription: String {
-        return "BPDU protocol \(protocolId) version \(bpduVersion) type \(type) flags \(flags) portRole \(portRole) rootID \(rootIdString) rootCost \(rootCost) bridgeID \(bridgeIdString) portId \(portId) age \(age) maxAge \(maxAge) helloTime \(helloTime) forwardDelay \(forwardDelay) \(data.count) bytes"
+        return "BPDU protocol \(protocolId) version \(bpduVersion) type \(type) flags \(flagsString) portRole \(portRole) rootID \(rootIdString) rootCost \(rootCost) bridgeID \(bridgeIdString) portId \(portId) age \(age) maxAge \(maxAge) helloTime \(helloTime) forwardDelay \(forwardDelay) \(data.count) bytes"
     }
     
     public var hexdump: String {
