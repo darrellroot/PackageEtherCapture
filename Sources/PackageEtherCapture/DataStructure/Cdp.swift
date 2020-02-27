@@ -9,8 +9,7 @@ import Foundation
 import Network
 import Logging
 
-public enum CdpValue: CustomStringConvertible {
-    
+public enum CdpValue: CustomStringConvertible, Hashable {
     case deviceId(String)
     case ipv4address(IPv4Address)
     case ipv6address(IPv6Address)
