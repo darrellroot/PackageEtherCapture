@@ -17,6 +17,7 @@ public enum Layer3: CustomStringConvertible, EtherDisplay {
     case ipv4(IPv4)
     case ipv6(IPv6)
     case bpdu(Bpdu)
+    case cdp(Cdp)
     case unknown(Unknown)
     
 
@@ -28,6 +29,8 @@ public enum Layer3: CustomStringConvertible, EtherDisplay {
                 return ipv6
             case .bpdu(let bpdu):
                 return bpdu
+            case .cdp(let cdp):
+                return cdp
             case .unknown(let unknown):
                 return unknown
         }
@@ -41,6 +44,8 @@ public enum Layer3: CustomStringConvertible, EtherDisplay {
             return ipv6.description
         case .bpdu(let bpdu):
             return bpdu.description
+        case .cdp(let cdp):
+            return cdp.description
         case .unknown(let unknown):
             return unknown.description
         }
@@ -55,6 +60,8 @@ public enum Layer3: CustomStringConvertible, EtherDisplay {
             return ipv6.hexdump
         case .bpdu(let bpdu):
             return bpdu.hexdump
+        case .cdp(let cdp):
+            return cdp.hexdump
         case .unknown(let unknown):
             return unknown.hexdump
         }
@@ -69,6 +76,8 @@ public enum Layer3: CustomStringConvertible, EtherDisplay {
             return ipv6.verboseDescription
         case .bpdu(let bpdu):
             return bpdu.verboseDescription
+        case .cdp(let cdp):
+            return cdp.verboseDescription
         case .unknown(let unknown):
             return unknown.verboseDescription
         }

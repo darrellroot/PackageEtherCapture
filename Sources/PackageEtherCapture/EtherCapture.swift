@@ -13,6 +13,7 @@ public enum EtherCaptureError: Error, CustomStringConvertible {
     case pcap_setfilter_failed(message: String)
     case pcap_max_captures_exceeded
     case unsupported_datalink(message: String)
+    case genericError(String)
     
     
     public var localizedDescription: String {
@@ -35,6 +36,8 @@ public enum EtherCaptureError: Error, CustomStringConvertible {
             return "pcap max captures exceeded"
         case .unsupported_datalink(let message):
             return "unsupported pcap datalink type: \(message)"
+        case .genericError(let message):
+            return "unexpected error \(message)"
         }
     }
 }
