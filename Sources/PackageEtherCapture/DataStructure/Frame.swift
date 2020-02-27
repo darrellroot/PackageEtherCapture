@@ -45,7 +45,7 @@ public struct Frame: CustomStringConvertible, EtherDisplay, Identifiable {
             return ipv4.layer4
         case .ipv6(let ipv6):
             return ipv6.layer4
-        case .bpdu(let bpdu):
+        case .bpdu(_), .cdp(_):
             return .noLayer4    // bpdu does not have layer 4
         case .unknown(let unknown):
             return nil
