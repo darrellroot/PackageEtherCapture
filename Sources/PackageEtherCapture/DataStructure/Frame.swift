@@ -123,10 +123,10 @@ public struct Frame: CustomStringConvertible, EtherDisplay, Identifiable {
             //TODO
             self.snapOrg = UInt(data[data.startIndex + 17]) * 256 * 256 + UInt(data[data.startIndex + 18]) * 256 + UInt(data[data.startIndex + 19])
             self.snapType = UInt(data[data.startIndex + 20]) * 256 + UInt(data[data.startIndex + 21])
-            if self.snapOrg == 0xc, self.snapType == 0x2000, let cdp = Cdp(data: data[data.startIndex + 20..<data.endIndex]) {
+            if self.snapOrg == 0xc, self.snapType == 0x2000, let cdp = Cdp(data: data[data.startIndex + 22..<data.endIndex]) {
                 self.layer3 = .cdp(cdp)
             } else {
-                let unknown = Unknown(data: data[data.startIndex + 20..<data.endIndex])
+                let unknown = Unknown(data: data[data.startIndex + 22..<data.endIndex])
                 self.layer3 = .unknown(unknown)
             }
         case (.ieee8023,_,_): // default case for 802.3
