@@ -62,28 +62,80 @@ public enum CdpValue: CustomStringConvertible, Hashable {
         }
     }
     public static func getValues(data: Data) throws -> [CdpValue] {
-        let type = data[data.startIndex]
-        let length = Int(EtherCapture.getUInt16(data: data.advanced(by: 1)))
+        let type = EtherCapture.getUInt16(data: data)
+        let length = Int(EtherCapture.getUInt16(data: data.advanced(by: 2)))
         guard data.count >= length else {
             throw EtherCaptureError.genericError("length \(length) data \(data.count)")
         }
+
         switch type {
         case 1:
-            let subdata = data[(data.startIndex + 2) ..< (data.startIndex + length)]
+            let subdata = data[(data.startIndex + 4) ..< (data.startIndex + length)]
             if let string = String(data: subdata,  encoding: .utf8) {
                 let cdpValue = CdpValue.deviceId(string)
                 return [cdpValue]
             } else {
                 throw EtherCaptureError.genericError("cdp type 1: unable to decode deviceId string")
             }
-        
+        case 2:
+            let numberAddresses = EtherCapture.getUInt32(data: data.advanced(by: 4))
+            var position = 8
+            var results: [CdpValue] = []
+            for loop in 0 ..< numberAddresses {
+                let protocolType = data[data.startIndex + position]
+                let protocolLength = Int(data[data.startIndex + position + 1])
+                switch protocolLength {
+                case 1: // 1 byte protocol length usually ipv4
+                    guard data.count >= position + 9 else {
+                        return results
+                    }
+                    let protocolNumber = data[data.startIndex + position + 2]
+                    let addressLength = Int(EtherCapture.getUInt16(data: data.advanced(by: position + 2 + protocolLength)))
+                    if protocolNumber != 0xcc {
+                        position = position + 2 + protocolLength + 2 + addressLength
+                        EtherCapture.logger.error("CDP: unsupported address protocol \(protocolNumber)")
+                    } else { //protocolNumber is 0xcc == IPv4
+                        if let ipv4Address = IPv4Address(data[position + 2 + protocolLength + 2 ..< position + 2 + protocolLength + 2 + 4]) {
+                            let result: CdpValue = .ipv4address(ipv4Address)
+                            results.append(result)
+                        }
+                        position = position + 2 + protocolLength + 2 + addressLength
+                    }
+                case 8: //8 byte protocol usually ipv6
+                    guard data.count >= position + 28 else {
+                        return results
+                    }
+                    let protocolNumber = EtherCapture.getUInt64(data: data.advanced(by: position + 2))
+                    let addressLength = Int(EtherCapture.getUInt16(data: data.advanced(by: position + 2 + protocolLength)))
+                    if protocolNumber != UInt64(0xaaaa0300000086dd) {
+                        EtherCapture.logger.error("CDP: unsupported address protocol \(protocolNumber)")
+
+                        position = position + 2 + protocolLength + 2 + addressLength
+                    } else { // protocol is ipv6
+                        if let ipv6address = IPv6Address(data[position + 2 + protocolLength + 2 ..< position + 2 + protocolLength + 2 + 16]) {
+                            let result = CdpValue.ipv6address(ipv6address)
+                            results.append(result)
+                        }
+                        position = position + 2 + protocolLength + 2 + addressLength
+                    }
+                default: // default protocolLength
+                    EtherCapture.logger.error("Cdp: unexpected protocol length \(protocolLength)")
+                    guard data.count >= position + 2 + protocolLength + 2 else {
+                        return results
+                    }
+                    let addressLength = Int(EtherCapture.getUInt16(data: data.advanced(by: position + 2 + protocolLength)))
+                    position = position + 2 + protocolLength + 2 + addressLength
+
+                } // switch protocolLength
+            } // for loop in numberAddresses
+            return results
         default:
             let alldata = data[(data.startIndex + 0) ..< (data.startIndex + length)]
             let cdpValue = CdpValue.unknown(alldata)
             return [cdpValue]
-        }
-    }
-}
+        }// switch type
+    }// func getValues
+}//enum CdpValue
 
 public struct Cdp: CustomStringConvertible, EtherDisplay {
     

@@ -144,7 +144,74 @@ final class PackageEtherCaptureTests: XCTestCase {
         XCTAssert(ipv6.sourceIP == IPv6Address("2600:1406:1400:49c::2313")!)
         XCTAssert(ipv6.destinationIP == IPv6Address("2601:647:4802:1620:d5ae:46fb:f6c7:a154")!)
     }
-    /*static var allTests = [
-        ("testExample", testExample),
-    ]*/
+    func testBpdu() {
+        let packetStream = "0180c20000004c710c19e3120027424203000002027c80004c710c19e30d0000000080004c710c19e30d80050000140002000f000000000000000000"
+        guard let data = Frame.makeData(packetStream: packetStream) else {
+            XCTFail()
+            return
+        }
+        let frame = Frame(data: data, timeval: timeval(), originalLength: 60)
+        XCTAssert(frame.frameFormat == .ieee8023)
+        XCTAssert(frame.dstmac == "01:80:c2:00:00:00")
+        XCTAssert(frame.srcmac == "4c:71:0c:19:e3:12")
+        XCTAssert(frame.ieeeLength == 39)
+        XCTAssert(frame.ieeeDsap == 0x42)
+        XCTAssert(frame.ieeeControl == 0x3)
+        XCTAssert(frame.snapOrg == nil)
+        XCTAssert(frame.snapType == nil)
+        XCTAssert(frame.ethertype == nil)
+        XCTAssert(frame.data.count == 60)
+        guard case .bpdu(let bpdu) = frame.layer3 else {
+            XCTFail()
+            return
+        }
+        XCTAssert(bpdu.protocolId == 0)
+        XCTAssert(bpdu.bpduVersion == 2)
+        XCTAssert(bpdu.type == 0x02)
+        XCTAssert(bpdu.flagTopChangeAgree == false)
+        XCTAssert(bpdu.flagAgreement == true)
+        XCTAssert(bpdu.flagForwarding == true)
+        XCTAssert(bpdu.flagLearning == true)
+        XCTAssert(bpdu.portRole == 3) // designated
+        XCTAssert(bpdu.flagProposal == false)
+        XCTAssert(bpdu.flagTopChange == false)
+        XCTAssert(bpdu.rootId == 0x80004c710c19e30d)
+        XCTAssert(bpdu.rootCost == 0)
+        XCTAssert(bpdu.bridgeId == 0x80004c710c19e30d)
+        XCTAssert(bpdu.portId == 0x8005)
+        XCTAssert(bpdu.age == 0.0)
+        XCTAssert(bpdu.maxAge == 20.0)
+        XCTAssert(bpdu.helloTime == 2.0)
+        XCTAssert(bpdu.forwardDelay == 15.0)
+    }
+    func testCdp() {
+        let packetStream = "01000ccccccc4c710c19e31200cdaaaa0300000c200002b469530001001034633731306331396533306400020049000000030101cc0004c0a800200208aaaa0300000086dd0010fe800000000000004e710cfffe19e30d0208aaaa0300000086dd0010260106474802162000000000000000010003000767693500040008000000290005000c322e342e352e373100060028436973636f2053473235302d303820285049443a53473235302d30382d4b39292d565344000a00060001000b0005010012000500001300050000140010737769746368313965333064"
+        guard let data = Frame.makeData(packetStream: packetStream) else {
+            XCTFail()
+            return
+        }
+        let frame = Frame(data: data, timeval: timeval(), originalLength: 60)
+        XCTAssert(frame.frameFormat == .ieee8023)
+        XCTAssert(frame.dstmac == "01:00:0c:cc:cc:cc")
+        XCTAssert(frame.srcmac == "4c:71:0c:19:e3:12")
+        XCTAssert(frame.ieeeLength == 205)
+        XCTAssert(frame.ieeeDsap == 0xaa)
+        XCTAssert(frame.ieeeControl == 0x3)
+        XCTAssert(frame.snapOrg == 0x00000c)
+        XCTAssert(frame.snapType == 0x2000)
+        XCTAssert(frame.ethertype == nil)
+        XCTAssert(frame.data.count == 219)
+        guard case .cdp(let cdp) = frame.layer3 else {
+            XCTFail()
+            return
+        }
+        XCTAssert(cdp.version == 2)
+        XCTAssert(cdp.ttl == 180)
+        XCTAssert(cdp.checksum == 0x6953)
+        XCTAssert(cdp.values.contains(.deviceId("4c710c19e30d")))
+        XCTAssert(cdp.values.contains(.ipv4address(IPv4Address("192.168.0.32")!)))
+        XCTAssert(cdp.values.contains(.ipv6address(IPv6Address("2601:647:4802:1620::1")!)))
+        XCTAssert(cdp.values.contains(.ipv6address(IPv6Address("fe80::4e71:cff:fe19:e30d")!)))
+
+    }
 }

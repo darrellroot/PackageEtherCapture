@@ -62,10 +62,10 @@ public struct Bpdu: CustomStringConvertible, EtherDisplay {
     public let rootCost: UInt32
     public let bridgeId: UInt64
     public let portId: UInt16
-    public let age: UInt16
-    public let maxAge: UInt16
-    public let helloTime: UInt16
-    public let forwardDelay: UInt16
+    public let age: Double
+    public let maxAge: Double
+    public let helloTime: Double
+    public let forwardDelay: Double
     public let data: Data
     
     public var layer4: Layer4 = .unknown(Unknown.completely)
@@ -92,10 +92,14 @@ public struct Bpdu: CustomStringConvertible, EtherDisplay {
         self.rootCost = EtherCapture.getUInt32(data: data.advanced(by: 13))
         self.bridgeId = EtherCapture.getUInt64(data: data.advanced(by: 17))
         self.portId = EtherCapture.getUInt16(data: data.advanced(by: 25))
-        self.age = EtherCapture.getUInt16(data: data.advanced(by: 27))
-        self.maxAge = EtherCapture.getUInt16(data: data.advanced(by: 29))
-        self.helloTime = EtherCapture.getUInt16(data: data.advanced(by: 31))
-        self.forwardDelay = EtherCapture.getUInt16(data: data.advanced(by: 33))
+        //self.age = EtherCapture.getUInt16(data: data.advanced(by: 27))
+        self.age = Double(data[data.startIndex + 27]) + Double(data[data.startIndex + 28]) / 256.0
+        //self.maxAge = EtherCapture.getUInt16(data: data.advanced(by: 29))
+        self.maxAge = Double(data[data.startIndex + 29]) + Double(data[data.startIndex + 30]) / 256.0
+        //self.helloTime = EtherCapture.getUInt16(data: data.advanced(by: 31))
+        self.helloTime = Double(data[data.startIndex + 31]) + Double(data[data.startIndex + 32]) / 256.0
+        //self.forwardDelay = EtherCapture.getUInt16(data: data.advanced(by: 33))
+        self.forwardDelay = Double(data[data.startIndex + 33]) + Double(data[data.startIndex + 34]) / 256.0
         
     }
 }

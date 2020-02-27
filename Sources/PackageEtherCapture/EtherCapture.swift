@@ -383,7 +383,7 @@ public class EtherCapture {
     static func getUInt64(data: Data)-> UInt64 {
         let first4 = getUInt32(data: data)
         let second4 = getUInt32(data: data.advanced(by: 4))
-        if EtherCapture.bigEndian == false {
+        if EtherCapture.bigEndian == true {
             return UInt64(first4) << 32 + UInt64(second4)
         } else {
             return UInt64(first4) + UInt64(second4) << 32
