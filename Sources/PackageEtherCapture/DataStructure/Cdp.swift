@@ -27,7 +27,11 @@ public enum CdpValue: CustomStringConvertible, Hashable {
     case capabilityMacRelay
     case softwareVersion(String)
     case platform(String)
+    case trustBitmap(String)
+    case untrustedCos(String)
+    case duplex(String)
     case nativeVlan(Int)
+    case systemName(String)
     case unknown(Data)
     
     public var description: String {
@@ -63,7 +67,6 @@ public enum CdpValue: CustomStringConvertible, Hashable {
             return "CVTA/STP Dispute Resolution/Cisco VT Camera"
         case .capabilityMacRelay:
             return "Mac Relay"
-
         case .softwareVersion(let version):
             return "Version \(version)"
         case .platform(let platform):
@@ -72,6 +75,14 @@ public enum CdpValue: CustomStringConvertible, Hashable {
             return "NativeVLAN \(vlan)"
         case .unknown(let unknown):
             return "UnknownCdpValue \(unknown.count) bytes type \(unknown[1])"
+        case .trustBitmap(let bitmap):
+            return bitmap
+        case .duplex(let duplex):
+            return duplex
+        case .systemName(let systemName):
+            return systemName
+        case .untrustedCos(let cos):
+            return cos
         }
     }
     public static func getValues(data: Data) throws -> [CdpValue] {
@@ -191,7 +202,65 @@ public enum CdpValue: CustomStringConvertible, Hashable {
                 results.append(.capabilityMacRelay)
             }
             return results
-
+        case 5: // type case 5 version
+            let subdata = data[(data.startIndex + 4) ..< (data.startIndex + length)]
+            if let string = String(data: subdata,  encoding: .utf8) {
+                let cdpValue = CdpValue.softwareVersion(string)
+                return [cdpValue]
+            } else {
+                throw EtherCaptureError.genericError("cdp type 5: unable to decode software version")
+            }
+        case 6: // type case 6 platform
+            let subdata = data[(data.startIndex + 4) ..< (data.startIndex + length)]
+            if let string = String(data: subdata,  encoding: .utf8) {
+                let cdpValue = CdpValue.platform(string)
+                return [cdpValue]
+            } else {
+                throw EtherCaptureError.genericError("cdp type \(type): unable to decode platform")
+            }
+        case 10: // type case 10 (0xa) native vlan
+            guard length == 6 else {
+                throw EtherCaptureError.genericError("cdp type \(type) length \(length) invalid")
+            }
+            let vlan = Int(EtherCapture.getUInt16(data: data.advanced(by: data.startIndex + 4)))
+            let cdpValue = CdpValue.nativeVlan(vlan)
+            return [cdpValue]
+        case 11: // type case 11 (0xb) duplex
+            guard length == 5 else {
+                throw EtherCaptureError.genericError("cdp type \(type) length \(length) invalid")
+            }
+            let duplexNum = data[data.startIndex + 4]
+            switch duplexNum {
+            case 1:
+                let cdpValue = CdpValue.duplex("Duplex Full")
+                return [cdpValue]
+            default:
+                let cdpValue = CdpValue.duplex("Duplex value \(duplexNum)")
+                return [cdpValue]
+            }
+        case 0x12: // type case (0x12) Trust bitmap
+            guard length == 5 else {
+                throw EtherCaptureError.genericError("cdp type \(type) length \(length) invalid")
+            }
+            let trustNum = data[data.startIndex + 4]
+            let trustString = String(format: "Trust Bitmap 0x%x",trustNum)
+            let cdpValue = CdpValue.trustBitmap(trustString)
+            return [cdpValue]
+        case 0x13: // untrusted port CoS
+            guard length == 5 else {
+                throw EtherCaptureError.genericError("cdp type \(type) length \(length) invalid")
+            }
+            let cosNum = data[data.startIndex + 4]
+            let cosString = String(format: "Untrusted Port CoS 0x%x",cosNum)
+            let cdpValue = CdpValue.untrustedCos(cosString)
+            return [cdpValue]
+        case 0x14: // system name
+            let subdata = data[(data.startIndex + 4) ..< (data.startIndex + length)]
+            guard let string = String(data: subdata,  encoding: .utf8) else {
+                throw EtherCaptureError.genericError("cdp type \(type): unable to decode platform")
+            }
+            let cdpValue = CdpValue.systemName(string)
+            return [cdpValue]
         default: // type case
             let alldata = data[(data.startIndex + 0) ..< (data.startIndex + length)]
             let cdpValue = CdpValue.unknown(alldata)

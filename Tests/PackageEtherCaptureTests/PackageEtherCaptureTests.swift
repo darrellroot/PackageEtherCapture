@@ -216,8 +216,15 @@ final class PackageEtherCaptureTests: XCTestCase {
         XCTAssert(cdp.values.contains(.capabilitySwitch))
         XCTAssert(cdp.values.contains(.capabilityIgmp))
         XCTAssert(!cdp.values.contains(.capabilityBridge))
-        XCTAssert(!cdp.values.contains(.capabilitySourceRouteBridge))
         XCTAssert(!cdp.values.contains(.capabilityMacRelay))
-        
+        XCTAssert(!cdp.values.contains(.capabilitySourceRouteBridge))
+        XCTAssert(cdp.values.contains(.softwareVersion("2.4.5.71")))
+        XCTAssert(cdp.values.contains(.platform("Cisco SG250-08 (PID:SG250-08-K9)-VSD")))
+        XCTAssert(cdp.values.contains(.nativeVlan(1)))
+        XCTAssert(cdp.values.contains(.duplex("Duplex Full")))
+        XCTAssert(cdp.values.contains(.trustBitmap("Trust Bitmap 0x0")))
+    
+        XCTAssert(cdp.values.contains(.untrustedCos("Untrusted Port CoS 0x0")))
+        XCTAssert(cdp.values.contains(.systemName("switch19e30d")))
     }
 }
