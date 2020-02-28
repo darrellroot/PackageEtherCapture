@@ -2,6 +2,7 @@
 
 **Warning: PackageEtherCapture is a 0.x release.  The API and resulting data structure are very unstable.  If you use this package, we recommend using a specific minor release and not automatically upgrading without testing.**
 
+**Warning2: Most of the "API" for PackageEtherCapture is the data structure returned by Frame.init(data: Data).  This data structure consists of nested structs and enumerations which are constantly being added to as more protocol decodes are added.  This means that even a minor version update of PackageEtherCapture can cause your code which uses the Frame() data structure to require updates.  We recommend setting a specific package version (preferably a "release" and only updating when you have development time to handle (or ignore) new protocol decodes in your switch statements.
 ## Overview
 
 PackageEtherCapture is a Swift Package with two sets of functionality:
@@ -16,9 +17,11 @@ PackageEtherCapture is a Swift Package with two sets of functionality:
 
 If you already installed Wireshark on your system, the installation process may have already created an "access_bpf" group, granted it rw access to /dev/bpf*, and added you to that group.  If that is already done, no further change is necessary.
 
-### Access to /dev/bpf* is not available on iOS.  So capturing packets from the wire is only supported for MacOS.
+### Access to /dev/bpf* is not available on iOS.  Capturing packets from the wire is only supported for MacOS.
 
-### Access to /dev/bpf* is not possible for sandboxed apps.  So capturing packets in an app in the MacOS App store is not possible.
+### Access to /dev/bpf* is not possible for sandboxed apps.  Capturing packets in an app in the MacOS App store is not possible.
+
+### Using PackageEtherCapture to create Frame data structures from data obtained by other means (such as from a .pcap or .pcapng import) does not require priviledged access and is possible within an iOS or sandboxed app.
 
 ## Dependencies
 
@@ -77,7 +80,9 @@ The following Layer-2 decodes are currently supported:
 The following Layer-3 decodes are currently supported:
 1. IPv4 Header
 2. IPv6 Header
-3. Unknown
+3. BPDU (spanning-tree bridge protocol data unit)
+4. CDP (Cisco Discovery Protocol)
+5. Unknown
 
 The following Layer-4 decodes are currently supported:
 1. UDP Datagram Header
@@ -93,6 +98,8 @@ Here is an overview of the data structure hierarchy:
     Frame.layer3
         IPv4
         IPv6
+        BPDU
+        CDP
         Unknown
         
         IPv4.layer4 and IPv6.layer4:
@@ -141,6 +148,8 @@ This protocol includes conveniently available computed properties for displaying
     public enum Layer3: CustomStringConvertible, EtherDisplay, Codable {
         case ipv4(IPv4)
         case ipv6(IPv6)
+        case bpdu(Bpdu)
+        case cdp(Cdp)
         case unknown(Unknown)
 
 ## IPv4 Data Structure
@@ -222,6 +231,9 @@ This protocol includes conveniently available computed properties for displaying
         public let destinationPort: UInt
         public let length: UInt
         public let checksum: UInt
+
+## Requirements to add an additional decode
+
 
 ## At this time we do not have a layer-5 structure for application-level data, but we anticipate that in the future.
 
