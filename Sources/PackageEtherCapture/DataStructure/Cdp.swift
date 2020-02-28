@@ -21,6 +21,10 @@ public enum CdpValue: CustomStringConvertible, Hashable {
     case capabilityHost
     case capabilityIgmp
     case capabilityRepeater
+    case capabilityVoip
+    case capabilityRemoteManaged
+    case capabilityVtCamera
+    case capabilityMacRelay
     case softwareVersion(String)
     case platform(String)
     case nativeVlan(Int)
@@ -51,6 +55,15 @@ public enum CdpValue: CustomStringConvertible, Hashable {
             return "IGMP-Speaker"
         case .capabilityRepeater:
             return "Repeater"
+        case .capabilityVoip:
+            return "VOIP"
+        case .capabilityRemoteManaged:
+            return "Remote Managed"
+        case .capabilityVtCamera:
+            return "CVTA/STP Dispute Resolution/Cisco VT Camera"
+        case .capabilityMacRelay:
+            return "Mac Relay"
+
         case .softwareVersion(let version):
             return "Version \(version)"
         case .platform(let platform):
@@ -64,8 +77,8 @@ public enum CdpValue: CustomStringConvertible, Hashable {
     public static func getValues(data: Data) throws -> [CdpValue] {
         let type = EtherCapture.getUInt16(data: data)
         let length = Int(EtherCapture.getUInt16(data: data.advanced(by: 2)))
-        guard data.count >= length else {
-            throw EtherCaptureError.genericError("length \(length) data \(data.count)")
+        guard data.count >= length, length > 4 else {
+            throw EtherCaptureError.genericError("CDP decode failed length \(length) data \(data.count)")
         }
 
         switch type {
@@ -77,7 +90,7 @@ public enum CdpValue: CustomStringConvertible, Hashable {
             } else {
                 throw EtherCaptureError.genericError("cdp type 1: unable to decode deviceId string")
             }
-        case 2:
+        case 2: // type case
             let numberAddresses = EtherCapture.getUInt32(data: data.advanced(by: 4))
             var position = 8
             var results: [CdpValue] = []
@@ -129,7 +142,57 @@ public enum CdpValue: CustomStringConvertible, Hashable {
                 } // switch protocolLength
             } // for loop in numberAddresses
             return results
-        default:
+        case 3: // type case 3 port id
+            let subdata = data[(data.startIndex + 4) ..< (data.startIndex + length)]
+            if let string = String(data: subdata,  encoding: .utf8) {
+                let cdpValue = CdpValue.portId(string)
+                return [cdpValue]
+            } else {
+                throw EtherCaptureError.genericError("cdp type 3: unable to decode portId string")
+            }
+        case 4: // type case 4 capabilities
+            guard length == 8 else {
+                throw EtherCaptureError.genericError("cdp type 4: length \(length) unable to decode capabilities")
+            }
+            var results: [CdpValue] = []
+            let octet3 = data[data.startIndex + 6]
+            let octet4 = data[data.startIndex + 7]
+            if octet4 & 0x01 != 0 {
+                results.append(.capabilityRouter)
+            }
+            if octet4 & 0x02 != 0 {
+                results.append(.capabilityBridge)
+            }
+            if octet4 & 0x04 != 0 {
+                results.append(.capabilitySourceRouteBridge)
+            }
+            if octet4 & 0x08 != 0 {
+                results.append(.capabilitySwitch)
+            }
+            if octet4 & 0x10 != 0 {
+                results.append(.capabilityHost)
+            }
+            if octet4 & 0x20 != 0 {
+                results.append(.capabilityIgmp)
+            }
+            if octet4 & 0x40 != 0 {
+                results.append(.capabilityRepeater)
+            }
+            if octet4 & 0x80 != 0 {
+                results.append(.capabilityVoip)
+            }
+            if octet3 & 0x01 != 0 {
+                results.append(.capabilityRemoteManaged)
+            }
+            if octet3 & 0x02 != 0 {
+                results.append(.capabilityVtCamera)
+            }
+            if octet3 & 0x04 != 0 {
+                results.append(.capabilityMacRelay)
+            }
+            return results
+
+        default: // type case
             let alldata = data[(data.startIndex + 0) ..< (data.startIndex + length)]
             let cdpValue = CdpValue.unknown(alldata)
             return [cdpValue]

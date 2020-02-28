@@ -212,6 +212,12 @@ final class PackageEtherCaptureTests: XCTestCase {
         XCTAssert(cdp.values.contains(.ipv4address(IPv4Address("192.168.0.32")!)))
         XCTAssert(cdp.values.contains(.ipv6address(IPv6Address("2601:647:4802:1620::1")!)))
         XCTAssert(cdp.values.contains(.ipv6address(IPv6Address("fe80::4e71:cff:fe19:e30d")!)))
-
+        XCTAssert(cdp.values.contains(.capabilityRouter))
+        XCTAssert(cdp.values.contains(.capabilitySwitch))
+        XCTAssert(cdp.values.contains(.capabilityIgmp))
+        XCTAssert(!cdp.values.contains(.capabilityBridge))
+        XCTAssert(!cdp.values.contains(.capabilitySourceRouteBridge))
+        XCTAssert(!cdp.values.contains(.capabilityMacRelay))
+        
     }
 }
