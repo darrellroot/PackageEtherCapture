@@ -232,8 +232,22 @@ This protocol includes conveniently available computed properties for displaying
         public let length: UInt
         public let checksum: UInt
 
-## Requirements to add an additional decode
+## Requirements to add an additional layer-3 decode (using LLDP as an example)
 
+1. Create new public Swift File/Struct in DataStructure directory (Lldp.swift)
+2. Make the struct conform to CustomStringConvertible and EtherDisplay.  Create an init(data: Data) initializer
+3. Add the struct as a case in the Layer3 enumeration, including all description/hexdump switches
+4. Add the new case to the Frame.layer4 switch
+5. In Frame.init(), call the Lldp() initializer in the appropriate part of the switch (usually based on ethertype)
+6. Get a wireshark capture of a frame, right-click on the frame and select "copy as hex stream"
+7. Use your hex stream to generate a unit test case.  Without a test case you WILL have a bug!
+8. Make sure everything needed by other Packages and applicaitons (such as Etherdump) is set to public
+9. Commit, tag with a minor version number change, and push with tags to github
+
+## Additional steps in Etherdump (GUI) if you are adding a view to your decode
+1. Update to latest package versions to get your new PackageEtherCapture version
+2. Create new layer3 detail view (LldpDetailView in our example)
+3. Edit Layer3DetailView switch to call your new detail view. The compiler will show you where (switch must be exhaustive)
 
 ## At this time we do not have a layer-5 structure for application-level data, but we anticipate that in the future.
 
