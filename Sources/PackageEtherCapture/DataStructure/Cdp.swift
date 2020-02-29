@@ -80,7 +80,7 @@ public enum CdpValue: CustomStringConvertible, Hashable {
         case .duplex(let duplex):
             return duplex
         case .systemName(let systemName):
-            return systemName
+            return "Device Name \(systemName)"
         case .untrustedCos(let cos):
             return cos
         }

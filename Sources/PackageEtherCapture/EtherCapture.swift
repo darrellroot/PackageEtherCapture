@@ -389,6 +389,29 @@ public class EtherCapture {
             return UInt64(first4) + UInt64(second4) << 32
         }
     }
+    static func getMac(data: Data) -> String? {
+        //input: 6 octets of data
+        //output: returns a string in mac address format
+        guard data.count >= 6 else {
+            return nil
+        }
+        var hexEncodedString = data[data.startIndex ..< data.startIndex + 6].hexEncodedString()
+        guard hexEncodedString.count >= 12 else {
+            return hexEncodedString
+        }
+        var index = hexEncodedString.endIndex
+        index = hexEncodedString.index(index, offsetBy: -2)
+        hexEncodedString.insert(":", at: index)
+        index = hexEncodedString.index(index, offsetBy: -2)
+        hexEncodedString.insert(":", at: index)
+        index = hexEncodedString.index(index, offsetBy: -2)
+        hexEncodedString.insert(":", at: index)
+        index = hexEncodedString.index(index, offsetBy: -2)
+        hexEncodedString.insert(":", at: index)
+        index = hexEncodedString.index(index, offsetBy: -2)
+        hexEncodedString.insert(":", at: index)
+        return hexEncodedString
+    }
     static func getCStrings(data: Data) -> [String] {
         guard let bigString = String(data: data, encoding: .utf8) else {
             EtherCapture.logger.error("Unable to decode strings from data \(data)")

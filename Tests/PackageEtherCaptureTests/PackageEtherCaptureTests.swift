@@ -184,8 +184,42 @@ final class PackageEtherCaptureTests: XCTestCase {
         XCTAssert(bpdu.helloTime == 2.0)
         XCTAssert(bpdu.forwardDelay == 15.0)
     }
+    func testLldp() {
+        let packetStream = "0180c200000e4c710c19e31288cc0207044c710c19e30d04040567693506020078fe0e00120f05001100110011001100110a0c7377697463683139653330640e0400140014100c0501c0a8002002000186a00010181102fe800000000000004e710cfffe19e30d02000186a000101811022601064748021620000000000000000102000186a000fe060080c20100010000"
+        guard let data = Frame.makeData(packetStream: packetStream) else {
+            XCTFail()
+            return
+        }
+        let frame = Frame(data: data, timeval: timeval(), originalLength: 60)
+        XCTAssert(frame.frameFormat == .ethernet)
+        XCTAssert(frame.dstmac == "01:80:c2:00:00:0e")
+        XCTAssert(frame.srcmac == "4c:71:0c:19:e3:12")
+        XCTAssert(frame.ieeeLength == nil)
+        XCTAssert(frame.ieeeDsap == nil)
+        XCTAssert(frame.ieeeControl == nil)
+        XCTAssert(frame.snapOrg == nil)
+        XCTAssert(frame.snapType == nil)
+        XCTAssert(frame.ethertype == 0x88cc)
+        XCTAssert(frame.data.count == 145)
+        guard case .lldp(let lldp) = frame.layer3 else {
+            XCTFail()
+            return
+        }
+        XCTAssert(lldp.values.count == 14)
+        XCTAssert(lldp.values.contains(.chassisId(subtype: 4, id: "4c:71:0c:19:e3:0d")))
+        XCTAssert(lldp.values.contains(.portId(subtype: 5, id: "gi5")))
+        XCTAssert(lldp.values.contains(.ttl(120)))
+        XCTAssert(lldp.values.contains(.systemName("switch19e30d")))
+        XCTAssert(lldp.values.contains(.capabilityMacBridge))
+        XCTAssert(lldp.values.contains(.capabilityRouter))
+        XCTAssert(lldp.values.contains(.enabledMacBridge))
+        XCTAssert(lldp.values.contains(.enabledRouter))
+        XCTAssert(!lldp.values.contains(.capabilityRepeater))
+        XCTAssert(!lldp.values.contains(.enabledDOCSIS))
+        XCTAssert(lldp.values.contains(.endOfLldp))
+    }
     func testCdp() {
-        let packetStream = "01000ccccccc4c710c19e31200cdaaaa0300000c200002b469530001001034633731306331396533306400020049000000030101cc0004c0a800200208aaaa0300000086dd0010fe800000000000004e710cfffe19e30d0208aaaa0300000086dd0010260106474802162000000000000000010003000767693500040008000000290005000c322e342e352e373100060028436973636f2053473235302d303820285049443a53473235302d30382d4b39292d565344000a00060001000b0005010012000500001300050000140010737769746368313965333064"
+        let packetStream = "01000ccccccc4c710c19e31200cdaaaa0300000c200002b469530001001034633731306331396533306400020049000000030101cc0004c0a800200208aaaa0300000086dd0010fe800000000000004e710cfffe19e30d0208aaaa0300000086dd001020010db84802162000000000000000010003000767693500040008000000290005000c322e342e352e373100060028436973636f2053473235302d303820285049443a53473235302d30382d4b39292d565344000a00060001000b0005010012000500001300050000140010737769746368313965333064"
         guard let data = Frame.makeData(packetStream: packetStream) else {
             XCTFail()
             return
@@ -210,7 +244,7 @@ final class PackageEtherCaptureTests: XCTestCase {
         XCTAssert(cdp.checksum == 0x6953)
         XCTAssert(cdp.values.contains(.deviceId("4c710c19e30d")))
         XCTAssert(cdp.values.contains(.ipv4address(IPv4Address("192.168.0.32")!)))
-        XCTAssert(cdp.values.contains(.ipv6address(IPv6Address("2601:647:4802:1620::1")!)))
+        XCTAssert(cdp.values.contains(.ipv6address(IPv6Address("2001:db8:4802:1620::1")!)))
         XCTAssert(cdp.values.contains(.ipv6address(IPv6Address("fe80::4e71:cff:fe19:e30d")!)))
         XCTAssert(cdp.values.contains(.capabilityRouter))
         XCTAssert(cdp.values.contains(.capabilitySwitch))
