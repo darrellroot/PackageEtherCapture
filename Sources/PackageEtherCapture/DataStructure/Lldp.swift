@@ -9,7 +9,7 @@ import Foundation
 import Network
 import Logging
 
-public enum LldpValue: Equatable {
+public enum LldpValue: Equatable, Hashable {
     case endOfLldp
     case chassisId(subtype: UInt8, id: String)
     case portId(subtype: UInt8, id: String)
