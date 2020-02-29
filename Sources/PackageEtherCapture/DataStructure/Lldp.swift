@@ -16,6 +16,8 @@ public enum LldpValue: Equatable, Hashable {
     case portDescription(String)
     case systemName(String)
     case ttl(Int)
+    case managementAddressIPv4(address: IPv4Address, subType: Int, interface: Int, oid: String)
+    case managementAddressIPv6(address: IPv6Address, subType: Int, interface: Int, oid: String)
     case capabilityOther
     case capabilityRepeater
     case capabilityMacBridge
@@ -301,7 +303,65 @@ public enum LldpValue: Equatable, Hashable {
                 EtherCapture.logger.error("LLDP: unable to decode type \(tlvType)")
                 return nil
             }
+        case 6: // system description
+            guard data.count >= tlvLength + 2 else {
+                EtherCapture.logger.error("LLDP: unable to decode type \(tlvType) data.count \(data.count)")
+                return nil
+            }
+            if let systemDescription = String(data: data[data.startIndex + 2 ..< data.startIndex + 2 + tlvLength], encoding: .utf8) {
+                self = .systemName(systemDescription)
+                return
+            } else {
+                EtherCapture.logger.error("LLDP: unable to decode type \(tlvType)")
+                return nil
+            }
+        case 8: //
+            guard data.count >= 11 else {
+                EtherCapture.logger.error("LLDP: unable to decode type \(tlvType) data.count \(data.count)")
+                return nil
+            }
+            let addressLength = Int(data[data.startIndex + 2])
+            let addressSubtype = data[data.startIndex + 3]
+            guard data.count >= 9 + addressLength else {
+                EtherCapture.logger.error("LLDP: unable to decode type \(tlvType) data.count \(data.count)")
+                return nil
+            }
+            switch addressSubtype {
+            case 1: // IPv4
+                guard addressLength == 5 else {
+                    EtherCapture.logger.error("LLDP: unable to decode type \(tlvType) data.count \(data.count) addressLength \(addressLength) addressSubtype \(addressSubtype)")
+                    return nil
+                }
+                let addressData = data[data.startIndex + 4 ..< data.startIndex + 8]
+                guard let ipv4Address = IPv4Address(addressData) else {
+                    EtherCapture.logger.error("LLDP: unable to decode type \(tlvType) ipv4 address")
+                    return nil
+                }
+                let intSubtype = Int(data[data.startIndex + 3 + addressLength])
+                let intNumber = Int(EtherCapture.getUInt32(data: data.advanced(by: 4 + addressLength)))
+                let oidLength = Int(data[data.startIndex + 8 + addressLength])
+                let oidString = String(data: data[data.startIndex + 9 + addressLength ..< data.startIndex + 9 + addressLength + oidLength], encoding: .utf8) ?? ""
+                self = .managementAddressIPv4(address: ipv4Address, subType: intSubtype, interface: intNumber, oid: oidString)
+            case 2: // ipv6
+                guard addressLength == 17 else {
+                    EtherCapture.logger.error("LLDP: unable to decode type \(tlvType) data.count \(data.count) addressLength \(addressLength) addressSubtype \(addressSubtype)")
+                    return nil
+                }
+                let addressData = data[data.startIndex + 4 ..< data.startIndex + 20]
+                guard let ipv6Address = IPv6Address(addressData) else {
+                    EtherCapture.logger.error("LLDP: unable to decode type \(tlvType) ipv4 address")
+                    return nil
+                }
+                let intSubtype = Int(data[data.startIndex + 3 + addressLength])
+                let intNumber = Int(EtherCapture.getUInt32(data: data.advanced(by: 4 + addressLength)))
+                let oidLength = Int(data[data.startIndex + 8 + addressLength])
+                let oidString = String(data: data[data.startIndex + 9 + addressLength ..< data.startIndex + 9 + addressLength + oidLength], encoding: .utf8) ?? ""
+                self = .managementAddressIPv6(address: ipv6Address, subType: intSubtype, interface: intNumber, oid: oidString)
 
+            default:
+                EtherCapture.logger.error("LLDP: unable to decode type \(tlvType) data.count \(data.count) addressLength \(addressLength) addressSubtype \(addressSubtype)")
+                return nil
+            }
         default: // tlvtype
             self = .unknown(tlvType)
             return
@@ -414,6 +474,10 @@ public enum LldpValue: Equatable, Hashable {
             return "enabledMacRelay"
         case .enabledReserved:
             return "enabledReserved"
+        case .managementAddressIPv4(let address, let subType, let interface, let oid):
+            return "ManagementAddress \(address.debugDescription) InterfaceSubtype \(subType) interface \(interface) oid \(oid)"
+        case .managementAddressIPv6(let address, let subType, let interface, let oid):
+            return "ManagementAddress \(address.debugDescription) InterfaceSubtype \(subType) interface \(interface) oid \(oid)"
         }
     }
 }
