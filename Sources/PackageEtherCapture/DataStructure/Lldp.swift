@@ -307,7 +307,7 @@ public enum LldpValue: Equatable {
             return
         } // end switch tlv type
     }
-    var description: String {
+    public var description: String {
         switch self {
             
         case .endOfLldp:
