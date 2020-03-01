@@ -16,6 +16,7 @@ import Foundation
 public enum Layer4: CustomStringConvertible, EtherDisplay {
     case tcp(Tcp)
     case udp(Udp)
+    case icmp4(Icmp4)
     case unknown(Unknown)
     case noLayer4     // used when we know there is no layer4 for this frame
     
@@ -30,6 +31,8 @@ public enum Layer4: CustomStringConvertible, EtherDisplay {
             return tcp.description
         case .udp(let udp):
             return udp.description
+        case .icmp4(let icmp4):
+            return icmp4.description
         case .noLayer4:
             return ""
         case .unknown(let unknown):
@@ -44,6 +47,8 @@ public enum Layer4: CustomStringConvertible, EtherDisplay {
             return tcp.hexdump
         case .udp(let udp):
             return udp.hexdump
+        case .icmp4(let icmp4):
+            return icmp4.hexdump
         case .noLayer4:
             return ""
         case .unknown(let unknown):
@@ -58,6 +63,8 @@ public enum Layer4: CustomStringConvertible, EtherDisplay {
             return tcp.verboseDescription
         case .udp(let udp):
             return udp.verboseDescription
+        case .icmp4(let icmp4):
+            return icmp4.verboseDescription
         case .noLayer4:
             return ""
         case .unknown(let unknown):

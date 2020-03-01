@@ -489,7 +489,7 @@ public enum LldpValue: Equatable, Hashable {
         case .managementAddressIPv6(let address, let subType, let interface, let oid):
             return "ManagementAddress \(address.debugDescription) InterfaceSubtype \(subType) interface \(interface) oid \(oid)"
         case .ouiSpecific(let oui, let subType, let info):
-            return "OUI \(oui) subType \(subType) \(info)"
+            return "OUI \(oui) subType \(subType) \(info.asciiEscaped)"
         }
     }
 }

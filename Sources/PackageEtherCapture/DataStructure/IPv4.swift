@@ -113,6 +113,12 @@ public struct IPv4: CustomStringConvertible, EtherDisplay {
             self.layer4 = .unknown(Unknown.completely)
         } else {
             switch ipProtocol {
+            case 1:
+                if let icmp4 = Icmp4(data: data[data.startIndex + 4 * Int(ihl) ..< data.endIndex]) {
+                    self.layer4 = .icmp4(icmp4)
+                } else {
+                    self.layer4 = .unknown(Unknown(data: data[finalHeaderIndex ..< data.endIndex]))
+                }
             case 6:
                 //let myData = Data(data[data.startIndex + 4 * Int(ihl) ..< data.endIndex])
                 //if let tcp = Tcp(data: myData) {
