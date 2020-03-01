@@ -221,7 +221,8 @@ final class PackageEtherCaptureTests: XCTestCase {
             
         XCTAssert(lldp.values.contains(.managementAddressIPv6(address: IPv6Address("fe80::4e71:cff:fe19:e30d")!, subType: 2, interface: 100000, oid: "")))
         XCTAssert(lldp.values.contains(.managementAddressIPv6(address: IPv6Address("2001:0db8:4802:1620::1")!, subType: 2, interface: 100000, oid: "")))
-
+        XCTAssert(lldp.values.contains(.ouiSpecific(oui: "00:12:0f", subType: 5, info: "\0\u{11}\0\u{11}\0\u{11}\0\u{11}\0\u{11}")))
+        XCTAssert(lldp.values.contains(.ouiSpecific(oui: "00:80:c2", subType: 1, info: "\0\u{01}")))
     }
     func testCdp() {
         let packetStream = "01000ccccccc4c710c19e31200cdaaaa0300000c200002b469530001001034633731306331396533306400020049000000030101cc0004c0a800200208aaaa0300000086dd0010fe800000000000004e710cfffe19e30d0208aaaa0300000086dd001020010db84802162000000000000000010003000767693500040008000000290005000c322e342e352e373100060028436973636f2053473235302d303820285049443a53473235302d30382d4b39292d565344000a00060001000b0005010012000500001300050000140010737769746368313965333064"

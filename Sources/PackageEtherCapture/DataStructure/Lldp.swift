@@ -18,6 +18,7 @@ public enum LldpValue: Equatable, Hashable {
     case ttl(Int)
     case managementAddressIPv4(address: IPv4Address, subType: Int, interface: Int, oid: String)
     case managementAddressIPv6(address: IPv6Address, subType: Int, interface: Int, oid: String)
+    case ouiSpecific(oui: String, subType: Int, info: String)
     case capabilityOther
     case capabilityRepeater
     case capabilityMacBridge
@@ -362,6 +363,15 @@ public enum LldpValue: Equatable, Hashable {
                 EtherCapture.logger.error("LLDP: unable to decode type \(tlvType) data.count \(data.count) addressLength \(addressLength) addressSubtype \(addressSubtype)")
                 return nil
             }
+        case 127: // vendor specific
+            guard data.count >= tlvLength + 2, let ouiIdentifier = EtherCapture.getOui(data: data.advanced(by: 2)) else {
+                EtherCapture.logger.error("LLDP: unable to decode type \(tlvType) length \(tlvLength) data.count \(data.count)")
+                return nil
+            }
+            let ouiSubtype = Int(data[data.startIndex + 5])
+            let ouiString = String(data: data[data.startIndex + 6 ..< data.startIndex + 2 + tlvLength], encoding: .utf8) ?? ""
+            self = .ouiSpecific(oui: ouiIdentifier, subType: ouiSubtype, info: ouiString)
+            return
         default: // tlvtype
             self = .unknown(tlvType)
             return
@@ -478,6 +488,8 @@ public enum LldpValue: Equatable, Hashable {
             return "ManagementAddress \(address.debugDescription) InterfaceSubtype \(subType) interface \(interface) oid \(oid)"
         case .managementAddressIPv6(let address, let subType, let interface, let oid):
             return "ManagementAddress \(address.debugDescription) InterfaceSubtype \(subType) interface \(interface) oid \(oid)"
+        case .ouiSpecific(let oui, let subType, let info):
+            return "OUI \(oui) subType \(subType) \(info)"
         }
     }
 }

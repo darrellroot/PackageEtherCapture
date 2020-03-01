@@ -389,6 +389,24 @@ public class EtherCapture {
             return UInt64(first4) + UInt64(second4) << 32
         }
     }
+    static func getOui(data: Data) -> String? {
+        //input: 3 octets of data
+        //output: returns a string in mac address format
+        guard data.count >= 3 else {
+            return nil
+        }
+        var hexEncodedString = data[data.startIndex ..< data.startIndex + 3].hexEncodedString()
+        guard hexEncodedString.count >= 6 else {
+            return hexEncodedString
+        }
+        var index = hexEncodedString.endIndex
+        index = hexEncodedString.index(index, offsetBy: -2)
+        hexEncodedString.insert(":", at: index)
+        index = hexEncodedString.index(index, offsetBy: -2)
+        hexEncodedString.insert(":", at: index)
+        return hexEncodedString
+    }
+
     static func getMac(data: Data) -> String? {
         //input: 6 octets of data
         //output: returns a string in mac address format
