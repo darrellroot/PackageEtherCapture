@@ -17,19 +17,37 @@ public enum IcmpType: Equatable, Hashable, CustomStringConvertible {
 
     case other(type: Int, code: Int)
     
+    public var typeString: String {
+        switch self {
+            
+        case .echoReply(_, _):
+            return "Echo Reply"
+        case .echoRequest(_, _):
+            return "Echo Request"
+        case .addressMaskRequest(_, _, _):
+            return "Address Mask Request"
+        case .addressMaskReply(_ , _, _):
+            return "Address Mask Reply"
+        case .other(_, _):
+            return "Other"
+        }
+    }
     public var description: String {
+        return "\(typeString) \(details)"
+    }
+    public var details: String {
         switch self {
         
         case .echoReply(let identifier, let sequence):
-            return "Echo Reply id \(identifier) sequence \(sequence)"
+            return "id \(identifier) sequence \(sequence)"
         case .echoRequest(let identifier, let sequence):
-            return "Echo Request id \(identifier) sequence \(sequence)"
+            return "id \(identifier) sequence \(sequence)"
         case .addressMaskRequest(let identifier, let sequence, let mask):
-            return "addressMaskRequest id \(identifier) sequence \(sequence) mask \(mask)"
+            return "id \(identifier) sequence \(sequence) mask \(mask)"
         case .addressMaskReply(let identifier, let sequence, let mask):
-            return "addressMaskReply id \(identifier) sequence \(sequence) mask \(mask)"
+            return "id \(identifier) sequence \(sequence) mask \(mask)"
         case .other:
-            return "other"
+            return "unable to further analyze"
         }
     }
 }
