@@ -313,5 +313,55 @@ final class PackageEtherCaptureTests: XCTestCase {
         }
         XCTAssert(icmp4.type == 8)
         XCTAssert(icmp4.code == 0)
+        XCTAssert(icmp4.icmpType == .echoRequest(identifer: 4997, sequence: 0))
     }
+    func testIcmpV42() {
+        let packetStream = "685b35890a04b07fb95d8ed208004520005471b200003901492204020201c0a8000a0000e78a138500005e5b412b00017a6508090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f3031323334353637"
+        guard let data = Frame.makeData(packetStream: packetStream) else {
+            XCTFail()
+            return
+        }
+        let frame = Frame(data: data, timeval: timeval(), originalLength: 66)
+        //Frame tests
+        XCTAssert(frame.frameFormat == .ethernet)
+        XCTAssert(frame.dstmac == "68:5b:35:89:0a:04")
+        XCTAssert(frame.srcmac == "b0:7f:b9:5d:8e:d2")
+        XCTAssert(frame.ieeeLength == nil)
+        XCTAssert(frame.ieeeDsap == nil)
+        XCTAssert(frame.ieeeControl == nil)
+        XCTAssert(frame.snapOrg == nil)
+        XCTAssert(frame.snapType == nil)
+        XCTAssert(frame.ethertype == 0x0800)
+        XCTAssert(frame.data.count == 98)
+        guard case .ipv4(let ipv4) = frame.layer3 else {
+            XCTFail()
+            return
+        }
+        //IPv4 packet tests
+        XCTAssert(ipv4.sourceIP == IPv4Address("4.2.2.1")!)
+        XCTAssert(ipv4.destinationIP == IPv4Address("192.168.0.10")!)
+        XCTAssert(ipv4.data.count == 84)
+        XCTAssert(ipv4.version == 4)
+        XCTAssert(ipv4.ihl == 5)
+        XCTAssert(ipv4.dscp == 8)
+        XCTAssert(ipv4.ecn == 0)
+        XCTAssert(ipv4.totalLength == 84)
+        XCTAssert(ipv4.identification == 0x71b2)
+        XCTAssert(ipv4.evilBit == false)
+        XCTAssert(ipv4.dontFragmentFlag == false)
+        XCTAssert(ipv4.moreFragmentsFlag == false)
+        XCTAssert(ipv4.fragmentOffset == 0)
+        XCTAssert(ipv4.ttl == 57)
+        XCTAssert(ipv4.ipProtocol == 1)
+        XCTAssert(ipv4.headerChecksum == 0x4922)
+        XCTAssert(ipv4.options == nil)
+        guard case .icmp4(let icmp4) = frame.layer4 else {
+            XCTFail()
+            return
+        }
+        XCTAssert(icmp4.type == 0)
+        XCTAssert(icmp4.code == 0)
+        XCTAssert(icmp4.icmpType == .echoReply(identifier: 4997, sequence: 0))
+    }
+
 }
