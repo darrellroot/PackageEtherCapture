@@ -69,20 +69,26 @@ public struct IPv6: EtherDisplay {
             return nil
         }
         
-        let finalHeaderIndex = data.startIndex + 20 //TODO deal with extension headers
+        let finalHeaderIndex = data.startIndex + 40 //TODO deal with extension headers
         if finalHeaderIndex >= data.endIndex {  // invalid case
             self.layer4 = .unknown(Unknown.completely)
         } else {
             switch nextHeader {
             case 6:
-                if let tcp = Tcp(data: data[data.startIndex + 20 ..< data.endIndex]) {
+                if let tcp = Tcp(data: data[finalHeaderIndex ..< data.endIndex]) {
                     self.layer4 = .tcp(tcp)
                 } else {
-                    self.layer4 = .unknown(Unknown(data: data[data.startIndex + 20 ..< data.endIndex]))
+                    self.layer4 = .unknown(Unknown(data: data[finalHeaderIndex ..< data.endIndex]))
                 }
             case 17:
                 if let udp = Udp(data: data[finalHeaderIndex ..< data.endIndex]) {
                     self.layer4 = .udp(udp)
+                } else {
+                    self.layer4 = .unknown(Unknown(data: data[finalHeaderIndex ..< data.endIndex]))
+                }
+            case 58:
+                if let icmp6 = Icmp6(data: data[finalHeaderIndex ..< data.endIndex]) {
+                    self.layer4 = .icmp6(icmp6)
                 } else {
                     self.layer4 = .unknown(Unknown(data: data[finalHeaderIndex ..< data.endIndex]))
                 }

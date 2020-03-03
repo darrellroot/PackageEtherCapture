@@ -267,7 +267,7 @@ final class PackageEtherCaptureTests: XCTestCase {
         XCTAssert(cdp.values.contains(.untrustedCos("Untrusted Port CoS 0x0")))
         XCTAssert(cdp.values.contains(.systemName("switch19e30d")))
     }
-    func testIcmpV41() {
+    func testIcmpV4EchoRequest() {
         let packetStream = "b07fb95d8ed2685b35890a04080045000054db2d000040010000c0a8000a040202010800df8a138500005e5b412b00017a6508090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f3031323334353637"
         guard let data = Frame.makeData(packetStream: packetStream) else {
             XCTFail()
@@ -315,7 +315,7 @@ final class PackageEtherCaptureTests: XCTestCase {
         XCTAssert(icmp4.code == 0)
         XCTAssert(icmp4.icmpType == .echoRequest(identifer: 4997, sequence: 0))
     }
-    func testIcmpV42() {
+    func testIcmpV4EchoReply() {
         let packetStream = "685b35890a04b07fb95d8ed208004520005471b200003901492204020201c0a8000a0000e78a138500005e5b412b00017a6508090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f3031323334353637"
         guard let data = Frame.makeData(packetStream: packetStream) else {
             XCTFail()
@@ -362,6 +362,293 @@ final class PackageEtherCaptureTests: XCTestCase {
         XCTAssert(icmp4.type == 0)
         XCTAssert(icmp4.code == 0)
         XCTAssert(icmp4.icmpType == .echoReply(identifier: 4997, sequence: 0))
+    }
+    func testIcmpV4TtlExceeded() {
+        let packetStream = "685b35890a0400015c63f84608004500003807cf00004001f19ac0a80001c0a8000a0b00bbe600000000450000348d8c000001116578c0a8000a040202018d8b829b002028d2"
+        guard let data = Frame.makeData(packetStream: packetStream) else {
+            XCTFail()
+            return
+        }
+        let frame = Frame(data: data, timeval: timeval(), originalLength: 66)
+        //Frame tests
+        XCTAssert(frame.frameFormat == .ethernet)
+        XCTAssert(frame.dstmac == "68:5b:35:89:0a:04")
+        XCTAssert(frame.srcmac == "00:01:5c:63:f8:46")
+        XCTAssert(frame.ieeeLength == nil)
+        XCTAssert(frame.ieeeDsap == nil)
+        XCTAssert(frame.ieeeControl == nil)
+        XCTAssert(frame.snapOrg == nil)
+        XCTAssert(frame.snapType == nil)
+        XCTAssert(frame.ethertype == 0x0800)
+        XCTAssert(frame.data.count == 70)
+        guard case .ipv4(let ipv4) = frame.layer3 else {
+            XCTFail()
+            return
+        }
+        //IPv4 packet tests
+        XCTAssert(ipv4.sourceIP == IPv4Address("192.168.0.1")!)
+        XCTAssert(ipv4.destinationIP == IPv4Address("192.168.0.10")!)
+        XCTAssert(ipv4.data.count == 56)
+        XCTAssert(ipv4.version == 4)
+        XCTAssert(ipv4.ihl == 5)
+        XCTAssert(ipv4.dscp == 0)
+        XCTAssert(ipv4.ecn == 0)
+        XCTAssert(ipv4.totalLength == 56)
+        XCTAssert(ipv4.identification == 0x07cf)
+        XCTAssert(ipv4.evilBit == false)
+        XCTAssert(ipv4.dontFragmentFlag == false)
+        XCTAssert(ipv4.moreFragmentsFlag == false)
+        XCTAssert(ipv4.fragmentOffset == 0)
+        XCTAssert(ipv4.ttl == 64)
+        XCTAssert(ipv4.ipProtocol == 1)
+        XCTAssert(ipv4.headerChecksum == 0xf19a)
+        XCTAssert(ipv4.options == nil)
+        guard case .icmp4(let icmp4) = frame.layer4 else {
+            XCTFail()
+            return
+        }
+        XCTAssert(icmp4.type == 11)
+        XCTAssert(icmp4.code == 0)
+        XCTAssert(icmp4.icmpType == .ttlExceeded)
+    }
+    func testIcmpV6EchoRequest() {
+        let packetStream = "b07fb95d8ed2685b35890a0486dd600f93be00103a402601064748021620b1d12e6f4ecedded2001055900196098000000000000132480006bc30fbd00005e5c5d81000c17b4"
+        guard let data = Frame.makeData(packetStream: packetStream) else {
+            XCTFail()
+            return
+        }
+        let frame = Frame(data: data, timeval: timeval(), originalLength: 66)
+        //Frame tests
+        XCTAssert(frame.frameFormat == .ethernet)
+        XCTAssert(frame.dstmac == "b0:7f:b9:5d:8e:d2")
+        XCTAssert(frame.srcmac == "68:5b:35:89:0a:04")
+        XCTAssert(frame.ieeeLength == nil)
+        XCTAssert(frame.ieeeDsap == nil)
+        XCTAssert(frame.ieeeControl == nil)
+        XCTAssert(frame.snapOrg == nil)
+        XCTAssert(frame.snapType == nil)
+        XCTAssert(frame.ethertype == 0x86dd)
+        XCTAssert(frame.data.count == 70)
+        guard case .ipv6(let ipv6) = frame.layer3 else {
+            XCTFail()
+            return
+        }
+        XCTAssert(ipv6.version == 6)
+        XCTAssert(ipv6.trafficClass == 0x00)
+        XCTAssert(ipv6.flowLabel == 0xf93be)
+        XCTAssert(ipv6.payloadLength == 16)
+        XCTAssert(ipv6.nextHeader == 58)
+        XCTAssert(ipv6.hopLimit == 64)
+        XCTAssert(ipv6.sourceIP == IPv6Address("2601:647:4802:1620:b1d1:2e6f:4ece:dded")!)
+        XCTAssert(ipv6.destinationIP == IPv6Address("2001:559:19:6098::1324")!)
+        guard case .icmp6(let icmp6) = frame.layer4 else {
+            XCTFail()
+            return
+        }
+        XCTAssert(icmp6.type == 128)
+        XCTAssert(icmp6.code == 0)
+        XCTAssert(icmp6.icmpType == .echoRequest(identifier: 0x0fbd, sequence: 0))
+        XCTAssert(icmp6.checksum == 0x6bc3)
+    }
+    func testIcmpV6EchoReply() {
+        let packetStream = "685b35890a04b07fb95d8ed286dd6204f95e00103a3b200105590019609800000000000013242601064748021620b1d12e6f4ecedded8100667c0fbd00015e5c5d82000c1bf9"
+        guard let data = Frame.makeData(packetStream: packetStream) else {
+            XCTFail()
+            return
+        }
+        let frame = Frame(data: data, timeval: timeval(), originalLength: 70)
+        //Frame tests
+        XCTAssert(frame.frameFormat == .ethernet)
+        XCTAssert(frame.dstmac == "68:5b:35:89:0a:04")
+        XCTAssert(frame.srcmac == "b0:7f:b9:5d:8e:d2")
+        XCTAssert(frame.ieeeLength == nil)
+        XCTAssert(frame.ieeeDsap == nil)
+        XCTAssert(frame.ieeeControl == nil)
+        XCTAssert(frame.snapOrg == nil)
+        XCTAssert(frame.snapType == nil)
+        XCTAssert(frame.ethertype == 0x86dd)
+        XCTAssert(frame.data.count == 70)
+        guard case .ipv6(let ipv6) = frame.layer3 else {
+            XCTFail()
+            return
+        }
+        XCTAssert(ipv6.version == 6)
+        XCTAssert(ipv6.trafficClass == 0x20)
+        XCTAssert(ipv6.flowLabel == 0x4f95e)
+        XCTAssert(ipv6.payloadLength == 16)
+        XCTAssert(ipv6.nextHeader == 58)
+        XCTAssert(ipv6.hopLimit == 59)
+        XCTAssert(ipv6.sourceIP == IPv6Address("2001:559:19:6098::1324")!)
+        XCTAssert(ipv6.destinationIP == IPv6Address("2601:647:4802:1620:b1d1:2e6f:4ece:dded")!)
+        guard case .icmp6(let icmp6) = frame.layer4 else {
+            XCTFail()
+            return
+        }
+        XCTAssert(icmp6.type == 129)
+        XCTAssert(icmp6.code == 0)
+        XCTAssert(icmp6.icmpType == .echoReply(identifier: 0x0fbd, sequence: 1))
+        XCTAssert(icmp6.checksum == 0x667c)
+    }
+    func testIcmpV6TimeExceeded() {
+        let packetStream = "685b35890a04b07fb95d8ed286dd6000000000403aff2601064748021620b27fb9fffe5d8ed22601064748021620b1d12e6f4ecedded03009dcf000000006000a81a001411012601064748021620b1d12e6f4ecedded20010559001960950000000000001324f804829b0014a1f6a4133a3ef07f0df3"
+        guard let data = Frame.makeData(packetStream: packetStream) else {
+            XCTFail()
+            return
+        }
+        let frame = Frame(data: data, timeval: timeval(), originalLength: 118)
+        //Frame tests
+        XCTAssert(frame.frameFormat == .ethernet)
+        XCTAssert(frame.dstmac == "68:5b:35:89:0a:04")
+        XCTAssert(frame.srcmac == "b0:7f:b9:5d:8e:d2")
+        XCTAssert(frame.ieeeLength == nil)
+        XCTAssert(frame.ieeeDsap == nil)
+        XCTAssert(frame.ieeeControl == nil)
+        XCTAssert(frame.snapOrg == nil)
+        XCTAssert(frame.snapType == nil)
+        XCTAssert(frame.ethertype == 0x86dd)
+        XCTAssert(frame.data.count == 118)
+        guard case .ipv6(let ipv6) = frame.layer3 else {
+            XCTFail()
+            return
+        }
+        XCTAssert(ipv6.version == 6)
+        XCTAssert(ipv6.trafficClass == 0x00)
+        XCTAssert(ipv6.flowLabel == 0x00000)
+        XCTAssert(ipv6.payloadLength == 64)
+        XCTAssert(ipv6.nextHeader == 58)
+        XCTAssert(ipv6.hopLimit == 255)
+        XCTAssert(ipv6.sourceIP == IPv6Address("2601:647:4802:1620:b27f:b9ff:fe5d:8ed2")!)
+        XCTAssert(ipv6.destinationIP == IPv6Address("2601:647:4802:1620:b1d1:2e6f:4ece:dded")!)
+        guard case .icmp6(let icmp6) = frame.layer4 else {
+            XCTFail()
+            return
+        }
+        XCTAssert(icmp6.type == 3)
+        XCTAssert(icmp6.code == 0)
+        XCTAssert(icmp6.icmpType == .hopLimitExceeded)
+        XCTAssert(icmp6.checksum == 0x9dcf)
+    }
+    func testIcmpV6NeighborSolicitation() {
+        let packetStream = "685b35890a04b07fb95d8ed286dd6000000000203afffe80000000000000b27fb9fffe5d8ed2fe800000000000001867ff5dd25bad6787005ab000000000fe800000000000001867ff5dd25bad670101b07fb95d8ed2"
+        guard let data = Frame.makeData(packetStream: packetStream) else {
+            XCTFail()
+            return
+        }
+        let frame = Frame(data: data, timeval: timeval(), originalLength: 86)
+        //Frame tests
+        XCTAssert(frame.frameFormat == .ethernet)
+        XCTAssert(frame.dstmac == "68:5b:35:89:0a:04")
+        XCTAssert(frame.srcmac == "b0:7f:b9:5d:8e:d2")
+        XCTAssert(frame.ieeeLength == nil)
+        XCTAssert(frame.ieeeDsap == nil)
+        XCTAssert(frame.ieeeControl == nil)
+        XCTAssert(frame.snapOrg == nil)
+        XCTAssert(frame.snapType == nil)
+        XCTAssert(frame.ethertype == 0x86dd)
+        XCTAssert(frame.data.count == 86)
+        guard case .ipv6(let ipv6) = frame.layer3 else {
+            XCTFail()
+            return
+        }
+        XCTAssert(ipv6.version == 6)
+        XCTAssert(ipv6.trafficClass == 0x00)
+        XCTAssert(ipv6.flowLabel == 0x00000)
+        XCTAssert(ipv6.payloadLength == 32)
+        XCTAssert(ipv6.nextHeader == 58)
+        XCTAssert(ipv6.hopLimit == 255)
+        XCTAssert(ipv6.sourceIP == IPv6Address("fe80::b27f:b9ff:fe5d:8ed2")!)
+        XCTAssert(ipv6.destinationIP == IPv6Address("fe80::1867:ff5d:d25b:ad67")!)
+        guard case .icmp6(let icmp6) = frame.layer4 else {
+            XCTFail()
+            return
+        }
+        XCTAssert(icmp6.type == 135)
+        XCTAssert(icmp6.code == 0)
+        XCTAssert(icmp6.checksum == 0x5ab0)
+        XCTAssert(icmp6.icmpType == .neighborSolicitation(target: IPv6Address("fe80::1867:ff5d:d25b:ad67")!))
+        XCTAssert(icmp6.options.count == 1)
+        XCTAssert(icmp6.options.first! == Icmp6Option.sourceLinkAddress("b0:7f:b9:5d:8e:d2"))
+    }
+    func testIcmpV6NeighborAdvertisement() {
+        let packetStream = "b07fb95d8ed2685b35890a0486dd6000000000183afffe800000000000001867ff5dd25bad67fe80000000000000b27fb9fffe5d8ed28800136940000000fe800000000000001867ff5dd25bad67"
+        guard let data = Frame.makeData(packetStream: packetStream) else {
+            XCTFail()
+            return
+        }
+        let frame = Frame(data: data, timeval: timeval(), originalLength: 78)
+        //Frame tests
+        XCTAssert(frame.frameFormat == .ethernet)
+        XCTAssert(frame.srcmac == "68:5b:35:89:0a:04")
+        XCTAssert(frame.dstmac == "b0:7f:b9:5d:8e:d2")
+        XCTAssert(frame.ieeeLength == nil)
+        XCTAssert(frame.ieeeDsap == nil)
+        XCTAssert(frame.ieeeControl == nil)
+        XCTAssert(frame.snapOrg == nil)
+        XCTAssert(frame.snapType == nil)
+        XCTAssert(frame.ethertype == 0x86dd)
+        XCTAssert(frame.data.count == 78)
+        guard case .ipv6(let ipv6) = frame.layer3 else {
+            XCTFail()
+            return
+        }
+        XCTAssert(ipv6.version == 6)
+        XCTAssert(ipv6.trafficClass == 0x00)
+        XCTAssert(ipv6.flowLabel == 0x00000)
+        XCTAssert(ipv6.payloadLength == 24)
+        XCTAssert(ipv6.nextHeader == 58)
+        XCTAssert(ipv6.hopLimit == 255)
+        XCTAssert(ipv6.destinationIP == IPv6Address("fe80::b27f:b9ff:fe5d:8ed2")!)
+        XCTAssert(ipv6.sourceIP == IPv6Address("fe80::1867:ff5d:d25b:ad67")!)
+        guard case .icmp6(let icmp6) = frame.layer4 else {
+            XCTFail()
+            return
+        }
+        XCTAssert(icmp6.type == 136)
+        XCTAssert(icmp6.code == 0)
+        XCTAssert(icmp6.checksum == 0x1369)
+        XCTAssert(icmp6.icmpType == .neighborAdvertisement(target: IPv6Address("fe80::1867:ff5d:d25b:ad67")!,router: false, solicited: true, override: false))
+        XCTAssert(icmp6.options.count == 0)
+    }
+    func testIcmpV6Redirect() {
+        // source credit https://github.com/bro/bro/blob/master/testing/btest/Traces/icmp/icmp6-redirect.pcap
+        let packetStream = "ffffffffffff00000000000086dd6000000000283afffe80000000000000000000000000deadfe80000000000000000000000000beef8900593e00000000fe80000000000000000000000000cafefe80000000000000000000000000babe"
+        guard let data = Frame.makeData(packetStream: packetStream) else {
+            XCTFail()
+            return
+        }
+        let frame = Frame(data: data, timeval: timeval(), originalLength: 78)
+        //Frame tests
+        XCTAssert(frame.frameFormat == .ethernet)
+        XCTAssert(frame.srcmac == "00:00:00:00:00:00")
+        XCTAssert(frame.dstmac == "ff:ff:ff:ff:ff:ff")
+        XCTAssert(frame.ieeeLength == nil)
+        XCTAssert(frame.ieeeDsap == nil)
+        XCTAssert(frame.ieeeControl == nil)
+        XCTAssert(frame.snapOrg == nil)
+        XCTAssert(frame.snapType == nil)
+        XCTAssert(frame.ethertype == 0x86dd)
+        XCTAssert(frame.data.count == 94)
+        guard case .ipv6(let ipv6) = frame.layer3 else {
+            XCTFail()
+            return
+        }
+        XCTAssert(ipv6.version == 6)
+        XCTAssert(ipv6.trafficClass == 0x00)
+        XCTAssert(ipv6.flowLabel == 0x00000)
+        XCTAssert(ipv6.payloadLength == 40)
+        XCTAssert(ipv6.nextHeader == 58)
+        XCTAssert(ipv6.hopLimit == 255)
+        XCTAssert(ipv6.destinationIP == IPv6Address("fe80::beef")!)
+        XCTAssert(ipv6.sourceIP == IPv6Address("fe80::dead")!)
+        guard case .icmp6(let icmp6) = frame.layer4 else {
+            XCTFail()
+            return
+        }
+        XCTAssert(icmp6.type == 137)
+        XCTAssert(icmp6.code == 0)
+        XCTAssert(icmp6.checksum == 0x593e)
+        XCTAssert(icmp6.icmpType == .redirect(target: IPv6Address("fe80::cafe")!,destination: IPv6Address("fe80::babe")!))
+        XCTAssert(icmp6.options.count == 0)
     }
 
 }

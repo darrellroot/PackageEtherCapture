@@ -34,8 +34,6 @@ public enum Icmp4Type: Equatable, Hashable, CustomStringConvertible {
     case redirectTosHost(IPv4Address)
     case informationRequest(identifier: Int, sequence: Int)
     case informationReply(identifier: Int, sequence: Int)
-    
-    
     case other(type: Int, code: Int)
     
     public var typeString: String {
