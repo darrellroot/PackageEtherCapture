@@ -250,6 +250,7 @@ public class EtherCapture {
         return version
     }
     public static func listInterfaces() -> [String]? {
+        // This does not seem to work on my system.  I think it used to work.
         var alldevs: UnsafeMutablePointer<pcap_if_t>? = nil
         let errbuf = UnsafeMutablePointer<Int8>.allocate(capacity: Int(PCAP_ERRBUF_SIZE))
         var interfaceNames: [String] = []

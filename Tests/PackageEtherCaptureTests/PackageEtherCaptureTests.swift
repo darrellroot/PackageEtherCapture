@@ -650,5 +650,4 @@ final class PackageEtherCaptureTests: XCTestCase {
         XCTAssert(icmp6.icmpType == .redirect(target: IPv6Address("fe80::cafe")!,destination: IPv6Address("fe80::babe")!))
         XCTAssert(icmp6.options.count == 0)
     }
-
 }
