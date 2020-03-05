@@ -31,7 +31,7 @@ public struct Tcp: EtherDisplay {
         return output
     }
     public var description: String {
-        return "\(sourcePort) > \(destinationPort) flags \(flags) \(self.payload.count) bytes"
+        return "TCP \(sourcePort) > \(destinationPort) flags \(flags) \(self.payload.count) bytes"
     }
     
     public var hexdump: String {

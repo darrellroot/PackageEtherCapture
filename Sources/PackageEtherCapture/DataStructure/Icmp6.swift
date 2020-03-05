@@ -223,7 +223,7 @@ public enum Icmp6Type: Equatable, Hashable, CustomStringConvertible {
 }
 public struct Icmp6: EtherDisplay {
     public var description: String {
-        return "ICMPv6 type \(type) code \(code) \(icmpType)"
+        return "ICMPv6 type \(icmpType)"
     }
     
     public var hexdump: String {

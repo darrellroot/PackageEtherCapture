@@ -264,7 +264,7 @@ public struct Frame: CustomStringConvertible, EtherDisplay, Identifiable {
         } else {
             ethertypeString = "unknown"
         }
-        return "\(srcmac) \(dstmac) \(frameFormat) \(ethertypeString) \(layer3) \(layer4)"
+        return "\(srcmac) \(dstmac) \(frameFormat) \(ethertypeString) \(layer3) \(layer4 ?? "")"
     }
     
     /**

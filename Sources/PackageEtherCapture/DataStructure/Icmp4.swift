@@ -143,7 +143,7 @@ public enum Icmp4Type: Equatable, Hashable, CustomStringConvertible {
 }
 public struct Icmp4: EtherDisplay {
     public var description: String {
-        return "ICMPv4 type \(type) code \(code) \(icmpType)"
+        return "ICMPv4 \(icmpType)"
     }
     
     public var hexdump: String {
