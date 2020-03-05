@@ -275,7 +275,7 @@ public struct Cdp: CustomStringConvertible, EtherDisplay {
         return "CDP"
     }
     public var verboseDescription: String {
-        return "CDP Verbose"
+        return "CDP version \(version) \(values.count) values"
     }
     
     public var hexdump: String {

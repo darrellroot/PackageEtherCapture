@@ -496,7 +496,7 @@ public enum LldpValue: Equatable, Hashable {
 public struct Lldp: CustomStringConvertible, EtherDisplay {
     
     public var description: String {
-        return "LLDP with \(self.values.count) TLV values"
+        return "LLDP \(self.values.count) TLV values"
     }
     public var verboseDescription: String {
         var retval = "LLDP "

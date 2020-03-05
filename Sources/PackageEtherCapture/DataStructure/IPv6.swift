@@ -24,7 +24,7 @@ public struct IPv6: EtherDisplay {
     public let padding: Data
 
     public var description: String {
-        return "IPv\(version) \(sourceIP.debugDescription) > \(destinationIP.debugDescription) payload \(payloadLength) nextHeader \(nextHeader) hopLimit \(hopLimit)"
+        return "IPv\(version) \(sourceIP.debugDescription) > \(destinationIP.debugDescription) nextHeader \(nextHeader)"
     }
     
     public var verboseDescription: String {

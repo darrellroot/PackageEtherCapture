@@ -258,13 +258,13 @@ public struct Frame: CustomStringConvertible, EtherDisplay, Identifiable {
     public var description: String {
         let ethertypeString: String
         if let ethertype = ethertype {
-            ethertypeString = String(format: "0x%4x",ethertype)
+            ethertypeString = ethertype.hex4
         } else if let ieeeDsap = ieeeDsap, let ieeeSsap = ieeeSsap {
             ethertypeString = String(format: "0x%2x",ieeeDsap) + String(format: "%02x",ieeeSsap)
         } else {
             ethertypeString = "unknown"
         }
-        return "\(srcmac) \(dstmac) \(frameFormat) \(ethertypeString) \(layer3)"
+        return "\(srcmac) \(dstmac) \(frameFormat) \(ethertypeString) \(layer3) \(layer4)"
     }
     
     /**

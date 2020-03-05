@@ -37,7 +37,7 @@ public struct IPv4: CustomStringConvertible, EtherDisplay {
     public var layer4: Layer4 = .unknown(Unknown.completely)
 
     public var description: String {
-        return "IPv\(version) \(sourceIP) > \(destinationIP) Len \(totalLength) ttl \(ttl) ipProt \(ipProtocol)"
+        return "IPv\(version) \(sourceIP) > \(destinationIP) ipProt \(ipProtocol)"
     }
     public var optionsAny: String {
         if options != nil {
