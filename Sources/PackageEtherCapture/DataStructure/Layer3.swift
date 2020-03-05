@@ -16,6 +16,7 @@ import Foundation
 public enum Layer3: CustomStringConvertible, EtherDisplay {
     case ipv4(IPv4)
     case ipv6(IPv6)
+    case arp(Arp)
     case bpdu(Bpdu)
     case cdp(Cdp)
     case lldp(Lldp)
@@ -43,6 +44,8 @@ public enum Layer3: CustomStringConvertible, EtherDisplay {
             return ipv4.description
         case .ipv6(let ipv6):
             return ipv6.description
+        case .arp(let arp):
+            return arp.description
         case .bpdu(let bpdu):
             return bpdu.description
         case .cdp(let cdp):
@@ -61,6 +64,8 @@ public enum Layer3: CustomStringConvertible, EtherDisplay {
             return ipv4.hexdump
         case .ipv6(let ipv6):
             return ipv6.hexdump
+        case .arp(let arp):
+            return arp.hexdump
         case .bpdu(let bpdu):
             return bpdu.hexdump
         case .cdp(let cdp):
@@ -79,6 +84,8 @@ public enum Layer3: CustomStringConvertible, EtherDisplay {
             return ipv4.verboseDescription
         case .ipv6(let ipv6):
             return ipv6.verboseDescription
+        case .arp(let arp):
+            return arp.verboseDescription
         case .bpdu(let bpdu):
             return bpdu.verboseDescription
         case .cdp(let cdp):
@@ -89,42 +96,5 @@ public enum Layer3: CustomStringConvertible, EtherDisplay {
             return unknown.verboseDescription
         }
     }
-    
-    /*enum Layer3DecodingError: Error {
-        case decoding(String)
-    }
-
-    enum CodingKeys: CodingKey {
-        case ipv4
-        case ipv6
-        case unknown
-    }
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        switch self {
-        case .ipv4 (let ipv4):
-            try container.encode(ipv4, forKey: .ipv4)
-        case .ipv6 (let ipv6):
-            try container.encode(ipv6, forKey: .ipv6)
-        case .unknown (let unknown):
-            try container.encode(unknown, forKey: .unknown)
-        }
-    }
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        if let ipv4 = try? container.decode(IPv4.self, forKey: .ipv4) {
-            self = .ipv4(ipv4)
-            return
-        }
-        if let ipv6 = try? container.decode(IPv6.self, forKey: .ipv6) {
-            self = .ipv6(ipv6)
-            return
-        }
-        if let unknown = try? container.decode(Unknown.self, forKey: .unknown) {
-            self = .unknown(unknown)
-            return
-        }
-        throw Layer3DecodingError.decoding("Decoding error for \(container)")
-    }*/
 
 }

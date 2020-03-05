@@ -650,4 +650,66 @@ final class PackageEtherCaptureTests: XCTestCase {
         XCTAssert(icmp6.icmpType == .redirect(target: IPv6Address("fe80::cafe")!,destination: IPv6Address("fe80::babe")!))
         XCTAssert(icmp6.options.count == 0)
     }
+    func testArpRequest() {
+        let packetStream = "ffffffffffff685b35890a0408060001080006040001685b35890a04c0a8000a000000000000c0a8000b"
+        guard let data = Frame.makeData(packetStream: packetStream) else {
+            XCTFail()
+            return
+        }
+        let frame = Frame(data: data, timeval: timeval(), originalLength: 42)
+        XCTAssert(frame.frameFormat == .ethernet)
+        XCTAssert(frame.dstmac == "ff:ff:ff:ff:ff:ff")
+        XCTAssert(frame.srcmac == "68:5b:35:89:0a:04")
+        XCTAssert(frame.ieeeLength == nil)
+        XCTAssert(frame.ieeeDsap == nil)
+        XCTAssert(frame.ieeeControl == nil)
+        XCTAssert(frame.snapOrg == nil)
+        XCTAssert(frame.snapType == nil)
+        XCTAssert(frame.ethertype == 0x0806)
+        XCTAssert(frame.data.count == 42)
+        guard case .arp(let arp) = frame.layer3 else {
+            XCTFail()
+            return
+        }
+        XCTAssert(arp.hardwareType == 1)
+        XCTAssert(arp.protocolType == 0x0800)
+        XCTAssert(arp.hardwareSize == 6)
+        XCTAssert(arp.protocolSize == 4)
+        XCTAssert(arp.operation == .arpRequest)
+        XCTAssert(arp.senderEthernet == "68:5b:35:89:0a:04")
+        XCTAssert(arp.senderIp == IPv4Address("192.168.0.10")!)
+        XCTAssert(arp.targetEthernet == "00:00:00:00:00:00")
+        XCTAssert(arp.targetIp == IPv4Address("192.168.0.11")!)
+    }
+    func testArpReply() {
+        let packetStream = "685b35890a046c709fd77258080600010800060400026c709fd77258c0a8000b685b35890a04c0a8000a000000000000000000000000000000000000"
+        guard let data = Frame.makeData(packetStream: packetStream) else {
+            XCTFail()
+            return
+        }
+        let frame = Frame(data: data, timeval: timeval(), originalLength: 60)
+        XCTAssert(frame.frameFormat == .ethernet)
+        XCTAssert(frame.dstmac == "68:5b:35:89:0a:04")
+        XCTAssert(frame.srcmac == "6c:70:9f:d7:72:58")
+        XCTAssert(frame.ieeeLength == nil)
+        XCTAssert(frame.ieeeDsap == nil)
+        XCTAssert(frame.ieeeControl == nil)
+        XCTAssert(frame.snapOrg == nil)
+        XCTAssert(frame.snapType == nil)
+        XCTAssert(frame.ethertype == 0x0806)
+        XCTAssert(frame.data.count == 60)
+        guard case .arp(let arp) = frame.layer3 else {
+            XCTFail()
+            return
+        }
+        XCTAssert(arp.hardwareType == 1)
+        XCTAssert(arp.protocolType == 0x0800)
+        XCTAssert(arp.hardwareSize == 6)
+        XCTAssert(arp.protocolSize == 4)
+        XCTAssert(arp.operation == .arpReply)
+        XCTAssert(arp.senderEthernet == "6c:70:9f:d7:72:58")
+        XCTAssert(arp.senderIp == IPv4Address("192.168.0.11")!)
+        XCTAssert(arp.targetEthernet == "68:5b:35:89:0a:04")
+        XCTAssert(arp.targetIp == IPv4Address("192.168.0.10")!)
+    }
 }

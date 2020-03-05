@@ -45,7 +45,7 @@ public struct Frame: CustomStringConvertible, EtherDisplay, Identifiable {
             return ipv4.layer4
         case .ipv6(let ipv6):
             return ipv6.layer4
-        case .bpdu(_), .cdp(_), .lldp(_):
+        case .arp(_),.bpdu(_), .cdp(_), .lldp(_):
             return .noLayer4    // bpdu does not have layer 4
         case .unknown(let unknown):
             return nil
@@ -138,6 +138,13 @@ public struct Frame: CustomStringConvertible, EtherDisplay, Identifiable {
         case (.ethernet,0x0800,_):  // IPv4
             if let ipv4 = IPv4(data: data[data.startIndex + 14..<data.endIndex]) {
                 self.layer3 = .ipv4(ipv4)
+            } else {
+                let unknown = Unknown(data: data[data.startIndex + 14..<data.endIndex])
+                self.layer3 = .unknown(unknown)
+            }
+        case (.ethernet,0x0806,_):  // Arp
+            if let arp = Arp(data: data[data.startIndex + 14..<data.endIndex]) {
+                self.layer3 = .arp(arp)
             } else {
                 let unknown = Unknown(data: data[data.startIndex + 14..<data.endIndex])
                 self.layer3 = .unknown(unknown)
