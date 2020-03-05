@@ -13,11 +13,12 @@ import Logging
  Top-level data structure for a frame capture from the network.
  */
 public struct Frame: CustomStringConvertible, EtherDisplay, Identifiable {
-    
+    static var frameCount = 0   // used to make frameNumber if not specified in initializer (which our pcap_loop cannot do because it cannot capture context
     /**
      - Parameter date: pcap timestamp the frame was captured
      */
     public let id = UUID()
+    public let frameNumber: Int
     public let date: Date    // pcap timestamp of packet capture
     public let srcmac: String
     public let dstmac: String
@@ -57,7 +58,13 @@ public struct Frame: CustomStringConvertible, EtherDisplay, Identifiable {
      */
     public let data: Data  // total frame contents
     
-    public init(data: Data, timeval: timeval = timeval(), originalLength: Int) {
+    public init(data: Data, timeval: timeval = timeval(), originalLength: Int, frameNumber: Int? = nil) {
+        if let frameNumber = frameNumber {
+            self.frameNumber = frameNumber
+        } else {
+            Frame.frameCount += 1
+            self.frameNumber = Frame.frameCount
+        }
         self.data = data
         self.originalLength = originalLength
         self.date = Date(timeIntervalSince1970: Double(timeval.tv_sec)) + Double(timeval.tv_usec)/1000000.0

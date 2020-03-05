@@ -57,14 +57,18 @@ PackageEtherCaptureDemo https://github.com/darrellroot/PackageEtherCaptureDemo d
 Another way to use PackageEtherCapture is to pass in captured network traffic (one frame at a time) to create Frame data structures.  Here's an example from the CLI version of etherdump https://github.com/darrellroot/etherdump, passing in data obtained from a .pcapng file:
 
         for (count,packet) in packetBlocks.enumerated() {
-        let frame = Frame(data: packet.packetData)
+        let frame = Frame(data: packet.packetData, originalLength = packet.packetData.count, frameNumber = count)
             displayFrame(frame: frame, packetCount: Int32(count), arguments: arguments)
         }
 
 Here's the Frame initializer:
-    public init(data: Data, timeval: timeval = timeval()) {
+    public init(data: Data, timeval: timeval = timeval(), originalLength: Int, frameNumber: Int? = nil) {
 
 The Frame initializer does not currently fail, but if it is unable to decode a valid frame it will set the frameFormat to .invalid and layer3 contents to .unknown.  The raw data will still be available in the data structure.
+
+The originalLength is just there to support .pcap file export, and is not used for anything.
+
+The frameNumber makes it easier to display a numbered list of frames, especially after filtering.  If you do not specify a frameNumber, The Frame() API will count for you (but the numbering does not reset if you start a second import/capture).
 
 ## Regarding "Layer" Terminology in PackageEtherCapture
 

@@ -172,6 +172,10 @@ public class EtherCapture {
         let callbackIndexPointer = UnsafeMutablePointer<u_char>.allocate(capacity: 1)
         callbackIndexPointer.initialize(from: &callbackIndex, count: 1)
         
+        Frame.frameCount = 0 // cannot put frameCount context into the C callback
+        // so we hope the static variable will count accurately for us
+        // if there are 2 simultaneous captures, the counting will be off
+        
         DispatchQueue.global().async {
             
             
