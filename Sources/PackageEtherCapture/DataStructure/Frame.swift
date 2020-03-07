@@ -179,7 +179,12 @@ public struct Frame: CustomStringConvertible, EtherDisplay, Identifiable {
         }
     }
     
-    static func makeData(packetStream: String) -> Data? {
+    //This function takes hexStream output from wireshark and turns it
+    //into Data suitable for importing into the Frame initializer
+    //Example:
+    //let packetStream = "ffffffffffff685b35890a0408060001080006040001685b35890a04c0a8000a000000000000c0a8000b"
+    //let data = Frame.makeData(packetStream: packetStream)!
+    public static func makeData(packetStream: String) -> Data? {
         var total = 0
         var data = Data(capacity: (packetStream.count / 2 + 1))
         for (count,char) in packetStream.enumerated() {
