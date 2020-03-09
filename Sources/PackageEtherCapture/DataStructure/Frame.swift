@@ -249,7 +249,7 @@ public struct Frame: CustomStringConvertible, EtherDisplay, Identifiable {
         }
         let eType: String
         if let ethertype = ethertype {
-            eType = "Ethertype 0x\(ethertype.hex4)) "
+            eType = "Ethertype \(ethertype.hex4)) "
         } else {
             eType = ""
         }
