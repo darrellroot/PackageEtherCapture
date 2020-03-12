@@ -74,7 +74,7 @@ public struct IPv4: CustomStringConvertible, EtherDisplay {
         self.totalLength = totalLength
         // deal with padding
         if data.count > totalLength {
-            self.padding = data.advanced(by: Int(totalLength))
+            self.padding = data[data.startIndex + Int(totalLength) ..< data.endIndex]
         } else {
             self.padding = Data()
         }

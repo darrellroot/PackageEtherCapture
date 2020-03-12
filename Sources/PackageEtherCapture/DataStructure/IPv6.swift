@@ -51,7 +51,7 @@ public struct IPv6: EtherDisplay {
         self.payloadLength = payloadLength
         
         if data.count > payloadLength + 40 {
-            self.padding = data.advanced(by: Int(payloadLength + 40))
+            self.padding = data[data.startIndex + Int(payloadLength) + 40 ..< data.endIndex]
         } else {
             self.padding = Data()
         }

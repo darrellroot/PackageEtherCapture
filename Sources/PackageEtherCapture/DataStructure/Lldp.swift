@@ -55,7 +55,7 @@ public enum LldpValue: Equatable, Hashable {
         }
         var results: [LldpValue] = []
 
-        var flags = EtherCapture.getUInt16(data: data.advanced(by: 2))
+        var flags = EtherCapture.getUInt16(data: data[data.startIndex + 2 ..< data.startIndex + 4])
         
         if flags & 0x0001 != 0 {
             results.append(.capabilityOther)
@@ -94,7 +94,7 @@ public enum LldpValue: Equatable, Hashable {
             results.append(.capabilityReserved)
         }
         
-        flags = EtherCapture.getUInt16(data: data.advanced(by: 4))
+        flags = EtherCapture.getUInt16(data: data[data.startIndex + 4 ..< data.startIndex + 6])
         
         if flags & 0x0001 != 0 {
             results.append(.enabledOther)
@@ -277,7 +277,7 @@ public enum LldpValue: Equatable, Hashable {
                 EtherCapture.logger.error("LLDP: unable to decode type \(tlvType) data.count \(data.count)")
                 return nil
             }
-            let ttl = Int(EtherCapture.getUInt16(data: data.advanced(by: 2)))
+            let ttl = Int(EtherCapture.getUInt16(data: data[data.startIndex + 2 ..< data.startIndex + 4]))
             self = .ttl(ttl)
             return
         case 4: // port description
@@ -339,7 +339,7 @@ public enum LldpValue: Equatable, Hashable {
                     return nil
                 }
                 let intSubtype = Int(data[data.startIndex + 3 + addressLength])
-                let intNumber = Int(EtherCapture.getUInt32(data: data.advanced(by: 4 + addressLength)))
+                let intNumber = Int(EtherCapture.getUInt32(data: data[data.startIndex + 4 + addressLength ..< data.startIndex + 8 + addressLength]))
                 let oidLength = Int(data[data.startIndex + 8 + addressLength])
                 let oidString = String(data: data[data.startIndex + 9 + addressLength ..< data.startIndex + 9 + addressLength + oidLength], encoding: .utf8) ?? ""
                 self = .managementAddressIPv4(address: ipv4Address, subType: intSubtype, interface: intNumber, oid: oidString)
@@ -354,7 +354,7 @@ public enum LldpValue: Equatable, Hashable {
                     return nil
                 }
                 let intSubtype = Int(data[data.startIndex + 3 + addressLength])
-                let intNumber = Int(EtherCapture.getUInt32(data: data.advanced(by: 4 + addressLength)))
+                let intNumber = Int(EtherCapture.getUInt32(data: data[data.startIndex + 4 + addressLength ..< data.startIndex + 8 + addressLength]))
                 let oidLength = Int(data[data.startIndex + 8 + addressLength])
                 let oidString = String(data: data[data.startIndex + 9 + addressLength ..< data.startIndex + 9 + addressLength + oidLength], encoding: .utf8) ?? ""
                 self = .managementAddressIPv6(address: ipv6Address, subType: intSubtype, interface: intNumber, oid: oidString)
@@ -364,7 +364,7 @@ public enum LldpValue: Equatable, Hashable {
                 return nil
             }
         case 127: // vendor specific
-            guard data.count >= tlvLength + 2, let ouiIdentifier = EtherCapture.getOui(data: data.advanced(by: 2)) else {
+            guard data.count >= tlvLength + 2, let ouiIdentifier = EtherCapture.getOui(data: data[data.startIndex + 2 ..< data.startIndex + 5]) else {
                 EtherCapture.logger.error("LLDP: unable to decode type \(tlvType) length \(tlvLength) data.count \(data.count)")
                 return nil
             }
@@ -518,7 +518,7 @@ public struct Lldp: CustomStringConvertible, EtherDisplay {
         }
         var position = 0
         while position <= data.count - 2 {
-            let tlvHeader = EtherCapture.getUInt16(data: data.advanced(by: position))
+            let tlvHeader = EtherCapture.getUInt16(data: data[data.startIndex + position ..< data.startIndex + position + 2])
             let tlvLength = Int(tlvHeader & 0x01ff)
             let tlvType = (tlvHeader & 0xfe00) >> 9
             guard data.count >= position + tlvLength + 2 else {
