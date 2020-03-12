@@ -50,14 +50,14 @@ public enum Icmp6Option: Equatable, Hashable, CustomStringConvertible {
             }
             switch type {
             case 1:
-                if let linkAddress = EtherCapture.getMac(data: data.advanced(by: position + 2)) {
+                if let linkAddress = EtherCapture.getMac(data: data[data.startIndex + position + 2 ..< data.startIndex + position + 8]) {
                     results.append(.sourceLinkAddress(linkAddress))
                 } else {
                     EtherCapture.logger.error("Icmp6Option.getOptions: unable to decode type \(type) length \(length) position \(position)")
                 }
                 position = position + length
             case 2:
-                if let linkAddress = EtherCapture.getMac(data: data.advanced(by: position + 2)) {
+                if let linkAddress = EtherCapture.getMac(data: data[data.startIndex + position + 2 ..< data.startIndex + position + 8]) {
                     results.append(.targetLinkAddress(linkAddress))
                 } else {
                     EtherCapture.logger.error("Icmp6Option.getOptions: unable to decode type \(type) length \(length) position \(position)")
@@ -72,8 +72,8 @@ public enum Icmp6Option: Equatable, Hashable, CustomStringConvertible {
                 let flags = data[data.startIndex + position + 3]
                 let onLink = (flags & 0b10000000 != 0)
                 let autoconfig = (flags & 0b01000000 != 0)
-                let validLifetime = Int(EtherCapture.getUInt32(data: data.advanced(by: position + 4)))
-                let preferredLifetime = Int(EtherCapture.getUInt32(data: data.advanced(by: position + 8)))
+                let validLifetime = Int(EtherCapture.getUInt32(data: data[data.startIndex + position + 4 ..< data.startIndex + position + 8]))
+                let preferredLifetime = Int(EtherCapture.getUInt32(data: data[data.startIndex + position + 8 ..< data.startIndex + position + 12]))
                 if let prefix = IPv6Address(data[data.startIndex + position + 16 ..< data.startIndex + position + 32]) {
                     let result = Icmp6Option.prefixInfo(prefixLength: prefixLength, onLink: onLink, autoconfig: autoconfig, validLifetime: validLifetime, preferredLifetime: preferredLifetime, prefix: prefix)
                     results.append(result)
@@ -95,7 +95,7 @@ public enum Icmp6Option: Equatable, Hashable, CustomStringConvertible {
                     EtherCapture.logger.error("Icmp6Option.getOptions: unable to decode type \(type) length \(length) position \(position)")
                     return results
                 }
-                let mtu = Int(EtherCapture.getUInt32(data: data.advanced(by: position + 4)))
+                let mtu = Int(EtherCapture.getUInt32(data: data[data.startIndex + position + 4 ..< data.startIndex + position + 8]))
                 let result = Icmp6Option.mtu(mtu)
                 results.append(result)
                 position = position + length
@@ -253,7 +253,7 @@ public struct Icmp6: EtherDisplay {
         self.type = type
         let code = Int(UInt(data[data.startIndex + 1]))
         self.code = code
-        self.checksum = EtherCapture.getUInt16(data: data.advanced(by: 2))
+        self.checksum = EtherCapture.getUInt16(data: data[data.startIndex + 2 ..< data.startIndex + 4])
         
         switch (self.type, self.code) {
         case (1,_):
@@ -308,7 +308,7 @@ public struct Icmp6: EtherDisplay {
             } else {
                 self.payload = Data()
             }
-            let pointer = Int(EtherCapture.getUInt32(data: data.advanced(by: 4)))
+            let pointer = Int(EtherCapture.getUInt32(data: data[data.startIndex + 4 ..< data.startIndex + 8]))
             self.icmpType = .parameterProblem(code: code, pointer: pointer)
             return
         case (128,0),(129,0):
@@ -317,8 +317,8 @@ public struct Icmp6: EtherDisplay {
             } else {
                 self.payload = Data()
             }
-            let identifier = Int(EtherCapture.getUInt16(data: data.advanced(by: 4)))
-            let sequence = Int(EtherCapture.getUInt16(data:data.advanced(by: 6)))
+            let identifier = Int(EtherCapture.getUInt16(data: data[data.startIndex + 4 ..< data.startIndex + 6]))
+            let sequence = Int(EtherCapture.getUInt16(data:data[data.startIndex + 6 ..< data.startIndex + 8]))
             if type == 128 {
                 self.icmpType = .echoRequest(identifier: identifier, sequence: sequence)
             } else if type == 129 {
