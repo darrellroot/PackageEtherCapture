@@ -88,17 +88,13 @@ public struct Bpdu: CustomStringConvertible, EtherDisplay {
         self.flagProposal = (flags & UInt8(0x02)) != 0
         self.flagTopChange = (flags & UInt8(0x01)) != 0
         
-        self.rootId = EtherCapture.getUInt64(data: data.advanced(by: 5))
-        self.rootCost = EtherCapture.getUInt32(data: data.advanced(by: 13))
-        self.bridgeId = EtherCapture.getUInt64(data: data.advanced(by: 17))
-        self.portId = EtherCapture.getUInt16(data: data.advanced(by: 25))
-        //self.age = EtherCapture.getUInt16(data: data.advanced(by: 27))
+        self.rootId = EtherCapture.getUInt64(data: data[data.startIndex + 5 ..< data.startIndex + 13])
+        self.rootCost = EtherCapture.getUInt32(data: data[data.startIndex + 13 ..< data.startIndex + 17])
+        self.bridgeId = EtherCapture.getUInt64(data: data[data.startIndex + 17 ..< data.startIndex + 25])
+        self.portId = EtherCapture.getUInt16(data: data[data.startIndex + 25 ..< data.startIndex + 27])
         self.age = Double(data[data.startIndex + 27]) + Double(data[data.startIndex + 28]) / 256.0
-        //self.maxAge = EtherCapture.getUInt16(data: data.advanced(by: 29))
         self.maxAge = Double(data[data.startIndex + 29]) + Double(data[data.startIndex + 30]) / 256.0
-        //self.helloTime = EtherCapture.getUInt16(data: data.advanced(by: 31))
         self.helloTime = Double(data[data.startIndex + 31]) + Double(data[data.startIndex + 32]) / 256.0
-        //self.forwardDelay = EtherCapture.getUInt16(data: data.advanced(by: 33))
         self.forwardDelay = Double(data[data.startIndex + 33]) + Double(data[data.startIndex + 34]) / 256.0
         
     }

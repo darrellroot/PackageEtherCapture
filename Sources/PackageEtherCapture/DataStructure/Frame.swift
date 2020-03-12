@@ -107,7 +107,7 @@ public struct Frame: CustomStringConvertible, EtherDisplay, Identifiable {
             self.ethertype = nil
             
             if data.count > unsure + 14 {
-                self.padding = data.advanced(by: (Int(unsure + 14)))
+                self.padding = data[data.startIndex + Int(unsure) + 14 ..< data.endIndex]
             }
         }
         self.frameFormat = frameFormat
