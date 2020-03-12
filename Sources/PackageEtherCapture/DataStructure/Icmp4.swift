@@ -172,7 +172,7 @@ public struct Icmp4: EtherDisplay {
         self.type = type
         let code = Int(UInt(data[data.startIndex + 1]))
         self.code = code
-        self.checksum = EtherCapture.getUInt16(data: data.advanced(by: 2))
+        self.checksum = EtherCapture.getUInt16(data: data[data.startIndex + 2 ..< data.startIndex + 4])
         
         switch (self.type, self.code) {
         case (0,0),(8,0):
@@ -180,8 +180,8 @@ public struct Icmp4: EtherDisplay {
                 EtherCapture.logger.error("incomplete ICMPv4 datagram detected type \(type) code \(code) \(data.count) bytes")
                 return nil
             }
-            let identifier = Int(EtherCapture.getUInt16(data: data.advanced(by: 4)))
-            let sequence = Int(EtherCapture.getUInt16(data: data.advanced(by: 6)))
+            let identifier = Int(EtherCapture.getUInt16(data: data[data.startIndex + 4 ..< data.startIndex + 6]))
+            let sequence = Int(EtherCapture.getUInt16(data: data[data.startIndex + 6 ..< data.startIndex + 8]))
             self.payload = data[data.startIndex + 8 ..< data.endIndex]
             if type == 0 {
                 self.icmpType = .echoReply(identifier: identifier, sequence: sequence)
@@ -286,12 +286,12 @@ public struct Icmp4: EtherDisplay {
                 EtherCapture.logger.error("incomplete ICMPv4 datagram detected type \(type) code \(code) \(data.count) bytes")
                 return nil
             }
-            let identifier = Int(EtherCapture.getUInt16(data: data.advanced(by: 4)))
-            let sequence = Int(EtherCapture.getUInt16(data: data.advanced(by: 6)))
+            let identifier = Int(EtherCapture.getUInt16(data: data[data.startIndex + 4 ..< data.startIndex + 6]))
+            let sequence = Int(EtherCapture.getUInt16(data: data[data.startIndex + 6 ..< data.startIndex + 8]))
             self.payload = Data()
-            let originate = EtherCapture.getUInt32(data: data.advanced(by: 8))
-            let receive = EtherCapture.getUInt32(data: data.advanced(by: 12))
-            let transmit = EtherCapture.getUInt32(data: data.advanced(by: 16))
+            let originate = EtherCapture.getUInt32(data: data[data.startIndex + 8 ..< data.startIndex + 12])
+            let receive = EtherCapture.getUInt32(data: data[data.startIndex + 12 ..< data.startIndex + 16])
+            let transmit = EtherCapture.getUInt32(data: data[data.startIndex + 16 ..< data.startIndex + 20])
             if type == 13 {
                 self.icmpType = .timestampRequest(identifier: identifier, sequence: sequence, originate: originate, receive: receive, transmit: transmit)
             } else {
@@ -303,8 +303,8 @@ public struct Icmp4: EtherDisplay {
                 EtherCapture.logger.error("incomplete ICMPv4 datagram detected type \(type) code \(code) \(data.count) bytes")
                 return nil
             }
-            let identifier = Int(EtherCapture.getUInt16(data: data.advanced(by: 4)))
-            let sequence = Int(EtherCapture.getUInt16(data: data.advanced(by: 6)))
+            let identifier = Int(EtherCapture.getUInt16(data: data[data.startIndex + 4 ..< data.startIndex + 6]))
+            let sequence = Int(EtherCapture.getUInt16(data: data[data.startIndex + 6 ..< data.startIndex + 8]))
             self.payload = Data()
             if type == 15 {
                 self.icmpType = .informationRequest(identifier: identifier, sequence: sequence)
@@ -316,8 +316,8 @@ public struct Icmp4: EtherDisplay {
                 EtherCapture.logger.error("incomplete ICMPv4 datagram detected type \(type) code \(code) \(data.count) bytes")
                 return nil
             }
-            let identifier = Int(EtherCapture.getUInt16(data: data.advanced(by: 4)))
-            let sequence = Int(EtherCapture.getUInt16(data: data.advanced(by: 6)))
+            let identifier = Int(EtherCapture.getUInt16(data: data[data.startIndex + 4 ..< data.startIndex + 6]))
+            let sequence = Int(EtherCapture.getUInt16(data: data[data.startIndex + 6 ..< data.startIndex + 8]))
             self.payload = Data()
             if type == 17 {
                 self.icmpType = Icmp4Type.addressMaskRequest(identifier: identifier, sequence: sequence, mask: mask)
@@ -330,7 +330,6 @@ public struct Icmp4: EtherDisplay {
             self.payload = data[data.startIndex + 4 ..< data.endIndex]
             return
         }// switch (self.type, self.code)
-        //self.payload = Data(data[(data.startIndex + 8) ..< data.endIndex])
         
     }
 }
