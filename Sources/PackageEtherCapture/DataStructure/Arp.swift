@@ -58,6 +58,9 @@ public struct Arp: CustomStringConvertible, EtherDisplay {
     public let targetIp: IPv4Address
     public let data: Data
     
+    public var startIndex: [Field:Data.Index] = [:] //first byte of the field
+    public var endIndex: [Field:Data.Index] = [:]  //1 past last byte of the field
+    
     public var layer4: Layer4 = .unknown(Unknown.completely)
 
     init?(data: Data) {
@@ -67,15 +70,30 @@ public struct Arp: CustomStringConvertible, EtherDisplay {
         }
         self.data = data
         self.hardwareType = EtherCapture.getUInt16(data: data)
+        startIndex[.hardwareType] = data.startIndex
+        endIndex[.hardwareType] = data.startIndex + 2
+        
         self.protocolType = EtherCapture.getUInt16(data: data[data.startIndex + 2 ..< data.startIndex + 4])
+        startIndex[.protocolType] = data.startIndex + 2
+        endIndex[.protocolType] = data.startIndex + 4
+        
         self.hardwareSize = Int(data[data.startIndex + 4])
+        startIndex[.hardwareSize] = data.startIndex + 4
+        endIndex[.hardwareSize] = data.startIndex + 5
+
         self.protocolSize = Int(data[data.startIndex + 5])
+        startIndex[.protocolSize] = data.startIndex + 5
+        endIndex[.protocolSize] = data.startIndex + 6
+
         let operationInt = Int( EtherCapture.getUInt16(data: data[data.startIndex + 6 ..< data.startIndex + 8]))
+        startIndex[.operation] = data.startIndex + 6
+        endIndex[.operation] = data.startIndex + 8
         guard let operation = ArpOperation(operation: operationInt) else {
             EtherCapture.logger.error("EtherCapture.Arp: invalid ARP operation \(operationInt)")
             return nil
         }
         self.operation = operation
+        
         guard let senderEthernet = EtherCapture.getMac(data: data[data.startIndex + 8 ..< data.startIndex + 14]),
         let senderIp = IPv4Address(data[data.startIndex + 14 ..< data.startIndex + 18]),
         let targetEthernet = EtherCapture.getMac(data: data[data.startIndex + 18 ..< data.startIndex + 24]),
@@ -84,9 +102,21 @@ public struct Arp: CustomStringConvertible, EtherDisplay {
             return nil
         }
         self.senderEthernet = senderEthernet
+        startIndex[.senderEthernet] = data.startIndex + 8
+        endIndex[.senderEthernet] = data.startIndex + 14
+
         self.senderIp = senderIp
+        startIndex[.senderIp] = data.startIndex + 14
+        endIndex[.senderIp] = data.startIndex + 18
+
         self.targetEthernet = targetEthernet
+        startIndex[.targetEthernet] = data.startIndex + 18
+        endIndex[.targetEthernet] = data.startIndex + 24
+
         self.targetIp = targetIp
+        startIndex[.targetIp] = data.startIndex + 24
+        endIndex[.targetIp] = data.startIndex + 28
+
         guard hardwareType == 1, protocolType == 0x0800, hardwareSize == 6, protocolSize == 4 else {
             EtherCapture.logger.error("EtherCapture.Arp: invalid types or sizes detected")
             return nil

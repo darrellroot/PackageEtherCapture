@@ -22,4 +22,15 @@ public enum Field {
     case snapType
     case etherType
     case padding
+    // ARP Fields
+    case hardwareType
+    case protocolType
+    case hardwareSize
+    case protocolSize
+    case operation
+    case senderEthernet
+    case senderIp
+    case targetEthernet
+    case targetIp
+    
 }
