@@ -148,7 +148,11 @@ public struct Frame: CustomStringConvertible, EtherDisplay, Identifiable {
         case (.ieee8023,_,0xaa): //SNAP, add 802.2 SNAP, might be CDP
             //TODO
             self.snapOrg = UInt(data[data.startIndex + 17]) * 256 * 256 + UInt(data[data.startIndex + 18]) * 256 + UInt(data[data.startIndex + 19])
+            startIndex[.snapOrg] = data.startIndex + 17
+            endIndex[.snapOrg] = data.startIndex + 20
             self.snapType = UInt(data[data.startIndex + 20]) * 256 + UInt(data[data.startIndex + 21])
+            startIndex[.snapType] = data.startIndex + 20
+            endIndex[.snapType] = data.endIndex + 22
             if self.snapOrg == 0xc, self.snapType == 0x2000, let cdp = Cdp(data: data[data.startIndex + 22..<data.endIndex]) {
                 self.layer3 = .cdp(cdp)
             } else {
@@ -267,7 +271,7 @@ public struct Frame: CustomStringConvertible, EtherDisplay, Identifiable {
     }
     public var ethertypeString: String {
         if let ethertype = ethertype {
-            return "Ethertype \(ethertype.hex4))"
+            return "Ethertype \(ethertype.hex4)"
         } else {
             return ""
         }
@@ -317,7 +321,7 @@ public struct Frame: CustomStringConvertible, EtherDisplay, Identifiable {
         }
         let eType: String
         if let ethertype = ethertype {
-            eType = "Ethertype \(ethertype.hex4)) "
+            eType = "Ethertype \(ethertype.hex4) "
         } else {
             eType = ""
         }
