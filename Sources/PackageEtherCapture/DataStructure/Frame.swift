@@ -223,6 +223,55 @@ public struct Frame: CustomStringConvertible, EtherDisplay, Identifiable {
     /**
      - Returns: One line verbose information frame header only
      */
+    public var ieeeLengthString: String {
+        if let ieeeLength = ieeeLength {
+            return "LEN \(ieeeLength)"
+        } else {
+            return ""  //if optional does not exist, dont add ending space
+        }
+    }
+    public var dsapString: String {
+        if let ieeeDsap = ieeeDsap {
+            return "DSAP 0x\(ieeeDsap.hex)"
+        } else {
+            return ""
+        }
+    }
+    public var ssapString: String {
+        if let ieeeSsap = ieeeSsap {
+            return "SSAP 0x\(ieeeSsap.hex)"
+        } else {
+            return ""
+        }
+    }
+    public var controlString: String {
+        if let ieeeControl = ieeeControl {
+            return "CONTROL 0x\(ieeeControl.hex)"
+        } else {
+            return ""
+        }
+    }
+    public var orgString: String {
+        if let snapOrg = snapOrg {
+            return "SNAP Org 0x\(String(format: "%6x ",snapOrg))"
+        } else {
+            return ""
+        }
+    }
+    public var snapTypeString: String {
+        if let snapType = snapType {
+            return "SnapType \(snapType.hex4)"
+        } else {
+            return ""
+        }
+    }
+    public var ethertypeString: String {
+        if let ethertype = ethertype {
+            return "Ethertype \(ethertype.hex4))"
+        } else {
+            return ""
+        }
+    }
     public var verboseDescription: String {
         let length: String
         if let ieeeLength = ieeeLength {
