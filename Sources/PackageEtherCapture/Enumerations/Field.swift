@@ -32,5 +32,18 @@ public enum Field {
     case senderIp
     case targetEthernet
     case targetIp
+    // BPDU Fields
+    case protocolId
+    case bpduVersion
+    case type
+    case flags
+    case rootId
+    case rootCost
+    case bridgeId
+    case portId
+    case age
+    case maxAge
+    case helloTime
+    case forwardDelay
     
 }
