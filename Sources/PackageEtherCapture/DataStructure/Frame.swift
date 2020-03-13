@@ -35,6 +35,9 @@ public struct Frame: CustomStringConvertible, EtherDisplay, Identifiable {
     public var originalLength: Int // used for generating pcap
 
     public var padding: Data?  // for 802.2 only
+    
+    public var startIndex: [Field:Data.Index] = [:] //first byte of the field
+    public var endIndex: [Field:Data.Index] = [:]  //1 past last byte of the field
     /**
      - Parameter layer3: Nested data structure with higher layer information
      */
@@ -79,11 +82,15 @@ public struct Frame: CustomStringConvertible, EtherDisplay, Identifiable {
         }
         if data.count > 5 {
             dstmac = "\(data[data.startIndex + 0].hex):\(data[data.startIndex + 1].hex):\(data[data.startIndex + 2].hex):\(data[data.startIndex + 3].hex):\(data[data.startIndex + 4].hex):\(data[data.startIndex + 5].hex)"
+            startIndex[.dstmac] = data.startIndex + 0
+            endIndex[.dstmac] = data.startIndex + 6
         } else {
             dstmac = "unknown"
         }
         if data.count > 11 {
             srcmac = "\(data[data.startIndex + 6].hex):\(data[data.startIndex + 7].hex):\(data[data.startIndex + 8].hex):\(data[data.startIndex + 9].hex):\(data[data.startIndex + 10].hex):\(data[data.startIndex + 11].hex)"
+            startIndex[.srcmac] = data.startIndex + 6
+            endIndex[.srcmac] = data.startIndex + 12
         } else {
             srcmac = "unknown"
         }
@@ -94,6 +101,8 @@ public struct Frame: CustomStringConvertible, EtherDisplay, Identifiable {
         if unsure > 0x5dc {
             frameFormat = .ethernet
             ethertype = unsure
+            startIndex[.ethertype] = data.startIndex + 12
+            endIndex[.ethertype] = data.startIndex + 14
             self.frameFormat = .ethernet
             self.ieeeLength = nil
             self.ieeeDsap = nil
@@ -101,13 +110,23 @@ public struct Frame: CustomStringConvertible, EtherDisplay, Identifiable {
         } else {
             frameFormat = .ieee8023
             self.ieeeLength = unsure
+            startIndex[.ieeeLength] = data.startIndex + 12
+            endIndex[.ieeeLength] = data.startIndex + 14
             self.ieeeDsap = UInt8(data[data.startIndex + 14])
+            startIndex[.ieeeDsap] = data.startIndex + 14
+            endIndex[.ieeeDsap] = data.startIndex + 15
             self.ieeeSsap = UInt8(data[data.startIndex + 15])
+            startIndex[.ieeeSsap] = data.startIndex + 15
+            endIndex[.ieeeSsap] = data.startIndex + 16
             self.ieeeControl = UInt8(data[data.startIndex + 16])
+            startIndex[.ieeeControl] = data.startIndex + 16
+            endIndex[.ieeeControl] = data.startIndex + 17
             self.ethertype = nil
             
             if data.count > unsure + 14 {
                 self.padding = data[data.startIndex + Int(unsure) + 14 ..< data.endIndex]
+                startIndex[.padding] = data.startIndex + Int(unsure) + 14
+                endIndex[.padding] = data.endIndex
             }
         }
         self.frameFormat = frameFormat
