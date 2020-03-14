@@ -9,7 +9,7 @@ import Foundation
 import Network
 import Logging
 
-public enum LldpValue: Equatable, Hashable {
+public enum LldpType: Equatable, Hashable {
     case endOfLldp
     case chassisId(subtype: UInt8, id: String)
     case portId(subtype: UInt8, id: String)
@@ -45,6 +45,51 @@ public enum LldpValue: Equatable, Hashable {
     case enabledReserved
 
     case unknown(Int)  //TLV type is in the int
+
+    public init(_ lldpType: LldpType) {
+        self = lldpType
+    }
+}
+public struct LldpValue: Equatable, Hashable {
+    /*case endOfLldp
+    case chassisId(subtype: UInt8, id: String)
+    case portId(subtype: UInt8, id: String)
+    case portDescription(String)
+    case systemName(String)
+    case ttl(Int)
+    case managementAddressIPv4(address: IPv4Address, subType: Int, interface: Int, oid: String)
+    case managementAddressIPv6(address: IPv6Address, subType: Int, interface: Int, oid: String)
+    case ouiSpecific(oui: String, subType: Int, info: String)
+    case capabilityOther
+    case capabilityRepeater
+    case capabilityMacBridge
+    case capabilityAccessPoint
+    case capabilityRouter
+    case capabilityTelephone
+    case capabilityDOCSIS
+    case capabilityStationOnly
+    case capabilityCVLAN
+    case capabilitySVLAN
+    case capabilityMacRelay
+    case capabilityReserved
+    case enabledOther
+    case enabledRepeater
+    case enabledMacBridge
+    case enabledAccessPoint
+    case enabledRouter
+    case enabledTelephone
+    case enabledDOCSIS
+    case enabledStationOnly
+    case enabledCVLAN
+    case enabledSVLAN
+    case enabledMacRelay
+    case enabledReserved
+
+    case unknown(Int)  //TLV type is in the int*/
+    
+    var lldpType: LldpType
+    var startIndex: Data.Index?
+    var endIndex: Data.Index?
     
     public static func getCapabilities(data: Data) -> [LldpValue] {
         let tlvHeader = EtherCapture.getUInt16(data: data)
@@ -58,82 +103,87 @@ public enum LldpValue: Equatable, Hashable {
         var flags = EtherCapture.getUInt16(data: data[data.startIndex + 2 ..< data.startIndex + 4])
         
         if flags & 0x0001 != 0 {
-            results.append(.capabilityOther)
+            results.append(LldpValue(lldpType: .capabilityOther, startIndex: data.startIndex + 2, endIndex: data.startIndex + 4))
         }
         if flags & 0x0002 != 0 {
-            results.append(.capabilityRepeater)
+            results.append(LldpValue(lldpType: .capabilityRepeater, startIndex: data.startIndex + 2, endIndex: data.startIndex + 4))
         }
         if flags & 0x0004 != 0 {
-            results.append(.capabilityMacBridge)
+            results.append(LldpValue(lldpType: .capabilityMacBridge, startIndex: data.startIndex + 2, endIndex: data.startIndex + 4))
         }
         if flags & 0x0008 != 0 {
-            results.append(.capabilityAccessPoint)
+            results.append(LldpValue(lldpType: .capabilityAccessPoint, startIndex: data.startIndex + 2, endIndex: data.startIndex + 4))
         }
         if flags & 0x0010 != 0 {
-            results.append(.capabilityRouter)
+            results.append(LldpValue(lldpType: .capabilityRouter, startIndex: data.startIndex + 2, endIndex: data.startIndex + 4))
         }
         if flags & 0x0020 != 0 {
-            results.append(.capabilityTelephone)
+            results.append(LldpValue(lldpType: .capabilityTelephone, startIndex: data.startIndex + 2, endIndex: data.startIndex + 4))
         }
         if flags & 0x0040 != 0 {
-            results.append(.capabilityDOCSIS)
+            results.append(LldpValue(lldpType: .capabilityDOCSIS, startIndex: data.startIndex + 2, endIndex: data.startIndex + 4))
         }
         if flags & 0x0080 != 0 {
-            results.append(.capabilityStationOnly)
+            results.append(LldpValue(lldpType: .capabilityStationOnly, startIndex: data.startIndex + 2, endIndex: data.startIndex + 4))
         }
         if flags & 0x0100 != 0 {
-            results.append(.capabilityCVLAN)
+            results.append(LldpValue(lldpType: .capabilityCVLAN, startIndex: data.startIndex + 2, endIndex: data.startIndex + 4))
         }
         if flags & 0x0200 != 0 {
-            results.append(.capabilitySVLAN)
+            results.append(LldpValue(lldpType: .capabilitySVLAN, startIndex: data.startIndex + 2, endIndex: data.startIndex + 4))
         }
         if flags & 0x0400 != 0 {
-            results.append(.capabilityMacRelay)
+            results.append(LldpValue(lldpType: .capabilityMacRelay, startIndex: data.startIndex + 2, endIndex: data.startIndex + 4))
         }
         if flags & 0xf800 != 0 {
-            results.append(.capabilityReserved)
+            results.append(LldpValue(lldpType: .capabilityReserved, startIndex: data.startIndex + 2, endIndex: data.startIndex + 4))
         }
         
         flags = EtherCapture.getUInt16(data: data[data.startIndex + 4 ..< data.startIndex + 6])
         
         if flags & 0x0001 != 0 {
-            results.append(.enabledOther)
+            results.append(LldpValue(lldpType: .enabledOther, startIndex: data.startIndex + 4, endIndex: data.startIndex + 6))
         }
         if flags & 0x0002 != 0 {
-            results.append(.enabledRepeater)
+            results.append(LldpValue(lldpType: .enabledRepeater, startIndex: data.startIndex + 4, endIndex: data.startIndex + 6))
         }
         if flags & 0x0004 != 0 {
-            results.append(.enabledMacBridge)
+            results.append(LldpValue(lldpType: .enabledMacBridge, startIndex: data.startIndex + 4, endIndex: data.startIndex + 6))
         }
         if flags & 0x0008 != 0 {
-            results.append(.enabledAccessPoint)
+            results.append(LldpValue(lldpType: .enabledAccessPoint, startIndex: data.startIndex + 4, endIndex: data.startIndex + 6))
         }
         if flags & 0x0010 != 0 {
-            results.append(.enabledRouter)
+            results.append(LldpValue(lldpType: .enabledRouter, startIndex: data.startIndex + 4, endIndex: data.startIndex + 6))
         }
         if flags & 0x0020 != 0 {
-            results.append(.enabledTelephone)
+            results.append(LldpValue(lldpType: .enabledTelephone, startIndex: data.startIndex + 4, endIndex: data.startIndex + 6))
         }
         if flags & 0x0040 != 0 {
-            results.append(.enabledDOCSIS)
+            results.append(LldpValue(lldpType: .enabledDOCSIS, startIndex: data.startIndex + 4, endIndex: data.startIndex + 6))
         }
         if flags & 0x0080 != 0 {
-            results.append(.enabledStationOnly)
+            results.append(LldpValue(lldpType: .enabledStationOnly, startIndex: data.startIndex + 4, endIndex: data.startIndex + 6))
         }
         if flags & 0x0100 != 0 {
-            results.append(.enabledCVLAN)
+            results.append(LldpValue(lldpType: .enabledCVLAN, startIndex: data.startIndex + 4, endIndex: data.startIndex + 6))
         }
         if flags & 0x0200 != 0 {
-            results.append(.enabledSVLAN)
+            results.append(LldpValue(lldpType: .enabledSVLAN, startIndex: data.startIndex + 4, endIndex: data.startIndex + 6))
         }
         if flags & 0x0400 != 0 {
-            results.append(.enabledMacRelay)
+            results.append(LldpValue(lldpType: .enabledMacRelay, startIndex: data.startIndex + 4, endIndex: data.startIndex + 6))
         }
         if flags & 0xf800 != 0 {
-            results.append(.enabledReserved)
+            results.append(LldpValue(lldpType: .enabledReserved, startIndex: data.startIndex + 4, endIndex: data.startIndex + 6))
         }
         return results
 
+    }
+    init(lldpType: LldpType, startIndex: Data.Index?, endIndex: Data.Index?) {
+        self.lldpType = lldpType
+        self.startIndex = startIndex
+        self.endIndex = endIndex
     }
     init?(data: Data) {
         let tlvHeader = EtherCapture.getUInt16(data: data)
@@ -142,9 +192,11 @@ public enum LldpValue: Equatable, Hashable {
         guard data.count >= tlvLength + 2 else {
             return nil
         }
+        self.startIndex = data.startIndex
+        self.endIndex = data.startIndex + 2 + tlvLength
         switch tlvType {
         case 0:
-            self = .endOfLldp
+            self.lldpType = LldpType(.endOfLldp)
             return
         case 1:
             let subtype = data[data.startIndex + 2]
@@ -152,7 +204,7 @@ public enum LldpValue: Equatable, Hashable {
             switch subtype {
             case 4: // mac address
                 if let id = EtherCapture.getMac(data: subdata) {
-                    self = .chassisId(subtype: subtype, id: id)
+                    self.lldpType = LldpType(.chassisId(subtype: subtype, id: id))
                     return
                 } else {
                     EtherCapture.logger.error("LLDP: unable to decode type \(tlvType)")
@@ -173,7 +225,7 @@ public enum LldpValue: Equatable, Hashable {
                         return nil
                     }
                     let ipv4String = ipv4Address.debugDescription
-                    self = .chassisId(subtype: subtype, id: ipv4String)
+                    self.lldpType = LldpType(.chassisId(subtype: subtype, id: ipv4String))
                     return
                 case 2: // ipv6?
                     guard data.count >= 20 else {
@@ -186,7 +238,7 @@ public enum LldpValue: Equatable, Hashable {
                         return nil
                     }
                     let ipv6String = ipv6Address.debugDescription
-                    self = .chassisId(subtype: subtype, id: ipv6String)
+                    self.lldpType = LldpType(.chassisId(subtype: subtype, id: ipv6String))
                     return
                 default: // unknown address type
                     EtherCapture.logger.error("LLDP: unable to decode type \(tlvType) addressType \(addressType)")
@@ -194,7 +246,7 @@ public enum LldpValue: Equatable, Hashable {
                 }
             case 1,2,3,6,7: // Strings
                 if let id = String(data: subdata, encoding: .utf8) {
-                    self = .chassisId(subtype: subtype, id: id)
+                    self.lldpType = LldpType(.chassisId(subtype: subtype, id: id))
                     return
                 } else {
                     EtherCapture.logger.error("LLDP: unable to decode type \(tlvType)")
@@ -202,7 +254,7 @@ public enum LldpValue: Equatable, Hashable {
                 }
             default:
                 if let id = String(data: subdata, encoding: .utf8) {
-                    self = .chassisId(subtype: subtype, id: id)
+                    self.lldpType = LldpType(.chassisId(subtype: subtype, id: id))
                     return
                 } else {
                     EtherCapture.logger.error("LLDP: unable to decode type \(tlvType)")
@@ -215,7 +267,7 @@ public enum LldpValue: Equatable, Hashable {
             switch subtype {
             case 3: // mac address
                 if let id = EtherCapture.getMac(data: subdata) {
-                    self = .portId(subtype: subtype, id: id)
+                    self.lldpType = LldpType(.portId(subtype: subtype, id: id))
                     return
                 } else {
                     EtherCapture.logger.error("LLDP: unable to decode type \(tlvType)")
@@ -236,7 +288,7 @@ public enum LldpValue: Equatable, Hashable {
                         return nil
                     }
                     let ipv4String = ipv4Address.debugDescription
-                    self = .portId(subtype: subtype, id: ipv4String)
+                    self.lldpType = LldpType(.portId(subtype: subtype, id: ipv4String))
                     return
                 case 2: // ipv6?
                     guard data.count >= 20 else {
@@ -249,7 +301,7 @@ public enum LldpValue: Equatable, Hashable {
                         return nil
                     }
                     let ipv6String = ipv6Address.debugDescription
-                    self = .portId(subtype: subtype, id: ipv6String)
+                    self.lldpType = LldpType(.portId(subtype: subtype, id: ipv6String))
                     return
                 default: // unknown address type
                     EtherCapture.logger.error("LLDP: unable to decode type \(tlvType) addressType \(addressType)")
@@ -257,7 +309,7 @@ public enum LldpValue: Equatable, Hashable {
                 }
             case 1,2,5,6,7: // Strings
                 if let id = String(data: subdata, encoding: .utf8) {
-                    self = .portId(subtype: subtype, id: id)
+                    self.lldpType = LldpType(.portId(subtype: subtype, id: id))
                     return
                 } else {
                     EtherCapture.logger.error("LLDP: unable to decode type \(tlvType)")
@@ -265,7 +317,7 @@ public enum LldpValue: Equatable, Hashable {
                 }
             default:
                 if let id = String(data: subdata, encoding: .utf8) {
-                    self = .portId(subtype: subtype, id: id)
+                    self.lldpType = LldpType(.portId(subtype: subtype, id: id))
                     return
                 } else {
                     EtherCapture.logger.error("LLDP: unable to decode type \(tlvType)")
@@ -278,7 +330,7 @@ public enum LldpValue: Equatable, Hashable {
                 return nil
             }
             let ttl = Int(EtherCapture.getUInt16(data: data[data.startIndex + 2 ..< data.startIndex + 4]))
-            self = .ttl(ttl)
+            self.lldpType = LldpType(.ttl(ttl))
             return
         case 4: // port description
             guard data.count >= tlvLength + 2 else {
@@ -286,7 +338,7 @@ public enum LldpValue: Equatable, Hashable {
                 return nil
             }
             if let portDescription = String(data: data[data.startIndex + 2 ..< data.startIndex + 2 + tlvLength], encoding: .utf8) {
-                self = .portDescription(portDescription)
+                self.lldpType = LldpType(.portDescription(portDescription))
                 return
             } else {
                 EtherCapture.logger.error("LLDP: unable to decode type \(tlvType)")
@@ -298,7 +350,7 @@ public enum LldpValue: Equatable, Hashable {
                 return nil
             }
             if let systemName = String(data: data[data.startIndex + 2 ..< data.startIndex + 2 + tlvLength], encoding: .utf8) {
-                self = .systemName(systemName)
+                self.lldpType = LldpType(.systemName(systemName))
                 return
             } else {
                 EtherCapture.logger.error("LLDP: unable to decode type \(tlvType)")
@@ -310,7 +362,7 @@ public enum LldpValue: Equatable, Hashable {
                 return nil
             }
             if let systemDescription = String(data: data[data.startIndex + 2 ..< data.startIndex + 2 + tlvLength], encoding: .utf8) {
-                self = .systemName(systemDescription)
+                self.lldpType = LldpType(.systemName(systemDescription))
                 return
             } else {
                 EtherCapture.logger.error("LLDP: unable to decode type \(tlvType)")
@@ -342,7 +394,7 @@ public enum LldpValue: Equatable, Hashable {
                 let intNumber = Int(EtherCapture.getUInt32(data: data[data.startIndex + 4 + addressLength ..< data.startIndex + 8 + addressLength]))
                 let oidLength = Int(data[data.startIndex + 8 + addressLength])
                 let oidString = String(data: data[data.startIndex + 9 + addressLength ..< data.startIndex + 9 + addressLength + oidLength], encoding: .utf8) ?? ""
-                self = .managementAddressIPv4(address: ipv4Address, subType: intSubtype, interface: intNumber, oid: oidString)
+                self.lldpType = LldpType(.managementAddressIPv4(address: ipv4Address, subType: intSubtype, interface: intNumber, oid: oidString))
             case 2: // ipv6
                 guard addressLength == 17 else {
                     EtherCapture.logger.error("LLDP: unable to decode type \(tlvType) data.count \(data.count) addressLength \(addressLength) addressSubtype \(addressSubtype)")
@@ -357,7 +409,7 @@ public enum LldpValue: Equatable, Hashable {
                 let intNumber = Int(EtherCapture.getUInt32(data: data[data.startIndex + 4 + addressLength ..< data.startIndex + 8 + addressLength]))
                 let oidLength = Int(data[data.startIndex + 8 + addressLength])
                 let oidString = String(data: data[data.startIndex + 9 + addressLength ..< data.startIndex + 9 + addressLength + oidLength], encoding: .utf8) ?? ""
-                self = .managementAddressIPv6(address: ipv6Address, subType: intSubtype, interface: intNumber, oid: oidString)
+                self.lldpType = LldpType(.managementAddressIPv6(address: ipv6Address, subType: intSubtype, interface: intNumber, oid: oidString))
 
             default:
                 EtherCapture.logger.error("LLDP: unable to decode type \(tlvType) data.count \(data.count) addressLength \(addressLength) addressSubtype \(addressSubtype)")
@@ -370,15 +422,15 @@ public enum LldpValue: Equatable, Hashable {
             }
             let ouiSubtype = Int(data[data.startIndex + 5])
             let ouiString = String(data: data[data.startIndex + 6 ..< data.startIndex + 2 + tlvLength], encoding: .utf8) ?? ""
-            self = .ouiSpecific(oui: ouiIdentifier, subType: ouiSubtype, info: ouiString)
+            self.lldpType = LldpType(.ouiSpecific(oui: ouiIdentifier, subType: ouiSubtype, info: ouiString))
             return
         default: // tlvtype
-            self = .unknown(tlvType)
+            self.lldpType = LldpType(.unknown(tlvType))
             return
         } // end switch tlv type
     }
     public var description: String {
-        switch self {
+        switch self.lldpType {
             
         case .endOfLldp:
             return "End Of LLDP"
