@@ -152,7 +152,7 @@ public struct Frame: CustomStringConvertible, EtherDisplay, Identifiable {
             endIndex[.snapOrg] = data.startIndex + 20
             self.snapType = UInt(data[data.startIndex + 20]) * 256 + UInt(data[data.startIndex + 21])
             startIndex[.snapType] = data.startIndex + 20
-            endIndex[.snapType] = data.endIndex + 22
+            endIndex[.snapType] = data.startIndex + 22
             if self.snapOrg == 0xc, self.snapType == 0x2000, let cdp = Cdp(data: data[data.startIndex + 22..<data.endIndex]) {
                 self.layer3 = .cdp(cdp)
             } else {
