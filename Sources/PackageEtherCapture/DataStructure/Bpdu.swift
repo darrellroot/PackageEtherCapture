@@ -66,6 +66,7 @@ public struct Bpdu: CustomStringConvertible, EtherDisplay {
     public let maxAge: Double
     public let helloTime: Double
     public let forwardDelay: Double
+    public let v1Length: UInt8
     public let data: Data
     
     public var startIndex: [Field:Data.Index] = [:] //first byte of the field
@@ -74,7 +75,7 @@ public struct Bpdu: CustomStringConvertible, EtherDisplay {
     public var layer4: Layer4 = .unknown(Unknown.completely)
 
     init?(data: Data) {
-        guard data.count >= 35 else {
+        guard data.count >= 36 else {
             EtherCapture.logger.error("Unable to decode Bpdu from \(data.count) bytes")
             return nil
         }
@@ -134,5 +135,8 @@ public struct Bpdu: CustomStringConvertible, EtherDisplay {
         startIndex[.forwardDelay] = data.startIndex + 33
         endIndex[.forwardDelay] = data.startIndex + 35
         
+        self.v1Length = data[startIndex + 35]
+        startIndex[.v1Length] = data.startIndex + 35
+        endIndex[.v1Length] = data.startIndex + 36
     }
 }
