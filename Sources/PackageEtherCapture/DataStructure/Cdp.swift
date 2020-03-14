@@ -33,7 +33,7 @@ public enum CdpValue: CustomStringConvertible, Hashable {
     case nativeVlan(Int)
     case systemName(String)
     case unknown(Data)
-    
+        
     public var description: String {
         switch self {
             
@@ -92,11 +92,12 @@ public enum CdpValue: CustomStringConvertible, Hashable {
             throw EtherCaptureError.genericError("CDP decode failed length \(length) data \(data.count)")
         }
 
+
         switch type {
         case 1:
             let subdata = data[(data.startIndex + 4) ..< (data.startIndex + length)]
             if let string = String(data: subdata,  encoding: .utf8) {
-                let cdpValue = CdpValue.deviceId(string)
+                var cdpValue = CdpValue.deviceId(string)
                 return [cdpValue]
             } else {
                 throw EtherCaptureError.genericError("cdp type 1: unable to decode deviceId string")

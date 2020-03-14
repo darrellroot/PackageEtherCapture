@@ -162,6 +162,9 @@ public struct Icmp4: EtherDisplay {
     public let checksum: UInt16
     public let icmpType: Icmp4Type
     
+    public var startIndex: [Field:Data.Index] = [:] //first byte of the field
+    public var endIndex: [Field:Data.Index] = [:]  //1 past last byte of the field
+
     init?(data: Data) {
         guard data.count >= 4 else {
             EtherCapture.logger.error("incomplete ICMPv4 datagram detected")
@@ -169,10 +172,18 @@ public struct Icmp4: EtherDisplay {
         }
         self.data = data
         let type = Int(UInt(data[data.startIndex]))
+        startIndex[.type] = data.startIndex
+        endIndex[.type] = data.startIndex + 1
         self.type = type
+        
         let code = Int(UInt(data[data.startIndex + 1]))
         self.code = code
+        startIndex[.code] = data.startIndex + 1
+        endIndex[.code] = data.startIndex + 2
+
         self.checksum = EtherCapture.getUInt16(data: data[data.startIndex + 2 ..< data.startIndex + 4])
+        startIndex[.checksum] = data.startIndex + 2
+        endIndex[.checksum] = data.startIndex + 4
         
         switch (self.type, self.code) {
         case (0,0),(8,0):
@@ -183,6 +194,9 @@ public struct Icmp4: EtherDisplay {
             let identifier = Int(EtherCapture.getUInt16(data: data[data.startIndex + 4 ..< data.startIndex + 6]))
             let sequence = Int(EtherCapture.getUInt16(data: data[data.startIndex + 6 ..< data.startIndex + 8]))
             self.payload = data[data.startIndex + 8 ..< data.endIndex]
+            startIndex[.payload] = data.startIndex + 8
+            endIndex[.payload] = data.startIndex + data.endIndex
+
             if type == 0 {
                 self.icmpType = .echoReply(identifier: identifier, sequence: sequence)
             } else {
@@ -198,8 +212,12 @@ public struct Icmp4: EtherDisplay {
             self.payloadLength = payloadLength
             if payloadLength > 0, data.count >= payloadLength + 8 {
                 self.payload = data[data.startIndex + 8 ..< data.startIndex + 8 + payloadLength]
+                startIndex[.payload] = data.startIndex + 8
+                endIndex[.payload] = data.startIndex + 8 + payloadLength
             } else {
                 self.payload = data[data.startIndex + 8 ..< data.endIndex]
+                startIndex[.payload] = data.startIndex + 8
+                endIndex[.payload] = data.startIndex + data.endIndex
             }
             switch code {
             case 0:
@@ -223,6 +241,8 @@ public struct Icmp4: EtherDisplay {
                 return nil
             }
             self.payload = data[data.startIndex + 8 ..< data.endIndex]
+            startIndex[.payload] = data.startIndex + 8
+            endIndex[.payload] = data.startIndex + data.endIndex
             self.icmpType = .sourceQuench
         case (5,0),(5,1),(5,2),(5,3):
             guard data.count >= 8, let ipv4 = IPv4Address(data[data.startIndex + 4 ..< data.startIndex + 8]) else {
@@ -230,6 +250,8 @@ public struct Icmp4: EtherDisplay {
                 return nil
             }
             self.payload = data[data.startIndex + 8 ..< data.endIndex]
+            startIndex[.payload] = data.startIndex + 8
+            endIndex[.payload] = data.startIndex + data.endIndex
             switch code {
             case 0:
                 self.icmpType = .redirectHost(ipv4)
@@ -253,8 +275,12 @@ public struct Icmp4: EtherDisplay {
             self.payloadLength = payloadLength
             if payloadLength > 0, data.count >= payloadLength + 8 {
                 self.payload = data[data.startIndex + 8 ..< data.startIndex + 8 + payloadLength]
+                startIndex[.payload] = data.startIndex + 8
+                endIndex[.payload] = data.startIndex + 8 + payloadLength
             } else {
                 self.payload = data[data.startIndex + 8 ..< data.endIndex]
+                startIndex[.payload] = data.startIndex + 8
+                endIndex[.payload] = data.startIndex + data.endIndex
             }
             switch code {
             case 0:
@@ -275,8 +301,12 @@ public struct Icmp4: EtherDisplay {
             self.payloadLength = payloadLength
             if payloadLength > 0, data.count >= payloadLength + 8 {
                 self.payload = data[data.startIndex + 8 ..< data.startIndex + 8 + payloadLength]
+                startIndex[.payload] = data.startIndex + 8
+                endIndex[.payload] = data.startIndex + 8 + payloadLength
             } else {
                 self.payload = data[data.startIndex + 8 ..< data.endIndex]
+                startIndex[.payload] = data.startIndex + 8
+                endIndex[.payload] = data.startIndex + data.endIndex
             }
             let pointer = Int(data[data.startIndex + 4])
             self.icmpType = .parameterProblem(pointer: pointer)
@@ -328,6 +358,8 @@ public struct Icmp4: EtherDisplay {
         case (_ , _):
             self.icmpType = Icmp4Type.other(type: type, code: code)
             self.payload = data[data.startIndex + 4 ..< data.endIndex]
+            startIndex[.payload] = data.startIndex + 4
+            endIndex[.payload] = data.startIndex + data.endIndex
             return
         }// switch (self.type, self.code)
         

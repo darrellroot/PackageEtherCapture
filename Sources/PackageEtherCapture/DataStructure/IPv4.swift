@@ -30,6 +30,9 @@ public struct IPv4: CustomStringConvertible, EtherDisplay {
     public let options: Data?
     public let padding: Data
     
+    public var startIndex: [Field:Data.Index] = [:] //first byte of the field
+    public var endIndex: [Field:Data.Index] = [:]  //1 past last byte of the field
+
     //public let payload: Data?
     /**
      - Parameter layer4: Nested data structure with higher layer information
@@ -68,36 +71,69 @@ public struct IPv4: CustomStringConvertible, EtherDisplay {
             EtherCapture.logger.error("IPv4: Invalid ihl \(ihl) detected")
             return nil
         }
+        startIndex[.version] = data.startIndex
+        endIndex[.version] = data.startIndex + 1
+        startIndex[.ihl] = data.startIndex
+        endIndex[.ihl] = data.startIndex + 1
+        
         self.dscp = (data[data.startIndex + 1] & 0b11111100) >> 2
         self.ecn = (data[data.startIndex + 1] & 0b00000011)
+        startIndex[.dscp] = data.startIndex + 1
+        endIndex[.dscp] = data.startIndex + 2
+        startIndex[.ecn] = data.startIndex + 1
+        endIndex[.ecn] = data.startIndex + 2
+
         let totalLength = UInt(data[data.startIndex + 2]) * 256 + UInt(data[data.startIndex + 3])
         self.totalLength = totalLength
+        startIndex[.totalLength] = data.startIndex + 2
+        endIndex[.totalLength] = data.startIndex + 4
+
         // deal with padding
         if data.count > totalLength {
             self.padding = data[data.startIndex + Int(totalLength) ..< data.endIndex]
+            startIndex[.padding] = data.startIndex + Int(totalLength)
+            endIndex[.padding] = data.endIndex
         } else {
             self.padding = Data()
         }
     
         self.identification = UInt(data[data.startIndex + 4]) * 256 + UInt(data[data.startIndex + 5])
+        startIndex[.identification] = data.startIndex + 4
+        endIndex[.identification] = data.startIndex + 6
 
         self.dontFragmentFlag = data[data.startIndex + 6] & 0b01000000 != 0
         self.evilBit = data[data.startIndex + 6] & 0b10000000 != 0
         self.moreFragmentsFlag = data[data.startIndex + 6] & 0b00100000 != 0
+        startIndex[.flags] = data.startIndex + 6
+        endIndex[.flags] = data.startIndex + 7
 
         self.fragmentOffset = UInt(data[data.startIndex + 6] & 0b00011111) * 256 + UInt(data[data.startIndex + 7])
+        startIndex[.fragmentOffset] = data.startIndex + 6
+        endIndex[.fragmentOffset] = data.startIndex + 8
         
         self.ttl = data[data.startIndex + 8]
+        startIndex[.ttl] = data.startIndex + 8
+        endIndex[.ttl] = data.startIndex + 9
+
         self.ipProtocol = data[data.startIndex + 9]
+        startIndex[.ipProtocol] = data.startIndex + 9
+        endIndex[.ipProtocol] = data.startIndex + 10
+
         self.headerChecksum = UInt(data[data.startIndex + 10]) * 256 + UInt(data[data.startIndex + 11])
-        
+        startIndex[.headerChecksum] = data.startIndex + 10
+        endIndex[.headerChecksum] = data.startIndex + 12
+
         if let sourceIP = IPv4Address(data[data.startIndex + 12 ..< data.startIndex + 16]) {
             self.sourceIP = sourceIP
+            startIndex[.sourceIP] = data.startIndex + 12
+            endIndex[.sourceIP] = data.startIndex + 16
         } else {
             return nil
         }
         if let destinationIP = IPv4Address(data[data.startIndex + 16 ..< data.startIndex + 20]) {
             self.destinationIP = destinationIP
+            startIndex[.destinationIP] = data.startIndex + 16
+            endIndex[.destinationIP] = data.startIndex + 20
         } else {
             return nil
         }
@@ -105,6 +141,8 @@ public struct IPv4: CustomStringConvertible, EtherDisplay {
         let finalHeaderIndex = data.startIndex + 4 * Int(ihl)
         if data.count >= finalHeaderIndex, ihl > 5 {
             self.options = data[data.startIndex + 20 ..< finalHeaderIndex]
+            startIndex[.options] = data.startIndex + 20
+            endIndex[.options] = finalHeaderIndex
         } else {
             self.options = nil
         }

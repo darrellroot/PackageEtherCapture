@@ -46,4 +46,59 @@ public enum Field {
     case helloTime
     case forwardDelay
     
+    //ICMP4 fields
+    //case type //duplicate above but can reuse
+    case code
+    case checksum
+    case payload
+    
+    // IPv4 fields
+    case sourceIP
+    case destinationIP
+    case version
+    case ihl
+    case dscp
+    case ecn
+    case totalLength
+    case identification
+    //case flags // reuse
+    case fragmentOffset
+    case ttl
+    case ipProtocol
+    case headerChecksum
+    case options
+    //case padding // reuse
+    
+    //IPv6 fields
+    // case version // reuse
+    case trafficClass
+    case flowLabel
+    case payloadLength
+    case nextHeader
+    case hopLimit
+    // case sourceIP // reuse
+    // case destinationIP // reuse
+    // case padding // reuse
+    
+    //TCP fields
+    case sourcePort
+    case destinationPort
+    case sequenceNumber
+    case acknowledgementNumber
+    case dataOffset
+    //case flags
+    case window
+    // case checksum
+    case urgentPointer
+    //case options
+    // case payload
+    
+    //UDP fields
+    //case payload
+    //case sourcePort
+    //case destinationPort
+    case length
+    // case checksum
+    
+    
 }
