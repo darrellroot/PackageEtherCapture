@@ -45,6 +45,7 @@ public enum Field {
     case maxAge
     case helloTime
     case forwardDelay
+    case v1Length
     
     //ICMP4 fields
     //case type //duplicate above but can reuse
