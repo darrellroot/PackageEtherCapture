@@ -87,9 +87,9 @@ public struct LldpValue: Equatable, Hashable {
 
     case unknown(Int)  //TLV type is in the int*/
     
-    var lldpType: LldpType
-    var startIndex: Data.Index?
-    var endIndex: Data.Index?
+    public var lldpType: LldpType
+    public var startIndex: Data.Index?
+    public var endIndex: Data.Index?
     
     public static func getCapabilities(data: Data) -> [LldpValue] {
         let tlvHeader = EtherCapture.getUInt16(data: data)
