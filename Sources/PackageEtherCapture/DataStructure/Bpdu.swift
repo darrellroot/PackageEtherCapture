@@ -135,7 +135,7 @@ public struct Bpdu: CustomStringConvertible, EtherDisplay {
         startIndex[.forwardDelay] = data.startIndex + 33
         endIndex[.forwardDelay] = data.startIndex + 35
         
-        self.v1Length = data[startIndex + 35]
+        self.v1Length = data[data.startIndex + 35]
         startIndex[.v1Length] = data.startIndex + 35
         endIndex[.v1Length] = data.startIndex + 36
     }
