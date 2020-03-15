@@ -35,7 +35,7 @@ public enum CdpType: Hashable, Equatable {
     case unknown(Data)
 }
 
-public struct CdpValue: Equatable {
+public struct CdpValue: Equatable, Hashable {
 
     // Indexes do not matter for equatable
     public static func == (lhs: CdpValue, rhs: CdpValue) -> Bool {
