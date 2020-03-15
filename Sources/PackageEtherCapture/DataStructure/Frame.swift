@@ -356,4 +356,5 @@ public struct Frame: CustomStringConvertible, EtherDisplay, Identifiable {
      */
     public static let sampleFrame: Frame = Frame(data: makeData(packetStream: "685b35890a04c869cd2c0d50080045000034000040004006b959c0a80010c0a8000ac001de7ebc1aa99e868a316380100804203100000101080a872fd3281be79ab6")!, originalLength: 200)
 
+    public static let sampleFrameUdp: Frame = Frame(data: makeData(packetStream: "01005e0000fb9ce65e8ed42608004500005f30340000ff11e992c0a80023e00000fb14e914e9004bccdc0000840000000001000000000f5f636f6d70616e696f6e2d6c696e6b045f746370056c6f63616c00000c00010000000000110e4c616e2773206950616420283229c00c")!, originalLength: 109)
 }

@@ -144,6 +144,81 @@ final class PackageEtherCaptureTests: XCTestCase {
         XCTAssert(ipv6.sourceIP == IPv6Address("2600:1406:1400:49c::2313")!)
         XCTAssert(ipv6.destinationIP == IPv6Address("2601:647:4802:1620:d5ae:46fb:f6c7:a154")!)
     }
+    func testTcp() {
+        // same packet as first test
+        let packetStream = "685b35890a04c869cd2c0d50080045000034000040004006b959c0a80010c0a8000ac001de7ebc1aa99e868a316380100804203100000101080a872fd3281be79ab6"
+        guard let data = Frame.makeData(packetStream: packetStream) else {
+            XCTFail()
+            return
+        }
+        let frame = Frame(data: data, timeval: timeval(), originalLength: 66)
+        //Frame tests
+        XCTAssert(frame.frameFormat == .ethernet)
+        XCTAssert(frame.dstmac == "68:5b:35:89:0a:04")
+        XCTAssert(frame.srcmac == "c8:69:cd:2c:0d:50")
+        XCTAssert(frame.ieeeLength == nil)
+        XCTAssert(frame.ieeeDsap == nil)
+        XCTAssert(frame.ieeeControl == nil)
+        XCTAssert(frame.snapOrg == nil)
+        XCTAssert(frame.snapType == nil)
+        XCTAssert(frame.ethertype == 0x0800)
+        XCTAssert(frame.data.count == 66)
+        guard case .ipv4(let ipv4) = frame.layer3 else {
+            XCTFail()
+            return
+        }
+        //IPv4 packet tests
+        XCTAssert(ipv4.sourceIP == IPv4Address("192.168.0.16")!)
+        XCTAssert(ipv4.destinationIP == IPv4Address("192.168.0.10")!)
+        XCTAssert(ipv4.data.count == 52)
+        XCTAssert(ipv4.version == 4)
+        XCTAssert(ipv4.ihl == 5)
+        XCTAssert(ipv4.dscp == 0)
+        XCTAssert(ipv4.ecn == 0)
+        XCTAssert(ipv4.totalLength == 52)
+        XCTAssert(ipv4.identification == 0)
+        XCTAssert(ipv4.evilBit == false)
+        XCTAssert(ipv4.dontFragmentFlag == true)
+        XCTAssert(ipv4.moreFragmentsFlag == false)
+        XCTAssert(ipv4.fragmentOffset == 0)
+        XCTAssert(ipv4.ttl == 64)
+        XCTAssert(ipv4.ipProtocol == 6)
+        XCTAssert(ipv4.headerChecksum == 0xb959)
+        XCTAssert(ipv4.options == nil)
+        guard case .tcp(let tcp) = frame.layer4 else {
+            XCTFail()
+            return
+        }
+        //TODO TCP tests incomplete
+        XCTAssert(tcp.sourcePort == 49153)
+        XCTAssert(tcp.destinationPort == 56958)
+        //XCTAssert(tcp.sequenceNumber == 1)
+        //XCTAssert(tcp.acknowledgementNumber == 2)
+        XCTAssert(tcp.ack == true)
+        XCTAssert(tcp.window == 2052)
+        XCTAssert(tcp.urg == false)
+        //XCTAssert(tcp.options?.count == 12)
+    }
+    func testUdp() {
+        let packetStream = "01005e0000fb9ce65e8ed42608004500005f30340000ff11e992c0a80023e00000fb14e914e9004bccdc0000840000000001000000000f5f636f6d70616e696f6e2d6c696e6b045f746370056c6f63616c00000c00010000000000110e4c616e2773206950616420283229c00c"
+        guard let data = Frame.makeData(packetStream: packetStream) else {
+            XCTFail()
+            return
+        }
+        let frame = Frame(data: data, timeval: timeval(), originalLength: 109)
+        guard case .ipv4(let ipv4) = frame.layer3 else {
+            XCTFail()
+            return
+        }
+        guard case .udp(let udp) = frame.layer4 else {
+            XCTFail()
+            return
+        }
+        XCTAssert(udp.sourcePort == 5353)
+        XCTAssert(udp.destinationPort == 5353)
+        XCTAssert(udp.length == 75)
+        XCTAssert(udp.checksum == 0xccdc)
+    }
     func testBpdu() {
         let packetStream = "0180c20000004c710c19e3120027424203000002027c80004c710c19e30d0000000080004c710c19e30d80050000140002000f000000000000000000"
         guard let data = Frame.makeData(packetStream: packetStream) else {
