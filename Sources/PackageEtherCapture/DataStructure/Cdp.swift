@@ -282,6 +282,9 @@ public struct CdpValue: Equatable, Hashable {
 
 public struct Cdp: CustomStringConvertible, EtherDisplay {
     
+    public var startIndex: [Field:Data.Index] = [:] //first byte of the field
+    public var endIndex: [Field:Data.Index] = [:]  //1 past last byte of the field
+
     public var description: String {
         return "CDP"
     }
@@ -306,8 +309,17 @@ public struct Cdp: CustomStringConvertible, EtherDisplay {
         self.data = data
         guard data.count > 9 else { return nil }
         self.version = data[data.startIndex]
+        startIndex[.version] = data.startIndex
+        endIndex[.version] = data.startIndex + 1
+        
         self.ttl = data[data.startIndex + 1]
+        startIndex[.ttl] = data.startIndex + 1
+        endIndex[.ttl] = data.startIndex + 2
+
         self.checksum = EtherCapture.getUInt16(data: data[data.startIndex + 2 ..< data.startIndex + 4])
+        startIndex[.checksum] = data.startIndex + 2
+        endIndex[.checksum] = data.startIndex + 4
+
         var position = 4
         while data.count > position + 5 {
             let type = EtherCapture.getUInt16(data: data[data.startIndex + position ..< data.startIndex + position + 2])

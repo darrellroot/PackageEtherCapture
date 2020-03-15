@@ -47,6 +47,10 @@ public enum Field {
     case forwardDelay
     case v1Length
     
+    // CDP field
+    //version
+    // ttl
+    // checksum
     //ICMP4 fields
     //case type //duplicate above but can reuse
     case code
