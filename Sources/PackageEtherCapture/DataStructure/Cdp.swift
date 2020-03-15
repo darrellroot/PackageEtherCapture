@@ -9,7 +9,7 @@ import Foundation
 import Network
 import Logging
 
-public enum CdpValue: CustomStringConvertible, Hashable {
+public enum CdpType: Hashable, Equatable {
     case deviceId(String)
     case ipv4address(IPv4Address)
     case ipv6address(IPv6Address)
@@ -33,9 +33,20 @@ public enum CdpValue: CustomStringConvertible, Hashable {
     case nativeVlan(Int)
     case systemName(String)
     case unknown(Data)
-        
+}
+
+public struct CdpValue: Equatable {
+
+    // Indexes do not matter for equatable
+    public static func == (lhs: CdpValue, rhs: CdpValue) -> Bool {
+        return lhs.cdpType == rhs.cdpType
+    }
+    public var cdpType: CdpType
+    public var startIndex: Data.Index?
+    public var endIndex: Data.Index?
+
     public var description: String {
-        switch self {
+        switch self.cdpType {
             
         case .deviceId(let device):
             return "deviceID \(device)"
@@ -92,12 +103,11 @@ public enum CdpValue: CustomStringConvertible, Hashable {
             throw EtherCaptureError.genericError("CDP decode failed length \(length) data \(data.count)")
         }
 
-
         switch type {
         case 1:
             let subdata = data[(data.startIndex + 4) ..< (data.startIndex + length)]
             if let string = String(data: subdata,  encoding: .utf8) {
-                var cdpValue = CdpValue.deviceId(string)
+                let cdpValue = CdpValue(cdpType: CdpType.deviceId(string), startIndex: data.startIndex, endIndex: data.startIndex + length)
                 return [cdpValue]
             } else {
                 throw EtherCaptureError.genericError("cdp type 1: unable to decode deviceId string")
@@ -121,7 +131,7 @@ public enum CdpValue: CustomStringConvertible, Hashable {
                         EtherCapture.logger.error("CDP: unsupported address protocol \(protocolNumber)")
                     } else { //protocolNumber is 0xcc == IPv4
                         if let ipv4Address = IPv4Address(data[data.startIndex + position + 4 + protocolLength ..< data.startIndex + position + protocolLength + 8]) {
-                            let result: CdpValue = .ipv4address(ipv4Address)
+                            let result = CdpValue(cdpType: .ipv4address(ipv4Address), startIndex: data.startIndex + position, endIndex: data.startIndex + position + protocolLength + 8)
                             results.append(result)
                         }
                         position = position + 2 + protocolLength + 2 + addressLength
@@ -138,7 +148,7 @@ public enum CdpValue: CustomStringConvertible, Hashable {
                         position = position + 2 + protocolLength + 2 + addressLength
                     } else { // protocol is ipv6
                         if let ipv6address = IPv6Address(data[data.startIndex + position + 4 + protocolLength ..< data.startIndex + position + protocolLength + 20]) {
-                            let result = CdpValue.ipv6address(ipv6address)
+                            let result = CdpValue(cdpType: .ipv6address(ipv6address), startIndex: data.startIndex + position, endIndex: data.startIndex + position + protocolLength + 20)
                             results.append(result)
                         }
                         position = position + 2 + protocolLength + 2 + addressLength
@@ -157,7 +167,7 @@ public enum CdpValue: CustomStringConvertible, Hashable {
         case 3: // type case 3 port id
             let subdata = data[(data.startIndex + 4) ..< (data.startIndex + length)]
             if let string = String(data: subdata,  encoding: .utf8) {
-                let cdpValue = CdpValue.portId(string)
+                let cdpValue = CdpValue(cdpType: .portId(string), startIndex: data.startIndex + 2, endIndex: data.startIndex + length)
                 return [cdpValue]
             } else {
                 throw EtherCaptureError.genericError("cdp type 3: unable to decode portId string")
@@ -170,43 +180,43 @@ public enum CdpValue: CustomStringConvertible, Hashable {
             let octet3 = data[data.startIndex + 6]
             let octet4 = data[data.startIndex + 7]
             if octet4 & 0x01 != 0 {
-                results.append(.capabilityRouter)
+                results.append(CdpValue(cdpType: .capabilityRouter, startIndex: data.startIndex + 7, endIndex: data.startIndex + 8))
             }
             if octet4 & 0x02 != 0 {
-                results.append(.capabilityBridge)
+                results.append(CdpValue(cdpType: .capabilityBridge, startIndex: data.startIndex + 7, endIndex: data.startIndex + 8))
             }
             if octet4 & 0x04 != 0 {
-                results.append(.capabilitySourceRouteBridge)
+                results.append(CdpValue(cdpType: .capabilitySourceRouteBridge, startIndex: data.startIndex + 7, endIndex: data.startIndex + 8))
             }
             if octet4 & 0x08 != 0 {
-                results.append(.capabilitySwitch)
+                results.append(CdpValue(cdpType: .capabilitySwitch, startIndex: data.startIndex + 7, endIndex: data.startIndex + 8))
             }
             if octet4 & 0x10 != 0 {
-                results.append(.capabilityHost)
+                results.append(CdpValue(cdpType: .capabilityHost, startIndex: data.startIndex + 7, endIndex: data.startIndex + 8))
             }
             if octet4 & 0x20 != 0 {
-                results.append(.capabilityIgmp)
+                results.append(CdpValue(cdpType: .capabilityIgmp, startIndex: data.startIndex + 7, endIndex: data.startIndex + 8))
             }
             if octet4 & 0x40 != 0 {
-                results.append(.capabilityRepeater)
+                results.append(CdpValue(cdpType: .capabilityRepeater, startIndex: data.startIndex + 7, endIndex: data.startIndex + 8))
             }
             if octet4 & 0x80 != 0 {
-                results.append(.capabilityVoip)
+                results.append(CdpValue(cdpType: .capabilityVoip, startIndex: data.startIndex + 7, endIndex: data.startIndex + 8))
             }
             if octet3 & 0x01 != 0 {
-                results.append(.capabilityRemoteManaged)
+                results.append(CdpValue(cdpType: .capabilityRemoteManaged, startIndex: data.startIndex + 6, endIndex: data.startIndex + 7))
             }
             if octet3 & 0x02 != 0 {
-                results.append(.capabilityVtCamera)
+                results.append(CdpValue(cdpType: .capabilityVtCamera, startIndex: data.startIndex + 6, endIndex: data.startIndex + 7))
             }
             if octet3 & 0x04 != 0 {
-                results.append(.capabilityMacRelay)
+                results.append(CdpValue(cdpType: .capabilityMacRelay, startIndex: data.startIndex + 6, endIndex: data.startIndex + 7))
             }
             return results
         case 5: // type case 5 version
             let subdata = data[(data.startIndex + 4) ..< (data.startIndex + length)]
             if let string = String(data: subdata,  encoding: .utf8) {
-                let cdpValue = CdpValue.softwareVersion(string)
+                let cdpValue = CdpValue(cdpType: .softwareVersion(string), startIndex: data.startIndex + 2, endIndex: data.startIndex + length)
                 return [cdpValue]
             } else {
                 throw EtherCaptureError.genericError("cdp type 5: unable to decode software version")
@@ -214,7 +224,7 @@ public enum CdpValue: CustomStringConvertible, Hashable {
         case 6: // type case 6 platform
             let subdata = data[(data.startIndex + 4) ..< (data.startIndex + length)]
             if let string = String(data: subdata,  encoding: .utf8) {
-                let cdpValue = CdpValue.platform(string)
+                let cdpValue = CdpValue(cdpType: .platform(string), startIndex: data.startIndex + 2, endIndex: data.startIndex + length)
                 return [cdpValue]
             } else {
                 throw EtherCaptureError.genericError("cdp type \(type): unable to decode platform")
@@ -224,7 +234,7 @@ public enum CdpValue: CustomStringConvertible, Hashable {
                 throw EtherCaptureError.genericError("cdp type \(type) length \(length) invalid")
             }
             let vlan = Int(EtherCapture.getUInt16(data: data[data.startIndex + 4 ..< data.startIndex + 6]))
-            let cdpValue = CdpValue.nativeVlan(vlan)
+            let cdpValue = CdpValue(cdpType: .nativeVlan(vlan), startIndex: data.startIndex + 2, endIndex: data.startIndex + 6)
             return [cdpValue]
         case 11: // type case 11 (0xb) duplex
             guard length == 5 else {
@@ -233,10 +243,10 @@ public enum CdpValue: CustomStringConvertible, Hashable {
             let duplexNum = data[data.startIndex + 4]
             switch duplexNum {
             case 1:
-                let cdpValue = CdpValue.duplex("Duplex Full")
+                let cdpValue = CdpValue(cdpType: .duplex("Duplex Full"), startIndex: data.startIndex + 2, endIndex: data.startIndex + 5)
                 return [cdpValue]
             default:
-                let cdpValue = CdpValue.duplex("Duplex value \(duplexNum)")
+                let cdpValue = CdpValue(cdpType: .duplex("Duplex value \(duplexNum)"), startIndex: data.startIndex + 2, endIndex: data.startIndex + 5)
                 return [cdpValue]
             }
         case 0x12: // type case (0x12) Trust bitmap
@@ -245,7 +255,7 @@ public enum CdpValue: CustomStringConvertible, Hashable {
             }
             let trustNum = data[data.startIndex + 4]
             let trustString = String(format: "Trust Bitmap 0x%x",trustNum)
-            let cdpValue = CdpValue.trustBitmap(trustString)
+            let cdpValue = CdpValue(cdpType: .trustBitmap(trustString), startIndex: data.startIndex + 2, endIndex: data.startIndex + 5)
             return [cdpValue]
         case 0x13: // untrusted port CoS
             guard length == 5 else {
@@ -253,18 +263,18 @@ public enum CdpValue: CustomStringConvertible, Hashable {
             }
             let cosNum = data[data.startIndex + 4]
             let cosString = String(format: "Untrusted Port CoS 0x%x",cosNum)
-            let cdpValue = CdpValue.untrustedCos(cosString)
+            let cdpValue = CdpValue(cdpType: .untrustedCos(cosString), startIndex: data.startIndex + 2, endIndex: data.startIndex + 5)
             return [cdpValue]
         case 0x14: // system name
             let subdata = data[(data.startIndex + 4) ..< (data.startIndex + length)]
             guard let string = String(data: subdata,  encoding: .utf8) else {
                 throw EtherCaptureError.genericError("cdp type \(type): unable to decode platform")
             }
-            let cdpValue = CdpValue.systemName(string)
+            let cdpValue = CdpValue(cdpType: .systemName(string), startIndex: data.startIndex + 2, endIndex: data.startIndex + length)
             return [cdpValue]
         default: // type case
             let alldata = data[(data.startIndex + 0) ..< (data.startIndex + length)]
-            let cdpValue = CdpValue.unknown(alldata)
+            let cdpValue = CdpValue(cdpType: .unknown(alldata), startIndex: data.startIndex + 0, endIndex: data.startIndex + length)
             return [cdpValue]
         }// switch type
     }// func getValues

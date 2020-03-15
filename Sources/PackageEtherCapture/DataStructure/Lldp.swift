@@ -51,41 +51,6 @@ public enum LldpType: Equatable, Hashable {
     }
 }
 public struct LldpValue: Equatable, Hashable {
-    /*case endOfLldp
-    case chassisId(subtype: UInt8, id: String)
-    case portId(subtype: UInt8, id: String)
-    case portDescription(String)
-    case systemName(String)
-    case ttl(Int)
-    case managementAddressIPv4(address: IPv4Address, subType: Int, interface: Int, oid: String)
-    case managementAddressIPv6(address: IPv6Address, subType: Int, interface: Int, oid: String)
-    case ouiSpecific(oui: String, subType: Int, info: String)
-    case capabilityOther
-    case capabilityRepeater
-    case capabilityMacBridge
-    case capabilityAccessPoint
-    case capabilityRouter
-    case capabilityTelephone
-    case capabilityDOCSIS
-    case capabilityStationOnly
-    case capabilityCVLAN
-    case capabilitySVLAN
-    case capabilityMacRelay
-    case capabilityReserved
-    case enabledOther
-    case enabledRepeater
-    case enabledMacBridge
-    case enabledAccessPoint
-    case enabledRouter
-    case enabledTelephone
-    case enabledDOCSIS
-    case enabledStationOnly
-    case enabledCVLAN
-    case enabledSVLAN
-    case enabledMacRelay
-    case enabledReserved
-
-    case unknown(Int)  //TLV type is in the int*/
     
     public var lldpType: LldpType
     public var startIndex: Data.Index?

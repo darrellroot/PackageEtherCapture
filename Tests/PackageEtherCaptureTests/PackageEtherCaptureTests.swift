@@ -207,7 +207,7 @@ final class PackageEtherCaptureTests: XCTestCase {
             return
         }
         XCTAssert(lldp.values.count == 14)
-        let values = lldp.values.flatMap { $0.lldpType }
+        let values = lldp.values.compactMap { $0.lldpType }
         XCTAssert(values.contains(.chassisId(subtype: 4, id: "4c:71:0c:19:e3:0d")))
         XCTAssert(values.contains(.portId(subtype: 5, id: "gi5")))
         XCTAssert(values.contains(.ttl(120)))
@@ -250,24 +250,25 @@ final class PackageEtherCaptureTests: XCTestCase {
         XCTAssert(cdp.version == 2)
         XCTAssert(cdp.ttl == 180)
         XCTAssert(cdp.checksum == 0x6953)
-        XCTAssert(cdp.values.contains(.deviceId("4c710c19e30d")))
-        XCTAssert(cdp.values.contains(.ipv4address(IPv4Address("192.168.0.32")!)))
-        XCTAssert(cdp.values.contains(.ipv6address(IPv6Address("2001:db8:4802:1620::1")!)))
-        XCTAssert(cdp.values.contains(.ipv6address(IPv6Address("fe80::4e71:cff:fe19:e30d")!)))
-        XCTAssert(cdp.values.contains(.capabilityRouter))
-        XCTAssert(cdp.values.contains(.capabilitySwitch))
-        XCTAssert(cdp.values.contains(.capabilityIgmp))
-        XCTAssert(!cdp.values.contains(.capabilityBridge))
-        XCTAssert(!cdp.values.contains(.capabilityMacRelay))
-        XCTAssert(!cdp.values.contains(.capabilitySourceRouteBridge))
-        XCTAssert(cdp.values.contains(.softwareVersion("2.4.5.71")))
-        XCTAssert(cdp.values.contains(.platform("Cisco SG250-08 (PID:SG250-08-K9)-VSD")))
-        XCTAssert(cdp.values.contains(.nativeVlan(1)))
-        XCTAssert(cdp.values.contains(.duplex("Duplex Full")))
-        XCTAssert(cdp.values.contains(.trustBitmap("Trust Bitmap 0x0")))
+        let values = cdp.values.compactMap { $0.cdpType }
+        XCTAssert(values.contains(.deviceId("4c710c19e30d")))
+        XCTAssert(values.contains(.ipv4address(IPv4Address("192.168.0.32")!)))
+    XCTAssert(values.contains(.ipv6address(IPv6Address("2001:db8:4802:1620::1")!)))
+    XCTAssert(values.contains(.ipv6address(IPv6Address("fe80::4e71:cff:fe19:e30d")!)))
+        XCTAssert(values.contains(.capabilityRouter))
+        XCTAssert(values.contains(.capabilitySwitch))
+        XCTAssert(values.contains(.capabilityIgmp))
+        XCTAssert(!values.contains(.capabilityBridge))
+        XCTAssert(!values.contains(.capabilityMacRelay))
+        XCTAssert(!values.contains(.capabilitySourceRouteBridge))
+        XCTAssert(values.contains(.softwareVersion("2.4.5.71")))
+        XCTAssert(values.contains(.platform("Cisco SG250-08 (PID:SG250-08-K9)-VSD")))
+        XCTAssert(values.contains(.nativeVlan(1)))
+        XCTAssert(values.contains(.duplex("Duplex Full")))
+        XCTAssert(values.contains(.trustBitmap("Trust Bitmap 0x0")))
     
-        XCTAssert(cdp.values.contains(.untrustedCos("Untrusted Port CoS 0x0")))
-        XCTAssert(cdp.values.contains(.systemName("switch19e30d")))
+        XCTAssert(values.contains(.untrustedCos("Untrusted Port CoS 0x0")))
+        XCTAssert(values.contains(.systemName("switch19e30d")))
     }
     func testIcmpV4EchoRequest() {
         let packetStream = "b07fb95d8ed2685b35890a04080045000054db2d000040010000c0a8000a040202010800df8a138500005e5b412b00017a6508090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f3031323334353637"
