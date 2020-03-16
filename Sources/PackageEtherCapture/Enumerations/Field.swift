@@ -119,4 +119,16 @@ public enum Field {
     case transmit
     case address
     //case payloadLength
+    
+    //ICMP6 fields
+    //case type
+    //case code
+    //case checksum
+    //case payload
+    //case pointer
+    //case identifier
+    //case sequence
+    case target
+    // case flags
+    case destination
 }

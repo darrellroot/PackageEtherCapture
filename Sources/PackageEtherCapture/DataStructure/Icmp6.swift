@@ -242,6 +242,9 @@ public struct Icmp6: EtherDisplay {
     public let icmpType: Icmp6Type
     public var options: [Icmp6Option] = []
     
+    public var startIndex: [Field:Data.Index] = [:] //first byte of the field
+    public var endIndex: [Field:Data.Index] = [:]  //1 past last byte of the field
+
 
     init?(data: Data) {
         guard data.count >= 8 else {
@@ -251,14 +254,24 @@ public struct Icmp6: EtherDisplay {
         self.data = data
         let type = Int(UInt(data[data.startIndex]))
         self.type = type
+        startIndex[.type] = data.startIndex
+        endIndex[.type] = data.startIndex + 1
+        
         let code = Int(UInt(data[data.startIndex + 1]))
         self.code = code
+        startIndex[.code] = data.startIndex + 1
+        endIndex[.code] = data.startIndex + 2
+        
         self.checksum = EtherCapture.getUInt16(data: data[data.startIndex + 2 ..< data.startIndex + 4])
+        startIndex[.checksum] = data.startIndex + 2
+        endIndex[.checksum] = data.startIndex + 4
         
         switch (self.type, self.code) {
         case (1,_):
             if data.count > 8 {
                 self.payload = data[data.startIndex + 8 ..< data.endIndex]
+                startIndex[.payload] = data.startIndex + 8
+                endIndex[.payload] = data.endIndex
             } else {
                 self.payload = Data()
             }
@@ -284,6 +297,8 @@ public struct Icmp6: EtherDisplay {
         case (2,_):
             if data.count > 8 {
                 self.payload = data[data.startIndex + 8 ..< data.endIndex]
+                startIndex[.payload] = data.startIndex + 8
+                endIndex[.payload] = data.endIndex
             } else {
                 self.payload = Data()
             }
@@ -292,6 +307,8 @@ public struct Icmp6: EtherDisplay {
         case (3,_):
             if data.count > 8 {
                 self.payload = data[data.startIndex + 8 ..< data.endIndex]
+                startIndex[.payload] = data.startIndex + 8
+                endIndex[.payload] = data.endIndex
             } else {
                 self.payload = Data()
             }
@@ -305,20 +322,32 @@ public struct Icmp6: EtherDisplay {
         case (4,_):
             if data.count > 8 {
                 self.payload = data[data.startIndex + 8 ..< data.endIndex]
+                startIndex[.payload] = data.startIndex + 8
+                endIndex[.payload] = data.endIndex
             } else {
                 self.payload = Data()
             }
             let pointer = Int(EtherCapture.getUInt32(data: data[data.startIndex + 4 ..< data.startIndex + 8]))
+            startIndex[.pointer] = data.startIndex + 4
+            endIndex[.pointer] = data.startIndex + 8
             self.icmpType = .parameterProblem(code: code, pointer: pointer)
             return
         case (128,0),(129,0):
             if data.count > 8 {
                 self.payload = data[data.startIndex + 8 ..< data.endIndex]
+                startIndex[.payload] = data.startIndex + 8
+                endIndex[.payload] = data.endIndex
             } else {
                 self.payload = Data()
             }
             let identifier = Int(EtherCapture.getUInt16(data: data[data.startIndex + 4 ..< data.startIndex + 6]))
+            startIndex[.identifier] = data.startIndex + 4
+            endIndex[.identifier] = data.startIndex + 6
+            
             let sequence = Int(EtherCapture.getUInt16(data:data[data.startIndex + 6 ..< data.startIndex + 8]))
+            startIndex[.sequence] = data.startIndex + 6
+            endIndex[.sequence] = data.startIndex + 8
+            
             if type == 128 {
                 self.icmpType = .echoRequest(identifier: identifier, sequence: sequence)
             } else if type == 129 {
@@ -333,6 +362,8 @@ public struct Icmp6: EtherDisplay {
                 EtherCapture.logger.error("Incomplete ICMPv6 message type \(type) code \(code) \(data.count) bytes")
                 return nil
             }
+            startIndex[.target] = data.startIndex + 8
+            endIndex[.target] = data.startIndex + 24
             
             self.payload = Data()
             self.options = Icmp6Option.getOptions(data: data[data.startIndex + 24 ..< data.endIndex])
@@ -343,11 +374,16 @@ public struct Icmp6: EtherDisplay {
                 EtherCapture.logger.error("Incomplete ICMPv6 message type \(type) code \(code) \(data.count) bytes")
                 return nil
             }
+            startIndex[.target] = data.startIndex + 8
+            endIndex[.target] = data.startIndex + 24
+
             self.payload = Data()
             let flags = data[data.startIndex + 4]
             let routerFlag = (flags & 0b10000000) != 0
             let solicitedFlag = (flags & 0b01000000) != 0
             let overrideFlag = (flags & 0b00100000) != 0
+            startIndex[.flags] = data.startIndex + 4
+            endIndex[.flags] = data.startIndex + 5
 
             self.options = Icmp6Option.getOptions(data: data[data.startIndex + 24 ..< data.endIndex])
             self.icmpType = .neighborAdvertisement(target: target, router: routerFlag, solicited: solicitedFlag, override: overrideFlag)
@@ -357,6 +393,11 @@ public struct Icmp6: EtherDisplay {
                 EtherCapture.logger.error("Incomplete ICMPv6 message type \(type) code \(code) \(data.count) bytes")
                 return nil
             }
+            startIndex[.target] = data.startIndex + 8
+            endIndex[.target] = data.startIndex + 24
+            startIndex[.destination] = data.startIndex + 24
+            endIndex[.destination] = data.startIndex + 40
+
             self.payload = Data()
             self.options = Icmp6Option.getOptions(data: data[data.startIndex + 40 ..< data.endIndex])
             self.icmpType = .redirect(target: target, destination: destination)
