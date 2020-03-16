@@ -253,6 +253,8 @@ public struct Icmp4: EtherDisplay {
                 EtherCapture.logger.error("incomplete ICMPv4 datagram detected type \(type) code \(code) \(data.count) bytes")
                 return nil
             }
+            startIndex[.address] = data.startIndex + 4
+            endIndex[.address] = data.endIndex + 8
             self.payload = data[data.startIndex + 8 ..< data.endIndex]
             startIndex[.payload] = data.startIndex + 8
             endIndex[.payload] = data.startIndex + data.endIndex

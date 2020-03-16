@@ -117,4 +117,5 @@ public enum Field {
     case originate
     case receive
     case transmit
+    case address
 }
