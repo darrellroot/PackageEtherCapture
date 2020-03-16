@@ -214,6 +214,8 @@ public struct Icmp4: EtherDisplay {
             }
             let payloadLength = Int(data[data.startIndex + 5])
             self.payloadLength = payloadLength
+            startIndex[.payloadLength] = data.startIndex + 5
+            endIndex[.payloadLength] = data.startIndex + 6
             if payloadLength > 0, data.count >= payloadLength + 8 {
                 self.payload = data[data.startIndex + 8 ..< data.startIndex + 8 + payloadLength]
                 startIndex[.payload] = data.startIndex + 8
@@ -279,6 +281,8 @@ public struct Icmp4: EtherDisplay {
             }
             let payloadLength = Int(data[data.startIndex + 5])
             self.payloadLength = payloadLength
+            startIndex[.payloadLength] = data.startIndex + 5
+            endIndex[.payloadLength] = data.startIndex + 6
             if payloadLength > 0, data.count >= payloadLength + 8 {
                 self.payload = data[data.startIndex + 8 ..< data.startIndex + 8 + payloadLength]
                 startIndex[.payload] = data.startIndex + 8

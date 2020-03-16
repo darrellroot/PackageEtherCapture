@@ -118,4 +118,5 @@ public enum Field {
     case receive
     case transmit
     case address
+    case payloadLength
 }
