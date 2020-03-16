@@ -113,4 +113,8 @@ public enum Field {
     case sequence
     case identifier
     case mask
+    case pointer
+    case originate
+    case receive
+    case transmit
 }

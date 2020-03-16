@@ -314,6 +314,8 @@ public struct Icmp4: EtherDisplay {
             }
             let pointer = Int(data[data.startIndex + 4])
             self.icmpType = .parameterProblem(pointer: pointer)
+            startIndex[.pointer] = data.startIndex + 4
+            endIndex[.pointer] = data.startIndex + 5
             return
         case (13,0),(14,0):
             guard data.count >= 0 else {
@@ -328,8 +330,14 @@ public struct Icmp4: EtherDisplay {
             endIndex[.sequence] = data.startIndex + 8
             self.payload = Data()
             let originate = EtherCapture.getUInt32(data: data[data.startIndex + 8 ..< data.startIndex + 12])
+            startIndex[.originate] = data.startIndex + 8
+            endIndex[.originate] = data.startIndex + 12
             let receive = EtherCapture.getUInt32(data: data[data.startIndex + 12 ..< data.startIndex + 16])
+            startIndex[.receive] = data.startIndex + 12
+            endIndex[.receive] = data.startIndex + 16
             let transmit = EtherCapture.getUInt32(data: data[data.startIndex + 16 ..< data.startIndex + 20])
+            startIndex[.transmit] = data.startIndex + 16
+            endIndex[.transmit] = data.startIndex + 20
             if type == 13 {
                 self.icmpType = .timestampRequest(identifier: identifier, sequence: sequence, originate: originate, receive: receive, transmit: transmit)
             } else {
