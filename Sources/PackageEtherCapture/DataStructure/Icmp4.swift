@@ -358,6 +358,8 @@ public struct Icmp4: EtherDisplay {
                 EtherCapture.logger.error("incomplete ICMPv4 datagram detected type \(type) code \(code) \(data.count) bytes")
                 return nil
             }
+            startIndex[.mask] = data.startIndex + 8
+            endIndex[.mask] = data.startIndex + 12
             let identifier = Int(EtherCapture.getUInt16(data: data[data.startIndex + 4 ..< data.startIndex + 6]))
             startIndex[.identifier] = data.startIndex + 4
             endIndex[.identifier] = data.startIndex + 6

@@ -112,4 +112,5 @@ public enum Field {
     // case payload
     case sequence
     case identifier
+    case mask
 }
