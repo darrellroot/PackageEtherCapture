@@ -111,4 +111,5 @@ public enum Field {
     // case checksum
     // case payload
     case sequence
+    case identifier
 }

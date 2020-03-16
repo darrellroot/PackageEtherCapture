@@ -192,6 +192,8 @@ public struct Icmp4: EtherDisplay {
                 return nil
             }
             let identifier = Int(EtherCapture.getUInt16(data: data[data.startIndex + 4 ..< data.startIndex + 6]))
+            startIndex[.identifier] = data.startIndex + 4
+            endIndex[.identifier] = data.startIndex + 6
             let sequence = Int(EtherCapture.getUInt16(data: data[data.startIndex + 6 ..< data.startIndex + 8]))
             startIndex[.sequence] = data.startIndex + 6
             endIndex[.sequence] = data.startIndex + 8
@@ -319,6 +321,8 @@ public struct Icmp4: EtherDisplay {
                 return nil
             }
             let identifier = Int(EtherCapture.getUInt16(data: data[data.startIndex + 4 ..< data.startIndex + 6]))
+            startIndex[.identifier] = data.startIndex + 4
+            endIndex[.identifier] = data.startIndex + 6
             let sequence = Int(EtherCapture.getUInt16(data: data[data.startIndex + 6 ..< data.startIndex + 8]))
             startIndex[.sequence] = data.startIndex + 6
             endIndex[.sequence] = data.startIndex + 8
@@ -338,6 +342,8 @@ public struct Icmp4: EtherDisplay {
                 return nil
             }
             let identifier = Int(EtherCapture.getUInt16(data: data[data.startIndex + 4 ..< data.startIndex + 6]))
+            startIndex[.identifier] = data.startIndex + 4
+            endIndex[.identifier] = data.startIndex + 6
             let sequence = Int(EtherCapture.getUInt16(data: data[data.startIndex + 6 ..< data.startIndex + 8]))
             startIndex[.sequence] = data.startIndex + 6
             endIndex[.sequence] = data.startIndex + 8
@@ -353,6 +359,8 @@ public struct Icmp4: EtherDisplay {
                 return nil
             }
             let identifier = Int(EtherCapture.getUInt16(data: data[data.startIndex + 4 ..< data.startIndex + 6]))
+            startIndex[.identifier] = data.startIndex + 4
+            endIndex[.identifier] = data.startIndex + 6
             let sequence = Int(EtherCapture.getUInt16(data: data[data.startIndex + 6 ..< data.startIndex + 8]))
             startIndex[.sequence] = data.startIndex + 6
             endIndex[.sequence] = data.startIndex + 8
