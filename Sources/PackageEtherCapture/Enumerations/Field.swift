@@ -105,5 +105,10 @@ public enum Field {
     case length
     // case checksum
     
-    
+    //ICMP4 fields
+    //case type
+    //case code
+    // case checksum
+    // case payload
+    case sequence
 }

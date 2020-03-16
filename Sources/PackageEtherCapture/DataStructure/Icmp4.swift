@@ -193,6 +193,8 @@ public struct Icmp4: EtherDisplay {
             }
             let identifier = Int(EtherCapture.getUInt16(data: data[data.startIndex + 4 ..< data.startIndex + 6]))
             let sequence = Int(EtherCapture.getUInt16(data: data[data.startIndex + 6 ..< data.startIndex + 8]))
+            startIndex[.sequence] = data.startIndex + 6
+            endIndex[.sequence] = data.startIndex + 8
             self.payload = data[data.startIndex + 8 ..< data.endIndex]
             startIndex[.payload] = data.startIndex + 8
             endIndex[.payload] = data.startIndex + data.endIndex
@@ -318,6 +320,8 @@ public struct Icmp4: EtherDisplay {
             }
             let identifier = Int(EtherCapture.getUInt16(data: data[data.startIndex + 4 ..< data.startIndex + 6]))
             let sequence = Int(EtherCapture.getUInt16(data: data[data.startIndex + 6 ..< data.startIndex + 8]))
+            startIndex[.sequence] = data.startIndex + 6
+            endIndex[.sequence] = data.startIndex + 8
             self.payload = Data()
             let originate = EtherCapture.getUInt32(data: data[data.startIndex + 8 ..< data.startIndex + 12])
             let receive = EtherCapture.getUInt32(data: data[data.startIndex + 12 ..< data.startIndex + 16])
@@ -335,6 +339,8 @@ public struct Icmp4: EtherDisplay {
             }
             let identifier = Int(EtherCapture.getUInt16(data: data[data.startIndex + 4 ..< data.startIndex + 6]))
             let sequence = Int(EtherCapture.getUInt16(data: data[data.startIndex + 6 ..< data.startIndex + 8]))
+            startIndex[.sequence] = data.startIndex + 6
+            endIndex[.sequence] = data.startIndex + 8
             self.payload = Data()
             if type == 15 {
                 self.icmpType = .informationRequest(identifier: identifier, sequence: sequence)
@@ -348,6 +354,8 @@ public struct Icmp4: EtherDisplay {
             }
             let identifier = Int(EtherCapture.getUInt16(data: data[data.startIndex + 4 ..< data.startIndex + 6]))
             let sequence = Int(EtherCapture.getUInt16(data: data[data.startIndex + 6 ..< data.startIndex + 8]))
+            startIndex[.sequence] = data.startIndex + 6
+            endIndex[.sequence] = data.startIndex + 8
             self.payload = Data()
             if type == 17 {
                 self.icmpType = Icmp4Type.addressMaskRequest(identifier: identifier, sequence: sequence, mask: mask)
