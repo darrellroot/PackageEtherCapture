@@ -645,7 +645,9 @@ final class PackageEtherCaptureTests: XCTestCase {
         XCTAssert(icmp6.checksum == 0x5ab0)
         XCTAssert(icmp6.icmpType == .neighborSolicitation(target: IPv6Address("fe80::1867:ff5d:d25b:ad67")!))
         XCTAssert(icmp6.options.count == 1)
-        XCTAssert(icmp6.options.first! == Icmp6Option.sourceLinkAddress("b0:7f:b9:5d:8e:d2"))
+        let firstOption = icmp6.options.first!
+        
+        XCTAssert(firstOption.optionType == .sourceLinkAddress("b0:7f:b9:5d:8e:d2"))
     }
     func testIcmpV6NeighborAdvertisement() {
         let packetStream = "b07fb95d8ed2685b35890a0486dd6000000000183afffe800000000000001867ff5dd25bad67fe80000000000000b27fb9fffe5d8ed28800136940000000fe800000000000001867ff5dd25bad67"

@@ -9,7 +9,7 @@ import Foundation
 import Logging
 import Network
 
-public enum Icmp6Option: Equatable, Hashable, CustomStringConvertible {
+public enum Icmp6OptionType: Equatable, Hashable, CustomStringConvertible {
     public var description: String {
         switch self {
             
@@ -34,7 +34,20 @@ public enum Icmp6Option: Equatable, Hashable, CustomStringConvertible {
     case redirectedHeader(Data)
     case mtu(Int)
     case other(type: Int, length: Int)
+}
     
+public struct Icmp6Option: Equatable, Hashable, CustomStringConvertible {
+    public var description: String {
+        return self.optionType.description
+    }
+    
+    public static func == (lhs: Icmp6Option, rhs: Icmp6Option) -> Bool {
+        return lhs.optionType == rhs.optionType
+    }
+    public var optionType: Icmp6OptionType
+    public var startIndex: Data.Index?
+    public var endIndex: Data.Index?
+
     static func getOptions(data: Data) -> [Icmp6Option] {
         guard data.count >= 8 else {
             return []
@@ -44,6 +57,7 @@ public enum Icmp6Option: Equatable, Hashable, CustomStringConvertible {
         while position <= data.count - 8 {
             let type = data[data.startIndex + position]
             let length = 8 * Int(data[data.startIndex + position + 1])
+            
             guard length > 0 else {
                 EtherCapture.logger.error("Icmp6Option.getOptions: invalid length \(length) position \(position)")
                 return results
@@ -51,14 +65,16 @@ public enum Icmp6Option: Equatable, Hashable, CustomStringConvertible {
             switch type {
             case 1:
                 if let linkAddress = EtherCapture.getMac(data: data[data.startIndex + position + 2 ..< data.startIndex + position + 8]) {
-                    results.append(.sourceLinkAddress(linkAddress))
+                    let newOption = Icmp6Option(optionType: .sourceLinkAddress(linkAddress), startIndex: data.startIndex + position, endIndex: data.startIndex + position + 8)
+                    results.append(newOption)
                 } else {
                     EtherCapture.logger.error("Icmp6Option.getOptions: unable to decode type \(type) length \(length) position \(position)")
                 }
                 position = position + length
             case 2:
                 if let linkAddress = EtherCapture.getMac(data: data[data.startIndex + position + 2 ..< data.startIndex + position + 8]) {
-                    results.append(.targetLinkAddress(linkAddress))
+                    let newOption = Icmp6Option(optionType: .targetLinkAddress(linkAddress), startIndex: data.startIndex + position, endIndex: data.startIndex + position + 8)
+                    results.append(newOption)
                 } else {
                     EtherCapture.logger.error("Icmp6Option.getOptions: unable to decode type \(type) length \(length) position \(position)")
                 }
@@ -75,8 +91,8 @@ public enum Icmp6Option: Equatable, Hashable, CustomStringConvertible {
                 let validLifetime = Int(EtherCapture.getUInt32(data: data[data.startIndex + position + 4 ..< data.startIndex + position + 8]))
                 let preferredLifetime = Int(EtherCapture.getUInt32(data: data[data.startIndex + position + 8 ..< data.startIndex + position + 12]))
                 if let prefix = IPv6Address(data[data.startIndex + position + 16 ..< data.startIndex + position + 32]) {
-                    let result = Icmp6Option.prefixInfo(prefixLength: prefixLength, onLink: onLink, autoconfig: autoconfig, validLifetime: validLifetime, preferredLifetime: preferredLifetime, prefix: prefix)
-                    results.append(result)
+                    let newOption = Icmp6Option(optionType: .prefixInfo(prefixLength: prefixLength, onLink: onLink, autoconfig: autoconfig, validLifetime: validLifetime, preferredLifetime: preferredLifetime, prefix: prefix), startIndex: data.startIndex + position, endIndex: data.startIndex + position + 12)
+                    results.append(newOption)
                 } else {
                     EtherCapture.logger.error("Icmp6Option.getOptions: unable to decode type \(type) length \(length) position \(position)")
                 }
@@ -87,8 +103,8 @@ public enum Icmp6Option: Equatable, Hashable, CustomStringConvertible {
                     return results
                 }
                 let redirectedData = data[data.startIndex + position + 8 ..< data.startIndex + position + length]
-                let result = Icmp6Option.redirectedHeader(redirectedData)
-                results.append(result)
+                let newOption = Icmp6Option(optionType: .redirectedHeader(redirectedData), startIndex: data.startIndex + position, endIndex: data.startIndex + position + length)
+                results.append(newOption)
                 position = position + length
             case 5:
                 guard length == 8 else {
@@ -96,12 +112,12 @@ public enum Icmp6Option: Equatable, Hashable, CustomStringConvertible {
                     return results
                 }
                 let mtu = Int(EtherCapture.getUInt32(data: data[data.startIndex + position + 4 ..< data.startIndex + position + 8]))
-                let result = Icmp6Option.mtu(mtu)
-                results.append(result)
+                let newOption = Icmp6Option(optionType: .mtu(mtu), startIndex: data.startIndex + position, endIndex: data.startIndex + position + 8)
+                results.append(newOption)
                 position = position + length
             default:
-                let result = Icmp6Option.other(type: Int(type), length: length)
-                results.append(result)
+                let newOption = Icmp6Option(optionType: .other(type: Int(type), length: length), startIndex: data.startIndex + position, endIndex: data.startIndex + position + length)
+                results.append(newOption)
                 position = position + length
             }// switch type
         }// while position
