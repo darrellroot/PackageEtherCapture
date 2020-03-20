@@ -16,6 +16,7 @@ import Foundation
 public enum Layer4: CustomStringConvertible, EtherDisplay {
     case tcp(Tcp)
     case udp(Udp)
+    case igmp4(Igmp4)
     case icmp4(Icmp4)
     case icmp6(Icmp6)
     case unknown(Unknown)
@@ -32,6 +33,8 @@ public enum Layer4: CustomStringConvertible, EtherDisplay {
             return tcp.description
         case .udp(let udp):
             return udp.description
+        case .igmp4(let igmp4):
+            return igmp4.description
         case .icmp4(let icmp4):
             return icmp4.description
         case .icmp6(let icmp6):
@@ -50,6 +53,8 @@ public enum Layer4: CustomStringConvertible, EtherDisplay {
             return tcp.hexdump
         case .udp(let udp):
             return udp.hexdump
+        case .igmp4(let igmp4):
+            return igmp4.hexdump
         case .icmp4(let icmp4):
             return icmp4.hexdump
         case .icmp6(let icmp6):
@@ -68,6 +73,8 @@ public enum Layer4: CustomStringConvertible, EtherDisplay {
             return tcp.verboseDescription
         case .udp(let udp):
             return udp.verboseDescription
+        case .igmp4(let igmp4):
+            return igmp4.verboseDescription
         case .icmp4(let icmp4):
             return icmp4.verboseDescription
         case .icmp6(let icmp6):

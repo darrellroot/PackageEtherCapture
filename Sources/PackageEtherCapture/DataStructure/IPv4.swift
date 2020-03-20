@@ -157,6 +157,12 @@ public struct IPv4: CustomStringConvertible, EtherDisplay {
                 } else {
                     self.layer4 = .unknown(Unknown(data: data[finalHeaderIndex ..< data.endIndex]))
                 }
+            case 2:
+                if let igmp4 = Igmp4(data: data[data.startIndex + 4 * Int(ihl) ..< data.endIndex]) {
+                    self.layer4 = .igmp4(igmp4)
+                } else {
+                    self.layer4 = .unknown(Unknown(data: data[finalHeaderIndex ..< data.endIndex]))
+                }
             case 6:
                 //let myData = Data(data[data.startIndex + 4 * Int(ihl) ..< data.endIndex])
                 //if let tcp = Tcp(data: myData) {

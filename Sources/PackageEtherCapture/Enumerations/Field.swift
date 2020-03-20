@@ -131,4 +131,10 @@ public enum Field {
     case target
     // case flags
     case destination
+    
+    //IGMP4 fields
+    //case type
+    case maxResponseTime
+    //case checksum
+    //case address
 }
