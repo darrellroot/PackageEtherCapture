@@ -836,7 +836,7 @@ final class PackageEtherCaptureTests: XCTestCase {
             return
         }
         XCTAssert(igmp4.type == .membershipReportV2)
-        XCTAssert(igmp4.maxResponseTime == 0)
+        XCTAssert(igmp4.maxResponseTime == 0.0)
         XCTAssert(igmp4.checksum == 0x0904)
         XCTAssert(igmp4.address == IPv4Address("224.0.0.251")!)
     }
@@ -884,9 +884,63 @@ final class PackageEtherCaptureTests: XCTestCase {
             return
         }
         XCTAssert(igmp4.type == .membershipQueryGeneral)
-        XCTAssert(igmp4.maxResponseTime == 10)
+        XCTAssert(igmp4.maxResponseTime == 1.0)
         XCTAssert(igmp4.checksum == 0xeef5)
         XCTAssert(igmp4.address == IPv4Address("0.0.0.0")!)
+    }
+
+    func testIgmpV3QueryLongTimestamp() {
+        let packetStream = "01005e000001b07fb95d8ed20800450000200000000001021932c0a80001e00000011189ebf900000000027d00000000000000000000000000000000"
+        guard let data = Frame.makeData(packetStream: packetStream) else {
+            XCTFail()
+            return
+        }
+        let frame = Frame(data: data, timeval: timeval(), originalLength: 60)
+        XCTAssert(frame.frameFormat == .ethernet)
+        XCTAssert(frame.dstmac == "01:00:5e:00:00:01")
+        XCTAssert(frame.srcmac == "b0:7f:b9:5d:8e:d2")
+        XCTAssert(frame.ieeeLength == nil)
+        XCTAssert(frame.ieeeDsap == nil)
+        XCTAssert(frame.ieeeControl == nil)
+        XCTAssert(frame.snapOrg == nil)
+        XCTAssert(frame.snapType == nil)
+        XCTAssert(frame.ethertype == 0x0800)
+        XCTAssert(frame.data.count == 60)
+        guard case .ipv4(let ipv4) = frame.layer3 else {
+            XCTFail()
+            return
+        }
+        //IPv4 packet tests
+        XCTAssert(ipv4.sourceIP == IPv4Address("192.168.0.1")!)
+        XCTAssert(ipv4.destinationIP == IPv4Address("224.0.0.1")!)
+        XCTAssert(ipv4.data.count == 46) //includes 18 bytes frame padding
+        XCTAssert(ipv4.version == 4)
+        XCTAssert(ipv4.ihl == 5)
+        XCTAssert(ipv4.dscp == 0)
+        XCTAssert(ipv4.ecn == 0)
+        XCTAssert(ipv4.totalLength == 32)
+        XCTAssert(ipv4.identification == 0x0000)
+        XCTAssert(ipv4.evilBit == false)
+        XCTAssert(ipv4.dontFragmentFlag == false)
+        XCTAssert(ipv4.moreFragmentsFlag == false)
+        XCTAssert(ipv4.fragmentOffset == 0)
+        XCTAssert(ipv4.ttl == 1)
+        XCTAssert(ipv4.ipProtocol == 2)
+        XCTAssert(ipv4.headerChecksum == 0x1932)
+        XCTAssert(ipv4.options == nil)
+        guard case .igmp4(let igmp4) = frame.layer4 else {
+            XCTFail()
+            return
+        }
+        XCTAssert(igmp4.type == .membershipQueryGeneral)
+        XCTAssert(igmp4.maxResponseTime == 20.0)
+        XCTAssert(igmp4.checksum == 0xebf9)
+        XCTAssert(igmp4.address == IPv4Address("0.0.0.0")!)
+        XCTAssert(igmp4.version == 3)
+        XCTAssert(igmp4.supressFlag == false)
+        XCTAssert(igmp4.querierRobustness == 2)
+        XCTAssert(igmp4.queryInterval == 125)
+        XCTAssert(igmp4.numberOfSources == 0)
     }
 
 }
