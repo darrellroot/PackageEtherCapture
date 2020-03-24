@@ -816,7 +816,7 @@ final class PackageEtherCaptureTests: XCTestCase {
         //IPv4 packet tests
         XCTAssert(ipv4.sourceIP == IPv4Address("192.168.0.19")!)
         XCTAssert(ipv4.destinationIP == IPv4Address("224.0.0.251")!)
-        XCTAssert(ipv4.data.count == 46) //includes 14 bytes frame padding
+        XCTAssert(ipv4.data.count == 32) //includes 14 bytes frame padding
         XCTAssert(ipv4.version == 4)
         XCTAssert(ipv4.ihl == 6)
         XCTAssert(ipv4.dscp == 0)
@@ -864,7 +864,7 @@ final class PackageEtherCaptureTests: XCTestCase {
         //IPv4 packet tests
         XCTAssert(ipv4.sourceIP == IPv4Address("192.168.0.1")!)
         XCTAssert(ipv4.destinationIP == IPv4Address("224.0.0.1")!)
-        XCTAssert(ipv4.data.count == 46) //includes 18 bytes frame padding
+        XCTAssert(ipv4.data.count == 28) //includes 18 bytes frame padding
         XCTAssert(ipv4.version == 4)
         XCTAssert(ipv4.ihl == 5)
         XCTAssert(ipv4.dscp == 0)
@@ -913,7 +913,7 @@ final class PackageEtherCaptureTests: XCTestCase {
         //IPv4 packet tests
         XCTAssert(ipv4.sourceIP == IPv4Address("192.168.0.1")!)
         XCTAssert(ipv4.destinationIP == IPv4Address("224.0.0.1")!)
-        XCTAssert(ipv4.data.count == 46) //includes 18 bytes frame padding
+        XCTAssert(ipv4.data.count == 32) //includes 18 bytes frame padding
         XCTAssert(ipv4.version == 4)
         XCTAssert(ipv4.ihl == 5)
         XCTAssert(ipv4.dscp == 0)

@@ -139,7 +139,7 @@ public struct IPv4: CustomStringConvertible, EtherDisplay {
         }
         
         let finalHeaderIndex = data.startIndex + 4 * Int(ihl)
-        if data.count >= finalHeaderIndex, ihl > 5 {
+        if data.endIndex >= finalHeaderIndex, ihl > 5 {
             self.options = data[data.startIndex + 20 ..< finalHeaderIndex]
             startIndex[.options] = data.startIndex + 20
             endIndex[.options] = finalHeaderIndex

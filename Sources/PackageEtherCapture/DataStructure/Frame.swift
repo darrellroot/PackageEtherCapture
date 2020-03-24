@@ -35,6 +35,7 @@ public struct Frame: CustomStringConvertible, EtherDisplay, Identifiable {
     public var originalLength: Int // used for generating pcap
 
     public var padding: Data?  // for 802.2 only
+    public var paddingBytes = 0
     
     public var startIndex: [Field:Data.Index] = [:] //first byte of the field
     public var endIndex: [Field:Data.Index] = [:]  //1 past last byte of the field
@@ -107,6 +108,8 @@ public struct Frame: CustomStringConvertible, EtherDisplay, Identifiable {
             self.ieeeLength = nil
             self.ieeeDsap = nil
             self.ieeeSsap = nil
+            
+            
         } else {
             frameFormat = .ieee8023
             self.ieeeLength = unsure
@@ -127,6 +130,7 @@ public struct Frame: CustomStringConvertible, EtherDisplay, Identifiable {
                 self.padding = data[data.startIndex + Int(unsure) + 14 ..< data.endIndex]
                 startIndex[.padding] = data.startIndex + Int(unsure) + 14
                 endIndex[.padding] = data.endIndex
+                self.paddingBytes = data.endIndex - (data.startIndex + Int(unsure))
             }
         }
         self.frameFormat = frameFormat
@@ -166,7 +170,12 @@ public struct Frame: CustomStringConvertible, EtherDisplay, Identifiable {
             // should not get here
             break
         case (.ethernet,0x0800,_):  // IPv4
-            if let ipv4 = IPv4(data: data[data.startIndex + 14..<data.endIndex]) {
+            let ipv4TotalLength = Int(EtherCapture.getUInt16(data: data[data.startIndex + 16 ..< data.startIndex + 18]))
+            if data.endIndex > 14 + ipv4TotalLength {
+                self.padding = data[data.startIndex + 14 + ipv4TotalLength ..< data.endIndex]
+                self.paddingBytes = self.padding?.count ?? 0
+            }
+            if let ipv4 = IPv4(data: data[data.startIndex + 14..<data.endIndex - self.paddingBytes]) {
                 self.layer3 = .ipv4(ipv4)
             } else {
                 let unknown = Unknown(data: data[data.startIndex + 14..<data.endIndex])

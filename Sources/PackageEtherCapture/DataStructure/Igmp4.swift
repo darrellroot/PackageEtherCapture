@@ -165,12 +165,12 @@ public struct Igmp4: EtherDisplay {
         
     }
     public var description: String {
-        return "IGMP \(self.type)"
+        return "IGMPv\(self.version) \(self.type)"
     }
     
     public var verboseDescription: String {
         let time = Double(maxResponseTime) / 10.0
-        return "IGMP \(self.type) group \(address.debugDescription) MaxResponseTime \(time) seconds checksump \(checksum.hex)"
+        return "IGMPv\(self.version) \(self.type) group \(address.debugDescription) MaxResponseTime \(time) seconds checksump \(checksum.hex)"
     }
     
     public var hexdump: String {
