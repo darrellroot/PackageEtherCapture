@@ -174,6 +174,8 @@ public struct Frame: CustomStringConvertible, EtherDisplay, Identifiable {
             if data.endIndex > 14 + ipv4TotalLength {
                 self.padding = data[data.startIndex + 14 + ipv4TotalLength ..< data.endIndex]
                 self.paddingBytes = self.padding?.count ?? 0
+                startIndex[.padding] = data.startIndex + ipv4TotalLength + 14
+                endIndex[.padding] = data.endIndex
             }
             if let ipv4 = IPv4(data: data[data.startIndex + 14..<data.endIndex - self.paddingBytes]) {
                 self.layer3 = .ipv4(ipv4)

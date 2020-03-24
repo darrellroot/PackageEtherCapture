@@ -137,4 +137,8 @@ public enum Field {
     case maxResponseTime
     //case checksum
     //case address
+    //case flags supress flag and querier robustness
+    case queryIntervalCode
+    case numberOfSources
+    case sources //TODO highlight per source
 }

@@ -140,6 +140,9 @@ public struct Igmp4: EtherDisplay {
             self.maxResponseTime = Double(calculatedTime) / 10.0
         }
         self.supressFlag = (data[data.startIndex + 8] & 0b00001000) != 0
+        startIndex[.flags] = data.startIndex + 8
+        endIndex[.flags] = data.startIndex + 9
+
         self.querierRobustness = (data[data.startIndex + 8] & 0b00000111)
         
         let queryIntervalCode = data[data.startIndex + 9]
@@ -150,9 +153,14 @@ public struct Igmp4: EtherDisplay {
             let mantissa = UInt32((0b00001111 & queryIntervalCode) | 0b00010000)
             self.queryInterval = Int(mantissa << (exponent + 3))
         }
+        startIndex[.queryIntervalCode] = data.startIndex + 9
+        endIndex[.queryIntervalCode] = data.startIndex + 10
+
         let numberOfSources = Int(EtherCapture.getUInt16(data: data[data.startIndex + 10 ..< data.startIndex + 12]))
         self.numberOfSources = numberOfSources
-        
+        startIndex[.numberOfSources] = data.startIndex + 10
+        endIndex[.numberOfSources] = data.startIndex + 12
+
         guard data.count >= numberOfSources * 4 + 12 else {
             EtherCapture.logger.error("IGMP4 v3 decoder \(data.count) bytes expected \(numberOfSources * 4 + 12) bytes")
             return nil
@@ -162,7 +170,9 @@ public struct Igmp4: EtherDisplay {
                 sources.append(source)
             }
         }
-        
+        //TODO highlight per source
+        startIndex[.sources] = data.startIndex + 12
+        endIndex[.sources] = data.startIndex + 12 + numberOfSources * 4
     }
     public var description: String {
         return "IGMPv\(self.version) \(self.type)"
